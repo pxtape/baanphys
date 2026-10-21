@@ -22,9 +22,11 @@ describe("StudentClassroom access and progress", () => {
     const checkboxes = screen.getAllByRole("checkbox");
     fireEvent.click(checkboxes[0]);
     fireEvent.click(checkboxes[1]);
-    expect(await screen.findByText("ทำรายการครบแล้ว เก่งมาก!")).toBeInTheDocument();
+    expect(await screen.findByText("ทำครบแล้ว · ติดต่อ LINE เพื่อขอปลดล็อก")).toBeInTheDocument();
+    expect(screen.getByText("การติ๊กครบเป็นการบันทึกงานของคุณ ยังไม่ได้ส่งคำขอให้ติวเตอร์ กรุณาทัก LINE ด้วยตัวเอง")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^Level 10 / })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "กลับไปเส้นทางเรียน" }));
     expect(screen.getByRole("button", { name: /^Level 10 / })).toBeDisabled();
-    expect(screen.getByText("การติ๊กครบจะไม่ปลดล็อกเลเวลถัดไปโดยอัตโนมัติ")).toBeInTheDocument();
     expect(setTask).not.toHaveBeenCalled();
     expect(JSON.parse(localStorage.getItem(`baanphys:demo:completed:${DEMO_STUDENT.id}`) ?? "[]")).toEqual([
       "demo-pre-posn-9-video", "demo-pre-posn-9-homework",
@@ -62,7 +64,8 @@ describe("StudentClassroom access and progress", () => {
       completedItemIds={[]}/>);
     fireEvent.click(screen.getByRole("button", { name: "Level 1 บทเรียนจากฐานข้อมูล เลเวลปัจจุบัน" }));
     expect(screen.getAllByText("1 ชม. 15 นาที")).toHaveLength(2);
-    fireEvent.click(screen.getByRole("button", { name: "ดูวิดีโอ" }));
+    expect(screen.getByRole("button", { name: "ซ่อนวิดีโอ" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^Level 1 / })).toBeNull();
     expect(screen.getByTitle(DEMO_ITEMS[0].title)).toHaveAttribute("src", "/courses/media/live-video-one");
     expect(document.querySelector('iframe[src*="drive.google.com"]')).toBeNull();
     const mediaShell = screen.getByTitle(DEMO_ITEMS[0].title).parentElement!;

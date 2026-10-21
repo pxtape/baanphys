@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft, ArrowRight, Atom, BookOpen, Check, CheckCheck, ChevronRight,
   CirclePlay, Clock3, FileText, Flag, GraduationCap, LayoutGrid, LockKeyhole,
-  LogOut, Maximize, MessageCircle, Minimize, Route, ShieldCheck, X,
+  LogOut, Maximize, MessageCircle, Minimize, Route, ShieldCheck,
 } from "lucide-react";
 import {
   COURSES, PRE_POSN_LEVELS, formatStudyTime,
@@ -93,13 +93,13 @@ function LevelPathway({ levels, unlockedLevel, selectedLevel, completedItemIds, 
           aria-pressed={selected}
           style={{ "--path-column": rowIndex % 2 === 1 ? 4 - columnIndex : columnIndex + 1 } as React.CSSProperties}
           className={`classroom-path-node group relative z-10 flex items-center gap-4 rounded-xl border bg-[#fafaf7] px-4 py-3 text-left transition sm:flex-col sm:gap-3 sm:border-transparent sm:px-1 sm:py-0 sm:text-center ${locked ? "border-[#edf0eb] text-[#8d9890]" : "border-[#dce4de] text-[#172b3a]"}`}>
-          <span className={`relative flex h-14 w-14 shrink-0 items-center justify-center rounded-[18px] border text-lg font-semibold transition sm:h-16 sm:w-16 ${current ? "border-[#167a72] bg-[#167a72] text-white shadow-[0_0_0_6px_#e5eeea]" : completed ? "border-[#bfd9cc] bg-[#e4eee7] text-[#25745a]" : locked ? "border-[#e2e7df] bg-[#f0f2ed] text-[#adb5aa]" : "border-[#c8dace] bg-white text-[#167a72] group-hover:border-[#167a72]"} ${selected ? "ring-2 ring-[#ac733e] ring-offset-4 ring-offset-[#fafaf7]" : ""}`}>
+          <span className={`relative flex h-14 w-14 shrink-0 items-center justify-center rounded-[18px] border text-lg font-semibold transition sm:h-16 sm:w-16 ${current ? "border-[#167a72] bg-[#167a72] text-white shadow-[0_0_0_6px_#e5eeea]" : completed ? "border-[#bfd9cc] bg-[#e4eee7] text-[#25745a]" : locked ? "border-[#e2e7df] bg-[#f0f2ed] text-[#637261]" : "border-[#c8dace] bg-white text-[#167a72] group-hover:border-[#167a72]"} ${selected ? "ring-2 ring-[#ac733e] ring-offset-4 ring-offset-[#fafaf7]" : ""}`}>
             {level.number}
             {locked && <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#e6e9e2] text-[#929c8b]"><LockKeyhole size={11}/></span>}
             {completed && !locked && <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-[#fafaf7] bg-[#27795c] text-white"><Check size={11} strokeWidth={3}/></span>}
           </span>
-          <span className="min-w-0"><span className={`block text-xs font-semibold leading-5 ${locked ? "text-[#929d94]" : "text-[#273e3b]"}`}>{level.title}</span>
-            <span className={`mt-1 block text-[10px] leading-4 ${locked ? "text-[#a7afa4]" : "text-[#819087]"}`}>{formatStudyTime(level.durationMinutes)}{demo && level.durationMinutes !== null ? " · ตัวอย่าง" : ""}</span>
+          <span className="min-w-0"><span className={`block text-xs font-semibold leading-5 ${locked ? "text-[#59675f]" : "text-[#273e3b]"}`}>{level.title}</span>
+            <span className={`mt-1 block text-[10px] leading-4 ${locked ? "text-[#647267]" : "text-[#819087]"}`}>{formatStudyTime(level.durationMinutes)}{demo && level.durationMinutes !== null ? " · ตัวอย่าง" : ""}</span>
             {current && <span className="mt-1.5 inline-block rounded-full bg-[#e5eee8] px-2 py-0.5 text-[9px] font-semibold text-[#167a72]">คุณอยู่ตรงนี้</span>}
           </span>
           {!locked && <ChevronRight size={16} className="ml-auto text-[#167a72] sm:hidden"/>}
@@ -110,11 +110,11 @@ function LevelPathway({ levels, unlockedLevel, selectedLevel, completedItemIds, 
     <div className="flex items-center justify-center gap-2 border-t border-dashed border-[#d9e1d6] pt-7 text-[11px] text-[#879087]"><Flag size={14}/><span>ทุกก้าวเล็ก ๆ คือความก้าวหน้า</span></div>
     <style>{`
       @media (min-width: 640px) {
-        .classroom-path-row::before { content: ''; position: absolute; top: 32px; left: 12.5%; right: 12.5%; height: 2px; background: #d7e1d6; }
+        .classroom-path-row::before { content: ''; position: absolute; top: 32px; left: 12.5%; right: 12.5%; height: 2px; background: #9eb79e; }
         .classroom-path-node { grid-column: var(--path-column); grid-row: 1; }
       }
       @media (max-width: 639px) {
-        .classroom-path-row::before { content: ''; position: absolute; top: 40px; bottom: -36px; left: 43px; width: 2px; background: #d7e1d6; }
+        .classroom-path-row::before { content: ''; position: absolute; top: 40px; bottom: -36px; left: 43px; width: 2px; background: #9eb79e; }
       }
     `}</style>
   </div>;
@@ -126,13 +126,12 @@ function LessonPanel({ level, items, completedIds, pendingItem, error, demo, dir
   directDrive?: boolean; watermarkLabel?: string;
   onToggle: (itemId: string, done: boolean) => void; onClose: () => void;
 }) {
-  const [openMedia, setOpenMedia] = useState<string | null>(null);
+  const [openMedia, setOpenMedia] = useState<string | null>(items.find(item => item.kind === "video" && (item.hasMedia ?? Boolean(item.driveFileId)))?.id ?? null);
   const [mediaError, setMediaError] = useState("");
   const [mediaFullscreen, setMediaFullscreen] = useState(false);
   const mediaWrapperRef = useRef<HTMLDivElement>(null);
   const doneCount = items.filter((item) => completedIds.includes(item.id)).length;
   const finished = items.length > 0 && doneCount === items.length;
-  useEffect(() => { setOpenMedia(null); setMediaError(""); }, [level.number]);
   useEffect(() => {
     const handleFullscreenChange = () => setMediaFullscreen(Boolean(mediaWrapperRef.current && document.fullscreenElement === mediaWrapperRef.current));
     document.addEventListener("fullscreenchange", handleFullscreenChange);
@@ -151,12 +150,12 @@ function LessonPanel({ level, items, completedIds, pendingItem, error, demo, dir
   }
   return <section aria-label={`รายการเรียน Level ${level.number}`} className="overflow-hidden rounded-2xl border border-[#dce5dd] bg-white shadow-[0_8px_24px_#172b3a04]">
     <div className="border-b border-[#e5eae2] bg-[#f3f6ef] p-5">
-      <div className="flex items-center justify-between"><p className="text-[10px] font-semibold uppercase tracking-[.15em] text-[#6d8875]">YOUR NEXT SMALL STEP</p><button type="button" onClick={onClose} aria-label="ปิดรายการเรียน" className="rounded-md p-1 text-[#819087] hover:bg-white"><X size={16}/></button></div>
+      <div className="flex items-center justify-between"><p className="text-[10px] font-semibold uppercase tracking-[.15em] text-[#6d8875]">ห้องเรียนของคุณ</p><button type="button" onClick={onClose} aria-label="กลับไปเส้นทางเรียน" className="inline-flex items-center gap-2 rounded-md border border-[#ccd8ca] bg-white px-3 py-2 text-sm text-[#34483d]"><ArrowLeft size={16}/> กลับไปเส้นทางเรียน</button></div>
       <p className="mt-4 text-xs font-semibold text-[#167a72]">LEVEL {String(level.number).padStart(2, "0")}</p>
       <h3 className="mt-1 text-xl font-semibold leading-8 tracking-tight text-[#172b3a]">{level.title}</h3>
       <div className="mt-3 flex items-center gap-1.5 text-[11px] text-[#7c8d7e]"><Clock3 size={13}/>{formatStudyTime(level.durationMinutes)}{demo && level.durationMinutes !== null ? " · ตัวอย่าง" : ""}</div>
     </div>
-    <div className="p-5">
+    <div className="p-5 sm:p-8">
       <div className="flex items-center justify-between"><h4 className="text-sm font-semibold">สิ่งที่ต้องทำในเลเวลนี้</h4><span className="rounded-full bg-[#edf3ec] px-2.5 py-1 text-[10px] text-[#6f8b72]">{doneCount} / {items.length}</span></div>
       <div className="mt-3 h-1 overflow-hidden rounded-full bg-[#eef1eb]"><div className="h-full rounded-full bg-[#167a72] transition-all" style={{ width: `${items.length ? doneCount / items.length * 100 : 0}%` }}/></div>
       {demo && <p className="mt-3 text-[10px] leading-5 text-[#92784f]">รายการและเวลาในหน้านี้เป็นตัวอย่างสำหรับลองระบบ</p>}
@@ -170,13 +169,13 @@ function LessonPanel({ level, items, completedIds, pendingItem, error, demo, dir
             <div className="flex items-start gap-3"><input type="checkbox" id={`task-${item.id}`} checked={checked} disabled={pendingItem !== null}
               onChange={(event) => onToggle(item.id, event.target.checked)} aria-label={`เรียนครบ ${item.title}`}
               className="mt-1 h-4 w-4 shrink-0 accent-[#167a72] disabled:opacity-50"/>
-              <div className="min-w-0 flex-1"><label htmlFor={`task-${item.id}`} className={`cursor-pointer text-xs font-semibold leading-6 ${checked ? "text-[#829080] line-through decoration-[#b4c2ae]" : "text-[#34483d]"}`}>{item.title}</label>
-                <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-[#8d9988]"><span className="inline-flex items-center gap-1">{isVideo ? <CirclePlay size={11}/> : <FileText size={11}/>} {isVideo ? "วิดีโอ" : item.kind === "sheet" ? "ชีท / เอกสาร" : "การบ้าน"}</span><span>·</span><span>{formatStudyTime(item.durationMinutes)}</span></div>
-                {item.recommendedMinutes !== null && <p className="mt-1 text-[10px] leading-5 text-[#8c9785]">เวลาแนะนำ {formatStudyTime(item.recommendedMinutes)}</p>}
+              <div className="min-w-0 flex-1"><label htmlFor={`task-${item.id}`} className={`cursor-pointer text-xs font-semibold leading-6 ${checked ? "text-[#829080] line-through decoration-[#b4c2ae]" : "text-[#34483d]"}`}>{isVideo ? "ดูคลิป: " : item.kind === "sheet" ? "ชีทประกอบ: " : "ทำ HW: "}{item.title}</label>
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-[#586954]"><span className="inline-flex items-center gap-1">{isVideo ? <CirclePlay size={11}/> : <FileText size={11}/>} {isVideo ? "วิดีโอ" : item.kind === "sheet" ? "ชีท / เอกสาร" : "การบ้าน"}</span><span>·</span><span>{item.durationMinutes === null ? isVideo ? "ดูเวลาจากเครื่องเล่น" : "ยังไม่ระบุเวลาทำ" : `${isVideo ? "เวลาดู " : "เวลาประมาณ "}${formatStudyTime(item.durationMinutes)}`}</span></div>
+                {item.recommendedMinutes !== null && <p className="mt-1 text-[10px] leading-5 text-[#586954]">เวลาแนะนำ {formatStudyTime(item.recommendedMinutes)}</p>}
                 {item.instructions && <p className="mt-2 whitespace-pre-line text-[11px] leading-6 text-[#71806a]">{item.instructions}</p>}
                 <button type="button" disabled={!hasMedia || demo} onClick={() => { setOpenMedia(openMedia === item.id ? null : item.id); setMediaError(""); }}
                   className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-[#dfe7d8] px-2.5 py-1.5 text-[10px] font-medium text-[#167a72] transition hover:bg-[#f3f7ee] disabled:cursor-default disabled:border-[#edf0e8] disabled:text-[#a0a895]">
-                  {isVideo ? <CirclePlay size={12}/> : <FileText size={12}/>} {hasMedia && !demo ? openMedia === item.id ? "ปิดสื่อการเรียน" : isVideo ? "ดูวิดีโอ" : item.kind === "sheet" ? "เปิดชีท" : "เปิดการบ้าน" : "รอเพิ่มไฟล์จริง"}
+                  {isVideo ? <CirclePlay size={12}/> : <FileText size={12}/>} {hasMedia && !demo ? openMedia === item.id ? isVideo ? "ซ่อนวิดีโอ" : "ซ่อนเอกสาร" : isVideo ? "เริ่มดูวิดีโอ" : item.kind === "sheet" ? "เปิดชีท" : "เปิดการบ้าน" : "รอเพิ่มไฟล์จริง"}
                 </button>
               </div>
             </div>
@@ -190,9 +189,9 @@ function LessonPanel({ level, items, completedIds, pendingItem, error, demo, dir
       </div>
       {error && <p role="alert" className="mt-3 rounded-lg bg-[#fff2ed] px-3 py-2 text-xs leading-6 text-[#b15d43]">{error}</p>}
       <div className={`mt-4 rounded-xl border p-4 ${finished ? "border-[#b9d9bd] bg-[#edf6eb]" : "border-[#e9e7d7] bg-[#faf9ef]"}`}>
-        <div className="flex items-center gap-2">{finished ? <CheckCheck size={16} className="text-[#4a8956]"/> : <MessageCircle size={16} className="text-[#978154]"/>}<p className="text-xs font-semibold text-[#5e6b46]">{finished ? "ทำรายการครบแล้ว เก่งมาก!" : "เรียนครบแล้ว ทำอย่างไรต่อ?"}</p></div>
-        <p className="mt-2 text-[11px] leading-6 text-[#83876d]">ทัก LINE หาติวเตอร์ด้วยตัวเอง เพื่อให้ติวเตอร์ตรวจและปลดล็อกเลเวลถัดไปให้</p>
-        <p className="mt-2 border-t border-[#e4e7d7] pt-2 text-[10px] leading-5 text-[#8b937b]">การติ๊กครบจะไม่ปลดล็อกเลเวลถัดไปโดยอัตโนมัติ</p>
+        <div className="flex items-center gap-2">{finished ? <CheckCheck size={16} className="text-[#4a8956]"/> : <MessageCircle size={16} className="text-[#978154]"/>}<p className="text-xs font-semibold text-[#5e6b46]">{finished ? "ทำครบแล้ว · ติดต่อ LINE เพื่อขอปลดล็อก" : "ขั้นตอนปลดล็อกเลเวลถัดไป"}</p></div>
+        <p className="mt-2 text-[11px] leading-6 text-[#83876d]">1. ดูคลิปและทำ HW ให้ครบ → 2. ทัก LINE หาติวเตอร์ แจ้งคอร์สและเลเวล → 3. รอติวเตอร์ตรวจและแอดมินปลดล็อก</p>
+        <p className="mt-2 border-t border-[#e4e7d7] pt-2 text-[10px] leading-5 text-[#8b937b]">การติ๊กครบเป็นการบันทึกงานของคุณ ยังไม่ได้ส่งคำขอให้ติวเตอร์ กรุณาทัก LINE ด้วยตัวเอง</p>
       </div>
       {demo && <p className="mt-3 text-center text-[10px] leading-5 text-[#9ba391]">ลองติ๊กได้ ข้อมูลตัวอย่างเก็บเฉพาะเบราว์เซอร์นี้</p>}
     </div>
@@ -285,7 +284,7 @@ export function StudentClassroom({ demo = false, user, enrollments: initialEnrol
     if (!enrollment || number > enrollment.unlockedLevel) return;
     setSelectedLevel(number);
     setError("");
-    requestAnimationFrame(() => detailRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }));
+    requestAnimationFrame(() => detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
   }
 
   async function signOut() {
@@ -320,13 +319,13 @@ export function StudentClassroom({ demo = false, user, enrollments: initialEnrol
 
       {selectedCourse && enrollment ? <section ref={pathwayRef} className="mt-10 scroll-mt-5 border-t border-[#e3e8dc] pt-8" aria-labelledby="pathway-heading">
         <div className="mb-7 flex flex-wrap items-start justify-between gap-4"><div><p className="text-[9px] font-semibold uppercase tracking-[.17em] text-[#8c9a7b]">THE PATHWAY</p><h2 id="pathway-heading" className="mt-1.5 text-xl font-semibold tracking-tight">{selectedCourse.title}<span className="ml-3 text-xs font-normal text-[#9aa38c]">{selectedLevelCount ? `${selectedLevelCount} levels` : "รอรายละเอียดคอร์ส"}</span></h2></div><div className="flex flex-wrap items-center gap-4 pt-2 text-[10px] text-[#909b82]"><span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#b8d1b8]"/>เรียนผ่านมาแล้ว</span><span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#167a72]"/>เลเวลปัจจุบัน</span><span className="inline-flex items-center gap-1.5"><LockKeyhole size={10}/>ยังไม่ปลดล็อก</span></div></div>
-        <div className={`grid items-start gap-7 ${level ? "xl:grid-cols-[minmax(0,1fr)_350px]" : "lg:grid-cols-[minmax(0,1fr)_285px]"}`}>
-          <div className="min-w-0 rounded-2xl border border-[#e3e8dc] bg-[#fafaf7] p-5 sm:p-8">
+        <div className={`grid items-start gap-7 ${level ? "mx-auto max-w-[1120px]" : "lg:grid-cols-[minmax(0,1fr)_285px]"}`}>
+          <div hidden={Boolean(level)} className="min-w-0 rounded-2xl border border-[#e3e8dc] bg-[#fafaf7] p-5 sm:p-8">
             <div className="mb-7 flex items-center justify-between border-b border-[#e8ecdf] pb-5"><div className="flex items-center gap-2 text-[11px] text-[#7e8f70]"><Route size={15}/><span>เส้นทางการเรียนของคุณ</span></div><span className="font-mono text-[10px] text-[#9aa68b]">{String(currentLevel).padStart(2, "0")} / {selectedLevelCount ?? "—"}</span></div>
             {levels.length > 0 ? <LevelPathway levels={levels} unlockedLevel={enrollment.unlockedLevel} selectedLevel={selectedLevel} items={courseItems} completedItemIds={completedIds} demo={demo} onSelect={openLevel}/> : <div className="py-16 text-center"><BookOpen size={30} className="mx-auto text-[#a5b192]"/><p className="mt-4 text-sm text-[#738463]">รอรายละเอียดเส้นทางคอร์สนี้</p><p className="mt-2 text-xs text-[#9ba68d]">ติวเตอร์กำลังจัดเตรียมเลเวลและเนื้อหา</p></div>}
           </div>
-          <div ref={detailRef} className="scroll-mt-5 xl:sticky xl:top-5">
-            {level ? <LessonPanel level={level} items={courseItems.filter((item) => item.levelNumber === level.number)} completedIds={completedIds} pendingItem={pendingItem} error={error} demo={demo} directDrive={directDrive} watermarkLabel={`${user.displayName} · ${user.username}`} onToggle={(itemId, completed) => void toggleTask(itemId, completed)} onClose={() => setSelectedLevel(null)}/> : <aside className="space-y-5">
+          <div ref={detailRef} className="min-w-0 scroll-mt-5">
+            {level ? <LessonPanel key={`${selectedCourseId}-${level.number}`} level={level} items={courseItems.filter((item) => item.levelNumber === level.number)} completedIds={completedIds} pendingItem={pendingItem} error={error} demo={demo} directDrive={directDrive} watermarkLabel={`${user.displayName} · ${user.username}`} onToggle={(itemId, completed) => void toggleTask(itemId, completed)} onClose={() => setSelectedLevel(null)}/> : <aside className="space-y-5">
               <div className="relative overflow-hidden rounded-2xl bg-[#ecf0e2] p-6"><div className="relative z-10"><p className="text-[9px] font-semibold uppercase tracking-[.18em] text-[#94a078]">ONE LEVEL AT A TIME</p><div className="my-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-[#d7dec4] bg-[#f5f7ed] text-[#8b9b69]"><Atom size={31} strokeWidth={1}/></div><h3 className="text-lg font-medium leading-8 text-[#5d704b]">เข้าใจทีละเรื่อง<br/>ไปได้ไกลกว่าที่คิด</h3><p className="mt-3 text-[11px] leading-6 text-[#899776]">คลิกเลเวลที่ปลดล็อก เพื่อดูวิดีโอ การบ้าน และเวลาแนะนำในการเรียน</p><button type="button" onClick={() => openLevel(currentLevel)} disabled={levels.length === 0} className="mt-5 inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-[11px] font-semibold text-[#567243] disabled:opacity-50">เปิด Level {currentLevel}<ArrowRight size={13}/></button></div><span className="pointer-events-none absolute -right-16 -top-12 h-44 w-44 rounded-full border border-[#dce3ca]"/><span className="pointer-events-none absolute -bottom-20 -left-10 h-44 w-44 rounded-full border border-[#dce3ca]"/></div>
               <div className="rounded-xl border border-[#e3e7d9] bg-white p-5"><div className="flex items-center gap-2 text-xs font-semibold text-[#71845b]"><MessageCircle size={15}/>เรียนครบแล้ว ทักติวเตอร์</div><p className="mt-2 text-[11px] leading-6 text-[#97a187]">เมื่อเรียนและทำ HW ครบ ให้ทัก LINE หาติวเตอร์ด้วยตัวเอง ติวเตอร์จะตรวจและปลดล็อกเลเวลถัดไปให้</p></div>
               <div className="flex items-start gap-2 px-1 text-[10px] leading-5 text-[#a0a990]"><ShieldCheck size={14} className="mt-0.5 shrink-0"/><p>สื่อการเรียนสำหรับบัญชีของคุณเท่านั้น กรุณาไม่ส่งต่อให้ผู้อื่น</p></div>
