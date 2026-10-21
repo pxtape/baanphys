@@ -28,7 +28,7 @@ export function LiveLogin() {
   async function submit(event: React.FormEvent) {
     event.preventDefault(); setBusy(true); setMessage("");
     try {
-      const email = identifier.includes("@") ? identifier.trim() : classroomEmail(identifier);
+      const email = identifier.trim().toLowerCase() === "admin" ? "sippaphol2@gmail.com" : identifier.includes("@") ? identifier.trim() : classroomEmail(identifier);
       if (!email || (emailMode && !identifier.includes("@"))) { setMessage("กรอก Username ให้ถูกต้อง หรือใช้อีเมลบัญชีแอดมินเดิม"); return; }
       if (emailMode) {
         const callback = new URL(window.location.href); callback.hash = ""; callback.search = "";
