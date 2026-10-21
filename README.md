@@ -2,13 +2,13 @@
 
 โครงเว็บไซต์คอร์สฟิสิกส์ตาม draft ของเจ้าของคอร์ส: Username/รหัสผ่านที่ผู้ดูแลออกให้, สิทธิ์รายคอร์ส, pathway Pre-POSN 31 เลเวล, checklist วิดีโอ/HW และหลังบ้านปลดล็อกเลเวลเป็นรายคน
 
-**สถานะ: โครงร่างที่ทดลอง flow ได้ พร้อมโค้ด backend สำหรับเตรียมติดตั้ง ระบบบัญชี/ฐานข้อมูลคอร์สใหม่ยังไม่ได้ติดตั้งหรือทดสอบกับ Supabase จริง** เนื้อหาและเวลาจริงรอเจ้าของคอร์สส่งผ่านแชท ตัวอย่างไม่สร้างบัญชีหรือเปลี่ยนสิทธิ์จริง
+**สถานะ: เวอร์ชันทดลองเชื่อม Supabase จริงแล้ว** แอดมินออก Username/รหัสผ่านให้นักเรียน เปิดสิทธิ์คอร์ส ปลดล็อกเลเวล และเพิ่มชีท/วิดีโอ/HW ด้วยลิงก์ Google Drive ได้ ดู [คู่มือหลังบ้าน beta](docs/BETA-ADMIN.md)
 
 ## เปิดเว็บจาก GitHub
 
-เตรียม GitHub Pages และ workflow `Publish GitHub Pages` แล้ว เมื่อเปิด Pages ด้วย Source = GitHub Actions และ deployment สำเร็จ เว็บจะอยู่ที่ **https://pxtape.github.io/baanphys/**
+เว็บเผยแพร่ด้วย GitHub Pages ที่ **https://pxtape.github.io/baanphys/** อัปเดตโค้ดบน main แล้ว workflow `Publish GitHub Pages` จะ build และ deploy ให้อัตโนมัติ
 
-เวอร์ชัน Pages ให้ลองห้องเรียนและหลังบ้านด้วยข้อมูลจำลอง ไม่มีบัญชีจริงหรือคลิปส่วนตัว ดู [วิธีเปิด Pages ครั้งแรก](docs/GITHUB-PAGES.md)
+เข้าสู่ระบบจริงผ่าน `/login/` นักเรียนใช้ `/courses/` แอดมินใช้ `/admin/students/` และ `/admin/content/` ส่วน `/preview/*` แยกไว้ทดลองด้วยข้อมูลจำลอง
 
 ## ลองในเครื่อง
 
@@ -40,9 +40,11 @@ npm.cmd run dev
 - ตาราง `classroom_*` แยกจากระบบ Skill Tree เดิม
 - นักเรียนไม่สามารถเปิดคอร์สหรือปลดล็อกเลเวลของตัวเองได้ ต้องให้แอดมินกดทุกครั้ง
 - วิดีโอ/เอกสารจาก Google Drive ผ่านเส้นทางตรวจสิทธิ์ พร้อมลายน้ำชื่อผู้เรียน เวลา และห้าม cache สื่อส่วนตัว
-- GitHub Pages ใช้ชุด static preview แยกจากระบบจริง คำสั่ง `npm.cmd run build:pages` สร้างเว็บตัวอย่างที่ `.pages-build/out` ส่วนระบบจริงที่ใช้ server actions ต้องมี backend เพิ่มเติม ([เอกสาร Next.js](https://nextjs.org/docs/app/guides/static-exports))
+- GitHub Pages ใช้ static frontend เรียก Supabase ผ่าน Auth/RLS และ Edge Function คำสั่ง `npm.cmd run build:pages` สร้างไฟล์ที่ `.pages-build/out` โดยไม่ใส่ server actions หรือ service-role key ในเว็บ ([เอกสาร Next.js](https://nextjs.org/docs/app/guides/static-exports))
 
 ## ตั้งค่าระบบจริงเมื่อพร้อม
+
+**สำหรับ beta ปัจจุบันติดตั้งแล้ว:** ใช้ [คู่มือ beta](docs/BETA-ADMIN.md) ด้านล่างเป็นขั้นตอนของ Next.js server draft เดิม อย่ารัน `classroom.sql` ทับ beta ที่ทำงานอยู่
 
 1. คัดลอก `.env.example` เป็น `.env.local` แล้วตั้งค่า Supabase ห้าม commit ไฟล์รหัสลับ
 2. ติดตั้ง migration เดิมตามลำดับใน `supabase/migrations/` แล้วตรวจ/รัน `supabase/setup/classroom.sql` บนฐานข้อมูลทดสอบก่อน

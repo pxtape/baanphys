@@ -38,6 +38,11 @@ export async function createClassroomStudent(input: { username: string; password
       user_metadata: { display_name: displayName, username },
     });
     if (error || !data.user) return { error: "สร้างบัญชีไม่สำเร็จ Username อาจถูกใช้แล้ว กรุณาตรวจสอบแล้วลองใหม่" };
+    const { error: accountError } = await admin.from("classroom_accounts").insert({ user_id: data.user.id, username, display_name: displayName });
+    if (accountError) {
+      await admin.auth.admin.deleteUser(data.user.id);
+      return { error: "บันทึกนักเรียนไม่ได้ กรุณาลองใหม่" };
+    }
     revalidatePath("/admin");
     revalidatePath("/admin/students");
     return { student: { id: data.user.id, displayName, username } };

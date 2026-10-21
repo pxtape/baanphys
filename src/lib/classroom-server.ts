@@ -19,7 +19,7 @@ type ItemRow = {
   id: string;
   course_id: CourseId;
   level_number: number;
-  kind: "video" | "homework";
+  kind: "video" | "homework" | "sheet";
   title: string;
   duration_minutes: number | null;
   recommended_minutes: number | null;
@@ -45,7 +45,7 @@ export async function getClassroomStudentData(): Promise<ClassroomStudentData> {
   if (authError || !user || user.is_anonymous) redirect("/login?next=%2Fcourses");
 
   const [profileResult, enrollmentResult, itemResult, progressResult, levelsResult] = await Promise.all([
-    supabase.from("profiles").select("display_name,username").eq("id", user.id).maybeSingle(),
+    supabase.from("classroom_accounts").select("display_name,username").eq("user_id", user.id).maybeSingle(),
     supabase.from("classroom_enrollments").select("user_id,course_id,unlocked_level").eq("user_id", user.id),
     // Keep Drive IDs out of the page payload. The authenticated media route resolves them per request.
     supabase.from("classroom_items").select("id,course_id,level_number,kind,title,duration_minutes,recommended_minutes,instructions,drive_file_id").order("sort_order"),
@@ -91,16 +91,16 @@ export async function getClassroomAdminData(): Promise<ClassroomAdminData> {
   if (actorError || actor?.role !== "admin") redirect("/courses?error=forbidden");
 
   const [profilesResult, enrollmentsResult] = await Promise.all([
-    supabase.from("profiles").select("id,display_name,username").eq("role", "student").order("created_at"),
+    supabase.from("classroom_accounts").select("user_id,display_name,username").order("created_at"),
     supabase.from("classroom_enrollments").select("user_id,course_id,unlocked_level"),
   ]);
   if (profilesResult.error || enrollmentsResult.error) return { students: [], setupRequired: true };
   const enrollments = ((enrollmentsResult.data ?? []) as EnrollmentRow[]).map(mapEnrollment);
   return {
     students: (profilesResult.data ?? []).map((profile) => ({
-      id: String(profile.id), displayName: profile.display_name || "นักเรียน",
+      id: String(profile.user_id), displayName: profile.display_name || "นักเรียน",
       username: profile.username || "ยังไม่ได้กำหนด username",
-      enrollments: enrollments.filter((enrollment) => enrollment.studentId === profile.id),
+      enrollments: enrollments.filter((enrollment) => enrollment.studentId === profile.user_id),
     })),
     setupRequired: false,
   };

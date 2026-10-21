@@ -34,7 +34,7 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Build public classroom preview
+      - name: Build classroom web
         run: pnpm run build:pages
         env:
           PAGES_BASE_PATH: /baanphys

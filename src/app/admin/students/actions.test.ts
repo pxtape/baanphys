@@ -6,6 +6,8 @@ const mocks = vi.hoisted(() => ({
   profile: vi.fn(),
   createAdminClient: vi.fn(),
   createUser: vi.fn(),
+  insertAccount: vi.fn(),
+  deleteUser: vi.fn(),
   revalidatePath: vi.fn(),
 }));
 
@@ -25,8 +27,10 @@ describe("createClassroomStudent authorization", () => {
     vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
     mocks.getUser.mockResolvedValue({ data: { user: { id: "admin-id" } }, error: null });
     mocks.profile.mockResolvedValue({ data: { role: "admin" }, error: null });
-    mocks.createAdminClient.mockReturnValue({ auth: { admin: { createUser: mocks.createUser } } });
+    mocks.createAdminClient.mockReturnValue({ auth: { admin: { createUser: mocks.createUser, deleteUser: mocks.deleteUser } }, from: () => ({ insert: mocks.insertAccount }) });
     mocks.createUser.mockResolvedValue({ data: { user: { id: "new-id" } }, error: null });
+    mocks.insertAccount.mockResolvedValue({ error: null });
+    mocks.deleteUser.mockResolvedValue({ error: null });
   });
   afterEach(() => vi.unstubAllEnvs());
 
@@ -56,6 +60,12 @@ describe("createClassroomStudent authorization", () => {
     vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "");
     expect((await createClassroomStudent(validInput)).error).toContain("SUPABASE_SERVICE_ROLE_KEY");
     expect(mocks.createAdminClient).not.toHaveBeenCalled();
+  });
+
+  it("rolls back only the newly created account if classroom storage fails", async () => {
+    mocks.insertAccount.mockResolvedValue({ error: { message: "storage failed" } });
+    expect((await createClassroomStudent(validInput)).error).toBeTruthy();
+    expect(mocks.deleteUser).toHaveBeenCalledWith("new-id");
   });
 
   it("requires a strong initial password before any Auth call", async () => {

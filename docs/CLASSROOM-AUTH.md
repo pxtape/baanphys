@@ -1,5 +1,7 @@
 # บัญชีเข้าเรียน
 
+**สำหรับ beta ปัจจุบัน:** ดู [BETA-ADMIN.md](BETA-ADMIN.md) บัญชีนักเรียนเก็บ Username ใน `classroom_accounts` แยกจาก profiles ระบบ Pages สร้างบัญชีผ่าน Supabase Edge Function แทน Next.js server action และไม่ต้องใส่ service key ใน GitHub
+
 หน้า `/login` ใช้ Username และรหัสผ่านเป็นวิธีหลัก ไม่มีหน้าสมัครบัญชีเอง แอดมินสร้างบัญชีผ่าน `createClassroomStudent` ที่ `src/app/admin/students/actions.ts` เท่านั้น แล้วจึงมอบคอร์สให้บัญชีนั้นในหลังบ้าน
 
 Username มี 3–40 ตัว ใช้ภาษาอังกฤษ ตัวเลข จุด ขีดกลาง หรือขีดล่าง เริ่มและจบด้วยตัวอักษรหรือตัวเลข ห้ามจุดติดกัน ระบบตัดช่องว่างต้นท้ายและแปลงเป็นตัวพิมพ์เล็กเสมอ ภายใน Supabase Auth ใช้อีเมลรูปแบบ `username@classroom.invalid` เป็นตัวระบุบัญชี ไม่ใช่อีเมลสำหรับรับจดหมาย นักเรียนไม่ต้องมีอีเมล และไม่ควรส่ง magic link ไปที่ที่อยู่นี้

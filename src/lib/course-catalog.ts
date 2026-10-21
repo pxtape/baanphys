@@ -21,7 +21,7 @@ export type LearningItem = {
   id: string;
   courseId: CourseId;
   levelNumber: number;
-  kind: "video" | "homework";
+  kind: "video" | "homework" | "sheet";
   title: string;
   durationMinutes: number | null;
   recommendedMinutes: number | null;

@@ -21,7 +21,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ ite
   const { data: item, error } = await supabase.from("classroom_items").select("title,drive_file_id,kind").eq("id", itemId).maybeSingle();
   if (error || !item) return reject(404, "ไม่พบเนื้อหาหรือคุณยังไม่มีสิทธิ์เข้าถึง");
   if (!item.drive_file_id || !/^[a-zA-Z0-9_-]{10,200}$/.test(item.drive_file_id)) return reject(404, "รอลิงก์เนื้อหาจากติวเตอร์");
-  const { data: profile } = await supabase.from("profiles").select("display_name,username").eq("id", user.id).maybeSingle();
+  const { data: profile } = await supabase.from("classroom_accounts").select("display_name,username").eq("user_id", user.id).maybeSingle();
   const name = escapeHtml(String(profile?.display_name ?? "นักเรียน"));
   const username = escapeHtml(String(profile?.username ?? user.id.slice(0, 8)));
   const timestamp = escapeHtml(new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", dateStyle: "short", timeStyle: "short" }).format(new Date()));

@@ -5,11 +5,11 @@ import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, ArrowUpRight, BookOpen, Check, ChevronRight, GraduationCap, LockKeyhole, Search, ShieldCheck, UserPlus, Users } from "lucide-react";
 import { advanceClassroomStudent, enrollClassroomStudent, revokeClassroomEnrollment } from "@/app/courses/actions";
 import { createClassroomStudent } from "@/app/admin/students/actions";
-import { COURSES, DEMO_COMPLETED_ITEM_IDS, DEMO_ITEMS, type CourseId, type Enrollment, type StudentRecord } from "@/lib/course-catalog";
+import { COURSES, DEMO_COMPLETED_ITEM_IDS, DEMO_ITEMS, type CourseDefinition, type CourseId, type Enrollment, type StudentRecord } from "@/lib/course-catalog";
 
-type Props = { demo?: boolean; students: StudentRecord[]; setupRequired?: boolean };
+type Props = { demo?: boolean; students: StudentRecord[]; setupRequired?: boolean; courses?: CourseDefinition[] };
 
-export function ClassroomAdmin({ demo = false, students: initialStudents, setupRequired = false }: Props) {
+export function ClassroomAdmin({ demo = false, students: initialStudents, setupRequired = false, courses = COURSES }: Props) {
   const [students, setStudents] = useState(initialStudents);
   const [selectedId, setSelectedId] = useState(initialStudents[0]?.id ?? "");
   const [query, setQuery] = useState("");
@@ -22,6 +22,7 @@ export function ClassroomAdmin({ demo = false, students: initialStudents, setupR
   const [completed, setCompleted] = useState<string[]>([]);
   const selected = students.find((student) => student.id === selectedId);
   const visible = students.filter((student) => `${student.displayName} ${student.username}`.toLowerCase().includes(query.toLowerCase()));
+  useEffect(() => { if (!demo) setStudents(initialStudents); }, [demo, initialStudents]);
 
   const refreshDemo = useCallback(() => {
     if (!demo) return;
@@ -58,7 +59,7 @@ export function ClassroomAdmin({ demo = false, students: initialStudents, setupR
     if (!selected || busy || setupRequired) return;
     setMessage("");
     const enrollment = selected.enrollments.find((row) => row.courseId === courseId);
-    const course = COURSES.find((row) => row.id === courseId)!;
+    const course = courses.find((row) => row.id === courseId)!;
     if (operation === "enroll" && course.levelCount === null) {
       setMessage("คอร์สนี้รอรายละเอียดหลักสูตร ก่อนเปิดให้นักเรียนเรียน"); return;
     }
@@ -143,7 +144,7 @@ export function ClassroomAdmin({ demo = false, students: initialStudents, setupR
         </aside>
         <section className="rounded-2xl border border-[var(--line)] bg-white p-5 sm:p-7">
           {selected ? <><div className="flex items-center gap-4 border-b border-[var(--line)] pb-6"><span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--soft)] text-[var(--accent)]"><GraduationCap size={25}/></span><div><h2 className="text-xl font-semibold">{selected.displayName}</h2><p className="mt-1 text-xs text-[var(--muted)]">@{selected.username} · สิทธิ์คอร์สและเลเวล</p></div></div>
-            <div className="divide-y divide-[var(--line)]">{COURSES.map((course) => {
+            <div className="divide-y divide-[var(--line)]">{courses.map((course) => {
               const enrollment = selected.enrollments.find((row) => row.courseId === course.id);
               const tasks = demo && enrollment ? DEMO_ITEMS.filter((item) => item.courseId === course.id && item.levelNumber === enrollment.unlockedLevel) : [];
               const done = tasks.filter((item) => completed.includes(item.id)).length;

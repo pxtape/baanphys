@@ -22,6 +22,7 @@ type StudentClassroomProps = {
   completedItemIds: string[];
   setupRequired?: boolean;
   courseLevels?: Partial<Record<CourseId, CourseLevel[]>>;
+  directDrive?: boolean;
 };
 
 function readDemoEnrollments(studentId: string, fallback: Enrollment[]): Enrollment[] {
@@ -119,9 +120,10 @@ function LevelPathway({ levels, unlockedLevel, selectedLevel, completedItemIds, 
   </div>;
 }
 
-function LessonPanel({ level, items, completedIds, pendingItem, error, demo, onToggle, onClose }: {
+function LessonPanel({ level, items, completedIds, pendingItem, error, demo, directDrive, watermarkLabel, onToggle, onClose }: {
   level: CourseLevel; items: LearningItem[]; completedIds: string[]; pendingItem: string | null;
   error: string; demo: boolean;
+  directDrive?: boolean; watermarkLabel?: string;
   onToggle: (itemId: string, done: boolean) => void; onClose: () => void;
 }) {
   const [openMedia, setOpenMedia] = useState<string | null>(null);
@@ -169,17 +171,18 @@ function LessonPanel({ level, items, completedIds, pendingItem, error, demo, onT
               onChange={(event) => onToggle(item.id, event.target.checked)} aria-label={`เรียนครบ ${item.title}`}
               className="mt-1 h-4 w-4 shrink-0 accent-[#167a72] disabled:opacity-50"/>
               <div className="min-w-0 flex-1"><label htmlFor={`task-${item.id}`} className={`cursor-pointer text-xs font-semibold leading-6 ${checked ? "text-[#829080] line-through decoration-[#b4c2ae]" : "text-[#34483d]"}`}>{item.title}</label>
-                <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-[#8d9988]"><span className="inline-flex items-center gap-1">{isVideo ? <CirclePlay size={11}/> : <FileText size={11}/>} {isVideo ? "วิดีโอ" : "การบ้าน"}</span><span>·</span><span>{formatStudyTime(item.durationMinutes)}</span></div>
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-[#8d9988]"><span className="inline-flex items-center gap-1">{isVideo ? <CirclePlay size={11}/> : <FileText size={11}/>} {isVideo ? "วิดีโอ" : item.kind === "sheet" ? "ชีท / เอกสาร" : "การบ้าน"}</span><span>·</span><span>{formatStudyTime(item.durationMinutes)}</span></div>
                 {item.recommendedMinutes !== null && <p className="mt-1 text-[10px] leading-5 text-[#8c9785]">เวลาแนะนำ {formatStudyTime(item.recommendedMinutes)}</p>}
                 {item.instructions && <p className="mt-2 whitespace-pre-line text-[11px] leading-6 text-[#71806a]">{item.instructions}</p>}
                 <button type="button" disabled={!hasMedia || demo} onClick={() => { setOpenMedia(openMedia === item.id ? null : item.id); setMediaError(""); }}
                   className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-[#dfe7d8] px-2.5 py-1.5 text-[10px] font-medium text-[#167a72] transition hover:bg-[#f3f7ee] disabled:cursor-default disabled:border-[#edf0e8] disabled:text-[#a0a895]">
-                  {isVideo ? <CirclePlay size={12}/> : <FileText size={12}/>} {hasMedia && !demo ? openMedia === item.id ? "ปิดสื่อการเรียน" : isVideo ? "ดูวิดีโอ" : "เปิดการบ้าน" : "รอเพิ่มไฟล์จริง"}
+                  {isVideo ? <CirclePlay size={12}/> : <FileText size={12}/>} {hasMedia && !demo ? openMedia === item.id ? "ปิดสื่อการเรียน" : isVideo ? "ดูวิดีโอ" : item.kind === "sheet" ? "เปิดชีท" : "เปิดการบ้าน" : "รอเพิ่มไฟล์จริง"}
                 </button>
               </div>
             </div>
             {openMedia === item.id && !demo && <><div ref={mediaWrapperRef} className="classroom-media-shell relative mt-4 overflow-hidden rounded-lg bg-[#172b3a]">
-              <iframe title={item.title} src={`/courses/media/${encodeURIComponent(item.id)}`} className="classroom-media-frame aspect-video w-full border-0" allow="fullscreen" allowFullScreen referrerPolicy="no-referrer"/>
+              <iframe title={item.title} src={directDrive && item.driveFileId && /^[a-zA-Z0-9_-]{10,200}$/.test(item.driveFileId) ? `https://drive.google.com/file/d/${item.driveFileId}/preview` : `/courses/media/${encodeURIComponent(item.id)}`} className="classroom-media-frame aspect-video w-full border-0" allow={directDrive ? "fullscreen 'none'" : "fullscreen"} allowFullScreen={!directDrive} referrerPolicy="no-referrer"/>
+              {directDrive && <span className="classroom-account-mark pointer-events-none absolute z-10 max-w-[75%] rounded bg-black/25 px-3 py-2 text-[10px] text-white/70">{watermarkLabel}<br/>{new Date().toLocaleDateString("th-TH")}</span>}
               <div className="flex shrink-0 items-center justify-end bg-[#172b3a] px-3 py-2"><button type="button" onClick={() => void toggleMediaFullscreen()} className="inline-flex items-center gap-1.5 rounded border border-white/20 px-2.5 py-1.5 text-[10px] text-white hover:bg-white/10">{mediaFullscreen ? <Minimize size={12}/> : <Maximize size={12}/>} {mediaFullscreen ? "ออกจากเต็มจอ" : "ขยายเต็มจอ"}</button></div>
             </div>{mediaError && <p role="alert" className="mt-2 text-[11px] leading-6 text-[#ad6246]">{mediaError}</p>}</>}
           </article>;
@@ -196,11 +199,14 @@ function LessonPanel({ level, items, completedIds, pendingItem, error, demo, onT
     <style>{`
       .classroom-media-shell:fullscreen { display: flex; flex-direction: column; width: 100%; height: 100%; margin: 0; border-radius: 0; background: #172b3a; }
       .classroom-media-shell:fullscreen .classroom-media-frame { flex: 1; min-height: 0; height: auto; aspect-ratio: auto; }
+      .classroom-account-mark { left: 5%; top: 13%; animation: classroom-mark 29s steps(1,end) infinite; }
+      @keyframes classroom-mark { 25% {left:40%;top:25%} 50% {left:10%;top:65%} 75% {left:40%;top:70%} }
+      @media(prefers-reduced-motion:reduce) { .classroom-account-mark {animation:none} }
     `}</style>
   </section>;
 }
 
-export function StudentClassroom({ demo = false, user, enrollments: initialEnrollments, items, completedItemIds, setupRequired = false, courseLevels }: StudentClassroomProps) {
+export function StudentClassroom({ demo = false, user, enrollments: initialEnrollments, items, completedItemIds, setupRequired = false, courseLevels, directDrive = false }: StudentClassroomProps) {
   const [enrollments, setEnrollments] = useState(initialEnrollments);
   const [completedIds, setCompletedIds] = useState(completedItemIds);
   const [selectedCourseId, setSelectedCourseId] = useState<CourseId | null>(initialEnrollments[0]?.courseId ?? null);
@@ -223,6 +229,7 @@ export function StudentClassroom({ demo = false, user, enrollments: initialEnrol
   const selectedLevelCount = levels.length || selectedCourse?.levelCount;
   const currentLevel = enrollment?.unlockedLevel ?? 1;
   const courseIsEnrolled = Boolean(enrollment);
+  useEffect(() => { if (!demo) { setEnrollments(initialEnrollments); setCompletedIds(completedItemIds); } }, [demo, initialEnrollments, completedItemIds]);
 
   useEffect(() => {
     if (!demo) return;
@@ -319,7 +326,7 @@ export function StudentClassroom({ demo = false, user, enrollments: initialEnrol
             {levels.length > 0 ? <LevelPathway levels={levels} unlockedLevel={enrollment.unlockedLevel} selectedLevel={selectedLevel} items={courseItems} completedItemIds={completedIds} demo={demo} onSelect={openLevel}/> : <div className="py-16 text-center"><BookOpen size={30} className="mx-auto text-[#a5b192]"/><p className="mt-4 text-sm text-[#738463]">รอรายละเอียดเส้นทางคอร์สนี้</p><p className="mt-2 text-xs text-[#9ba68d]">ติวเตอร์กำลังจัดเตรียมเลเวลและเนื้อหา</p></div>}
           </div>
           <div ref={detailRef} className="scroll-mt-5 xl:sticky xl:top-5">
-            {level ? <LessonPanel level={level} items={courseItems.filter((item) => item.levelNumber === level.number)} completedIds={completedIds} pendingItem={pendingItem} error={error} demo={demo} onToggle={(itemId, completed) => void toggleTask(itemId, completed)} onClose={() => setSelectedLevel(null)}/> : <aside className="space-y-5">
+            {level ? <LessonPanel level={level} items={courseItems.filter((item) => item.levelNumber === level.number)} completedIds={completedIds} pendingItem={pendingItem} error={error} demo={demo} directDrive={directDrive} watermarkLabel={`${user.displayName} · ${user.username}`} onToggle={(itemId, completed) => void toggleTask(itemId, completed)} onClose={() => setSelectedLevel(null)}/> : <aside className="space-y-5">
               <div className="relative overflow-hidden rounded-2xl bg-[#ecf0e2] p-6"><div className="relative z-10"><p className="text-[9px] font-semibold uppercase tracking-[.18em] text-[#94a078]">ONE LEVEL AT A TIME</p><div className="my-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-[#d7dec4] bg-[#f5f7ed] text-[#8b9b69]"><Atom size={31} strokeWidth={1}/></div><h3 className="text-lg font-medium leading-8 text-[#5d704b]">เข้าใจทีละเรื่อง<br/>ไปได้ไกลกว่าที่คิด</h3><p className="mt-3 text-[11px] leading-6 text-[#899776]">คลิกเลเวลที่ปลดล็อก เพื่อดูวิดีโอ การบ้าน และเวลาแนะนำในการเรียน</p><button type="button" onClick={() => openLevel(currentLevel)} disabled={levels.length === 0} className="mt-5 inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-[11px] font-semibold text-[#567243] disabled:opacity-50">เปิด Level {currentLevel}<ArrowRight size={13}/></button></div><span className="pointer-events-none absolute -right-16 -top-12 h-44 w-44 rounded-full border border-[#dce3ca]"/><span className="pointer-events-none absolute -bottom-20 -left-10 h-44 w-44 rounded-full border border-[#dce3ca]"/></div>
               <div className="rounded-xl border border-[#e3e7d9] bg-white p-5"><div className="flex items-center gap-2 text-xs font-semibold text-[#71845b]"><MessageCircle size={15}/>เรียนครบแล้ว ทักติวเตอร์</div><p className="mt-2 text-[11px] leading-6 text-[#97a187]">เมื่อเรียนและทำ HW ครบ ให้ทัก LINE หาติวเตอร์ด้วยตัวเอง ติวเตอร์จะตรวจและปลดล็อกเลเวลถัดไปให้</p></div>
               <div className="flex items-start gap-2 px-1 text-[10px] leading-5 text-[#a0a990]"><ShieldCheck size={14} className="mt-0.5 shrink-0"/><p>สื่อการเรียนสำหรับบัญชีของคุณเท่านั้น กรุณาไม่ส่งต่อให้ผู้อื่น</p></div>

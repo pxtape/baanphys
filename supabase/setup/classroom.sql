@@ -1,3 +1,6 @@
+-- HISTORICAL draft only. Do not run against the active beta.
+-- The beta uses classroom-beta-isolated.sql and classroom_accounts instead,
+-- without modifying legacy profiles, auth triggers or roles.
 -- Manual-install schema for the course classroom, after the existing migrations.
 -- Not yet applied to any database. The Supabase CLI is not installed in this workspace.
 -- When CLI tooling is available, generate a migration with `supabase migration new classroom`
@@ -106,7 +109,7 @@ create table if not exists public.classroom_items (
   id text primary key check (id ~ '^[a-zA-Z0-9_-]{1,100}$'),
   course_id text not null,
   level_number integer not null,
-  kind text not null check (kind in ('video', 'homework')),
+  kind text not null check (kind in ('video', 'homework', 'sheet')),
   title text not null check (char_length(title) between 1 and 500),
   duration_minutes integer check (duration_minutes > 0),
   recommended_minutes integer check (recommended_minutes > 0),

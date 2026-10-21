@@ -28,13 +28,13 @@ for (const file of htmlFiles) {
     checkedReferences++;
   }
 }
-for (const relative of ["index.html", "preview/classroom/index.html", "preview/admin/index.html", "login/index.html"]) await fs.access(path.join(directory, relative));
+for (const relative of ["index.html", "preview/classroom/index.html", "preview/admin/index.html", "login/index.html", "admin/content/index.html"]) await fs.access(path.join(directory, relative));
 for (const file of files.filter((file) => /\.(js|html|txt)$/.test(file))) {
   const content = await fs.readFile(file, "utf8");
   if (/(?:SUPABASE_SERVICE_ROLE_KEY|sb_secret_[A-Za-z0-9_-]{10,}|-----BEGIN PRIVATE KEY-----)/.test(content)) throw new Error(`Private configuration in ${path.relative(directory, file)}`);
 }
 const login = await fs.readFile(path.join(directory, "login/index.html"), "utf8");
-if (/<input\b[^>]*type="password"/.test(login)) throw new Error("Preview must not accept real passwords");
+if (!/<input\b[^>]*type="password"/.test(login)) throw new Error("Live login must include a password input");
 const css = await Promise.all(files.filter((file) => file.endsWith(".css")).map((file) => fs.readFile(file, "utf8")));
 if (!css.some((content) => content.includes(".grid-cols-2") && content.includes(".min-h-screen"))) throw new Error("Expected classroom CSS not generated");
-console.log(`Verified ${htmlFiles.length} HTML files and ${checkedReferences} local links/assets; no server secrets or real password form.`);
+console.log(`Verified ${htmlFiles.length} HTML files and ${checkedReferences} local links/assets; no server secrets; live login included.`);
