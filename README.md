@@ -4,6 +4,12 @@
 
 **สถานะ: โครงร่างที่ทดลอง flow ได้ พร้อมโค้ด backend สำหรับเตรียมติดตั้ง ระบบบัญชี/ฐานข้อมูลคอร์สใหม่ยังไม่ได้ติดตั้งหรือทดสอบกับ Supabase จริง** เนื้อหาและเวลาจริงรอเจ้าของคอร์สส่งผ่านแชท ตัวอย่างไม่สร้างบัญชีหรือเปลี่ยนสิทธิ์จริง
 
+## เปิดเว็บจาก GitHub
+
+เตรียม GitHub Pages และ workflow `Publish GitHub Pages` แล้ว เมื่อเปิด Pages ด้วย Source = GitHub Actions และ deployment สำเร็จ เว็บจะอยู่ที่ **https://pxtape.github.io/baanphys/**
+
+เวอร์ชัน Pages ให้ลองห้องเรียนและหลังบ้านด้วยข้อมูลจำลอง ไม่มีบัญชีจริงหรือคลิปส่วนตัว ดู [วิธีเปิด Pages ครั้งแรก](docs/GITHUB-PAGES.md)
+
 ## ลองในเครื่อง
 
 ใช้ Node.js 22 ขึ้นไป เปิด PowerShell ที่โฟลเดอร์โปรเจกต์:
@@ -34,7 +40,7 @@ npm.cmd run dev
 - ตาราง `classroom_*` แยกจากระบบ Skill Tree เดิม
 - นักเรียนไม่สามารถเปิดคอร์สหรือปลดล็อกเลเวลของตัวเองได้ ต้องให้แอดมินกดทุกครั้ง
 - วิดีโอ/เอกสารจาก Google Drive ผ่านเส้นทางตรวจสิทธิ์ พร้อมลายน้ำชื่อผู้เรียน เวลา และห้าม cache สื่อส่วนตัว
-- ใช้ GitHub เก็บ source code; เปิดออนไลน์ต้อง deploy บนโฮสต์ที่รองรับ Next.js server เว็บนี้มี server actions จึงใช้ GitHub Pages แบบ static อย่างเดียวไม่ได้ ([เอกสาร Next.js](https://nextjs.org/docs/app/guides/static-exports))
+- GitHub Pages ใช้ชุด static preview แยกจากระบบจริง คำสั่ง `npm.cmd run build:pages` สร้างเว็บตัวอย่างที่ `.pages-build/out` ส่วนระบบจริงที่ใช้ server actions ต้องมี backend เพิ่มเติม ([เอกสาร Next.js](https://nextjs.org/docs/app/guides/static-exports))
 
 ## ตั้งค่าระบบจริงเมื่อพร้อม
 
