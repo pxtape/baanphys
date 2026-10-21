@@ -1,0 +1,20 @@
+@import "tailwindcss";
+@import "@xyflow/react/dist/style.css";
+@import "katex/dist/katex.min.css";
+
+:root { --ink: #172b3a; --muted: #66767b; --paper: #fafaf7; --accent: #167a72; --copper: #ad713e; --soft: #eaf2ef; --line: #e3e7e2; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: "Noto Sans Thai", "Leelawadee UI", "Tahoma", sans-serif; }
+button, a { -webkit-tap-highlight-color: transparent; }
+::selection { background: #cce4dd; color: var(--ink); }
+.eyebrow { color: var(--accent); font-size: 10px; font-weight: 700; letter-spacing: .16em; }
+.section-heading { color: var(--ink); font-size: clamp(1.45rem, 2.6vw, 2rem); font-weight: 600; letter-spacing: -.025em; line-height: 1.45; }
+.button-primary { display: inline-flex; align-items: center; justify-content: center; gap: 12px; border-radius: 6px; background: var(--accent); padding: 14px 20px; color: white; font-size: 14px; font-weight: 600; transition: background .18s ease, transform .18s ease; }
+.button-primary:hover { background: #105f59; transform: translateY(-1px); }
+.button-primary:focus-visible, a:focus-visible, button:focus-visible { outline: 3px solid #b9783c; outline-offset: 3px; }
+.filter-select { appearance: none; min-width: 112px; border: 1px solid var(--line); border-radius: 4px; background: white; padding: 8px 30px 8px 10px; color: var(--ink); font: inherit; font-size: 11px; }
+.flow-no-pan .react-flow__pane { cursor: default; }
+.flow-no-pan .react-flow__node { cursor: pointer; }
+.skill-edge path { stroke: #a9c7bf; stroke-width: 2; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
