@@ -162,6 +162,11 @@ function LessonPanel({ level, items, completedIds, pendingItem, error, demo, dir
       {items.length === 0 && <div className="my-5 rounded-xl border border-dashed border-[#dce5d6] px-4 py-6 text-center"><BookOpen size={24} className="mx-auto text-[#9aaa95]"/><p className="mt-3 text-xs font-medium text-[#60705f]">กำลังจัดเตรียมเนื้อหาเลเวลนี้</p><p className="mt-1.5 text-[11px] leading-5 text-[#91998a]">จะมีรายการวิดีโอ การบ้าน และเวลาแนะนำที่นี่</p></div>}
       <div className="mt-2 divide-y divide-[#edf0e9]">
         {items.map((item) => {
+          const answerOpen = openMedia === `${item.id}:answer`;
+          const solutionOpen = openMedia === `${item.id}:solution`;
+          const mediaFileId = answerOpen ? item.answerFileId : solutionOpen ? item.solutionFileId : item.driveFileId;
+          const mediaTitle = `${item.title}${answerOpen ? " — Answer only" : solutionOpen ? " — Full solution" : ""}`;
+          const validMediaFile = Boolean(mediaFileId && /^[a-zA-Z0-9_-]{10,200}$/.test(mediaFileId));
           const checked = completedIds.includes(item.id);
           const isVideo = item.kind === "video";
           const hasMedia = item.hasMedia ?? Boolean(item.driveFileId);
@@ -177,10 +182,11 @@ function LessonPanel({ level, items, completedIds, pendingItem, error, demo, dir
                   className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-[#dfe7d8] px-2.5 py-1.5 text-[10px] font-medium text-[#167a72] transition hover:bg-[#f3f7ee] disabled:cursor-default disabled:border-[#edf0e8] disabled:text-[#a0a895]">
                   {isVideo ? <CirclePlay size={12}/> : <FileText size={12}/>} {hasMedia && !demo ? openMedia === item.id ? isVideo ? "ซ่อนวิดีโอ" : "ซ่อนเอกสาร" : isVideo ? "เริ่มดูวิดีโอ" : item.kind === "sheet" ? "เปิดชีท" : "เปิดการบ้าน" : "รอเพิ่มไฟล์จริง"}
                 </button>
+                {!isVideo && <div className="mt-3 rounded-lg bg-[#f1f5ef] p-3"><p className="mb-2 text-xs font-semibold text-[#34483d]">ดูเฉลย · เปิดได้ทันที</p><div className="flex flex-wrap gap-2">{([{key: "answer", label: "Answer only", file: item.answerFileId}, {key: "solution", label: "Full solution", file: item.solutionFileId}] as const).map(option => <button key={option.key} type="button" disabled={!option.file || demo} aria-pressed={openMedia === `${item.id}:${option.key}`} onClick={() => { setOpenMedia(openMedia === `${item.id}:${option.key}` ? null : `${item.id}:${option.key}`); setMediaError(""); }} className="rounded-lg border border-[#bbcebb] bg-white px-3 py-2 text-xs font-semibold text-[#167a72] disabled:opacity-50">{option.label}{!option.file ? " · รอเพิ่มไฟล์" : ""}</button>)}</div></div>}
               </div>
             </div>
-            {openMedia === item.id && !demo && <><div ref={mediaWrapperRef} className="classroom-media-shell relative mt-4 overflow-hidden rounded-lg bg-[#172b3a]">
-              <iframe title={item.title} src={directDrive && item.driveFileId && /^[a-zA-Z0-9_-]{10,200}$/.test(item.driveFileId) ? `https://drive.google.com/file/d/${item.driveFileId}/preview` : `/courses/media/${encodeURIComponent(item.id)}`} className="classroom-media-frame aspect-video w-full border-0" allow={directDrive ? "fullscreen 'none'" : "fullscreen"} allowFullScreen={!directDrive} referrerPolicy="no-referrer"/>
+            {(openMedia === item.id || answerOpen || solutionOpen) && !demo && <><div ref={mediaWrapperRef} className="classroom-media-shell relative mt-4 overflow-hidden rounded-lg bg-[#172b3a]">
+              <iframe title={mediaTitle} src={directDrive && validMediaFile ? `https://drive.google.com/file/d/${mediaFileId}/preview` : `/courses/media/${encodeURIComponent(item.id)}${answerOpen ? "?variant=answer" : solutionOpen ? "?variant=solution" : ""}`} className="classroom-media-frame aspect-video w-full border-0" allow={directDrive ? "fullscreen 'none'" : "fullscreen"} allowFullScreen={!directDrive} referrerPolicy="no-referrer"/>
               {directDrive && <span className="classroom-account-mark pointer-events-none absolute z-10 max-w-[75%] rounded bg-black/25 px-3 py-2 text-[10px] text-white/70">{watermarkLabel}<br/>{new Date().toLocaleDateString("th-TH")}</span>}
               <div className="flex shrink-0 items-center justify-end bg-[#172b3a] px-3 py-2"><button type="button" onClick={() => void toggleMediaFullscreen()} className="inline-flex items-center gap-1.5 rounded border border-white/20 px-2.5 py-1.5 text-[10px] text-white hover:bg-white/10">{mediaFullscreen ? <Minimize size={12}/> : <Maximize size={12}/>} {mediaFullscreen ? "ออกจากเต็มจอ" : "ขยายเต็มจอ"}</button></div>
             </div>{mediaError && <p role="alert" className="mt-2 text-[11px] leading-6 text-[#ad6246]">{mediaError}</p>}</>}

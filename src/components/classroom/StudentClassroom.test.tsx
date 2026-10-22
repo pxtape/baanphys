@@ -75,4 +75,20 @@ describe("StudentClassroom access and progress", () => {
     await waitFor(() => expect(requestFullscreen).toHaveBeenCalledOnce());
     expect(mediaShell).toHaveClass("classroom-media-shell");
   });
+  it("opens both solution types before a sheet or homework is completed", () => {
+    for (const kind of ["sheet", "homework"] as const) {
+      const item = { ...DEMO_ITEMS[0], id: "solution-test", kind, answerFileId: "answer_file_123456", solutionFileId: "solution_file_123456" };
+      const view = render(<StudentClassroom directDrive user={DEMO_STUDENT} enrollments={DEMO_ENROLLMENTS} items={[item]} completedItemIds={[]}/>);
+      fireEvent.click(screen.getByRole("button", { name: /^Level 1 / }));
+      expect(screen.getByRole("checkbox")).not.toBeChecked();
+      fireEvent.click(screen.getByRole("button", { name: "Answer only" }));
+      expect(screen.getByTitle(`${item.title} — Answer only`)).toHaveAttribute("src", "https://drive.google.com/file/d/answer_file_123456/preview");
+      fireEvent.click(screen.getByRole("button", { name: "Full solution" }));
+      expect(screen.getByTitle(`${item.title} — Full solution`)).toHaveAttribute("src", "https://drive.google.com/file/d/solution_file_123456/preview");
+      expect(setTask).not.toHaveBeenCalled();
+      view.unmount();
+    }
+  });
+
 });
+

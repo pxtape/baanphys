@@ -27,6 +27,8 @@ export type LearningItem = {
   recommendedMinutes: number | null;
   driveFileId: string | null;
   hasMedia?: boolean;
+  answerFileId?: string | null;
+  solutionFileId?: string | null;
   instructions: string;
 };
 

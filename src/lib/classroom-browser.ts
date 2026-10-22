@@ -28,7 +28,7 @@ export async function loadClassroom() {
     user: { id: user.id, displayName: account.data?.display_name ?? profile.data?.display_name ?? "นักเรียน", username: account.data?.username ?? user.email ?? "" },
     courses: COURSES.map((course) => { const db = courses.data?.find((row) => row.id === course.id); return { ...course, levelCount: db?.level_count ?? null }; }),
     enrollments: (enrollments.data ?? []).map((row) => ({ studentId: row.user_id, courseId: row.course_id, unlockedLevel: row.unlocked_level })) as Enrollment[],
-    items: (items.data ?? []).map((row) => ({ id: row.id, courseId: row.course_id, levelNumber: row.level_number, kind: row.kind, title: row.title, durationMinutes: row.duration_minutes, recommendedMinutes: row.recommended_minutes, driveFileId: row.drive_file_id, hasMedia: Boolean(row.drive_file_id), instructions: row.instructions })) as LearningItem[],
+    items: (items.data ?? []).map((row) => ({ id: row.id, courseId: row.course_id, levelNumber: row.level_number, kind: row.kind, title: row.title, durationMinutes: row.duration_minutes, recommendedMinutes: row.recommended_minutes, driveFileId: row.drive_file_id, hasMedia: Boolean(row.drive_file_id), instructions: row.instructions, answerFileId: row.answer_file_id, solutionFileId: row.solution_file_id })) as LearningItem[],
     completedItemIds: (progress.data ?? []).map((row) => String(row.item_id)), courseLevels,
   };
 }
