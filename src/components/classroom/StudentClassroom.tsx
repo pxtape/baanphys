@@ -120,6 +120,23 @@ function LevelPathway({ levels, unlockedLevel, selectedLevel, completedItemIds, 
   </div>;
 }
 
+function StudyAdvice({ homework = false }: { homework?: boolean }) {
+  const steps = homework ? [
+    "ลองทำเองให้เต็มที่ก่อน ประมาณ 3–10 นาที หรือมากกว่านั้นตามความยากของโจทย์",
+    "ถ้าติด ขอคำใบ้จากพี่ทาง LINE ได้เลย แคปหน้าจอหรือถ่ายรูป พร้อมบอกว่าลองอะไรไปแล้วและสงสัยตรงไหน",
+    "เมื่อดูเฉลยแล้ว ลองวิเคราะห์ว่าพลาดตรงไหน เพราะอะไร และครั้งหน้าจะปรับอย่างไร",
+  ] : [
+    "ลองคิดและทำโจทย์ด้วยตัวเองก่อนฟังพี่ได้เลย",
+    "เปรียบเทียบวิธีคิดของตัวเองกับวิธีที่พี่ทำ สังเกตทั้งจุดที่เหมือนและต่างกัน",
+    "ลองทำซ้ำด้วยตัวเองอีกครั้ง เพื่อเช็กว่าเข้าใจและทำได้จริง",
+  ];
+  return <aside aria-label={homework ? "คำแนะนำในการทำ HW" : "แนะนำวิธีเรียน"} className="my-5 rounded-xl border border-[#d4e2d3] bg-[#f3f7f0] p-4 sm:p-5">
+    <h4 className="text-sm font-semibold text-[#294c3c]">{homework ? "ก่อนเริ่ม HW · ลองให้เต็มที่ แล้วค่อยขอคำใบ้" : "เรียนให้เข้าใจ · คิดก่อน ดูแล้วเทียบ ลองทำซ้ำ"}</h4>
+    <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-7 text-[#4c614f]">{steps.map(step => <li key={step}>{step}</li>)}</ol>
+    <p className="mt-3 border-t border-[#dce7d7] pt-3 text-sm font-medium leading-7 text-[#47744f]">ช่วงแรกอาจใช้เวลามากหน่อย ไม่เป็นไรนะ พอฝึกจนคุ้นแล้ว จะค่อย ๆ คิดได้คล่องและเร็วขึ้น</p>
+  </aside>;
+}
+
 function LessonPanel({ level, items, completedIds, pendingItem, error, demo, directDrive, watermarkLabel, onToggle, onClose }: {
   level: CourseLevel; items: LearningItem[]; completedIds: string[]; pendingItem: string | null;
   error: string; demo: boolean;
@@ -160,6 +177,7 @@ function LessonPanel({ level, items, completedIds, pendingItem, error, demo, dir
       <div className="mt-3 h-1 overflow-hidden rounded-full bg-[#eef1eb]"><div className="h-full rounded-full bg-[#167a72] transition-all" style={{ width: `${items.length ? doneCount / items.length * 100 : 0}%` }}/></div>
       {demo && <p className="mt-3 text-[10px] leading-5 text-[#92784f]">รายการและเวลาในหน้านี้เป็นตัวอย่างสำหรับลองระบบ</p>}
       {items.length === 0 && <div className="my-5 rounded-xl border border-dashed border-[#dce5d6] px-4 py-6 text-center"><BookOpen size={24} className="mx-auto text-[#9aaa95]"/><p className="mt-3 text-xs font-medium text-[#60705f]">กำลังจัดเตรียมเนื้อหาเลเวลนี้</p><p className="mt-1.5 text-[11px] leading-5 text-[#91998a]">จะมีรายการวิดีโอ การบ้าน และเวลาแนะนำที่นี่</p></div>}
+      {items.some(item => item.kind === "video" || item.kind === "sheet") && <StudyAdvice/>}
       <div className="mt-2 divide-y divide-[#edf0e9]">
         {items.map((item) => {
           const answerOpen = openMedia === `${item.id}:answer`;
@@ -171,6 +189,7 @@ function LessonPanel({ level, items, completedIds, pendingItem, error, demo, dir
           const isVideo = item.kind === "video";
           const hasMedia = item.hasMedia ?? Boolean(item.driveFileId);
           return <article key={item.id} className="py-4">
+            {item.kind === "homework" && items.find(entry => entry.kind === "homework")?.id === item.id && <StudyAdvice homework/>}
             <div className="flex items-start gap-3"><input type="checkbox" id={`task-${item.id}`} checked={checked} disabled={pendingItem !== null}
               onChange={(event) => onToggle(item.id, event.target.checked)} aria-label={`เรียนครบ ${item.title}`}
               className="mt-1 h-4 w-4 shrink-0 accent-[#167a72] disabled:opacity-50"/>
