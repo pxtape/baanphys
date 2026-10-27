@@ -5,8 +5,8 @@ import { StudyDashboard } from "./StudyDashboard";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft, ArrowRight, Atom, BookOpen, Check, CheckCheck,
-  CirclePlay, Clock3, FileText, Flag, GraduationCap, LayoutGrid, LockKeyhole,
-  LogOut, Maximize, MessageCircle, Minimize, Route, ShieldCheck,
+  CirclePlay, Clock3, FileText, GraduationCap, LayoutGrid, LockKeyhole,
+  LogOut, Maximize, MessageCircle, Minimize, Route,
 } from "lucide-react";
 import {
   COURSES, PRE_POSN_LEVELS, formatStudyTime,
@@ -49,15 +49,15 @@ function CourseCard({ course, enrollment, selected, onClick }: {
   const locked = !enrollment;
   return <button type="button" disabled={locked} onClick={onClick} aria-pressed={selected}
     aria-label={`${course.title}${locked ? " ยังไม่ปลดล็อก" : " เปิดคอร์ส"}`}
-    className={`lab-course group relative flex min-h-[158px] flex-col overflow-hidden rounded-2xl border p-5 text-left transition ${selected ? "border-[#3853ae] bg-[#253e8c] text-white shadow-[0_6px_0_#162a66]" : locked ? "border-[#e4e8e4] bg-[#f3f4f0] text-[#87918d]" : "border-[#dce4de] bg-white text-[#172b3a] hover:border-[#167a72]"}`}>
-    <span className={`flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.16em] ${selected ? "text-[#d4e1ff]" : "text-[#8a9790]"}`}>
+    className={`lab-course group relative flex min-h-[158px] flex-col overflow-hidden rounded-2xl border p-5 text-left transition ${selected ? "border-[#568677] bg-[#528273] text-white" : locked ? "border-[#e4e8e4] bg-[#f3f4f0] text-[#87918d]" : "border-[#dce4de] bg-white text-[#172b3a] hover:border-[#167a72]"}`}>
+    <span className={`flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.16em] ${selected ? "text-[#e2eee6]" : "text-[#8a9790]"}`}>
       <GraduationCap size={14}/>{course.subtitle}
     </span>
     <span className="mt-4 flex items-center justify-between gap-3">
       <span className="text-xl font-semibold tracking-tight">{course.title}</span>
       {locked ? <LockKeyhole size={19} strokeWidth={1.7}/> : <ArrowRight size={20} className="transition group-hover:translate-x-1"/>}
     </span>
-    <span className={`mt-auto pt-3 text-[11px] ${selected ? "text-[#d4e1ff]" : "text-[#87918d]"}`}>
+    <span className={`mt-auto pt-3 text-[11px] ${selected ? "text-[#e2eee6]" : "text-[#87918d]"}`}>
       {locked ? "รอเปิดสิทธิ์เข้าเรียน" : course.levelCount ? `ปลดล็อก ${enrollment.unlockedLevel} / ${course.levelCount} เลเวล` : "ได้รับสิทธิ์เข้าเรียนแล้ว"}
     </span>
     {selected && <span className="absolute -bottom-10 -right-6 h-28 w-28 rounded-full border border-white/10"/>}
@@ -72,72 +72,20 @@ function getLevels(course: CourseDefinition): CourseLevel[] {
   }));
 }
 
-const EXPEDITIONS = [
-  { start: 1, end: 3, title: "เริ่มออกเดินทาง", topic: "การเคลื่อนที่แนวตรง", note: "อ่านการเคลื่อนที่ให้เป็นภาษาเดียวกับธรรมชาติ", color: "#3554aa", paper: "#e8efff", art: "motion" },
-  { start: 4, end: 8, title: "ทำความรู้จักกับแรง", topic: "นิวตันและการเคลื่อนที่", note: "จากลูกบอลหนึ่งลูก สู่กฎที่อธิบายทั้งโลก", color: "#186c89", paper: "#dbf2f9", art: "orbit" },
-  { start: 9, end: 16, title: "มองให้เห็นสิ่งที่ซ่อนอยู่", topic: "พลังงาน โมเมนตัม และการสั่น", note: "เชื่อมแรงโน้มถ่วง พลังงาน การชน และการหมุน", color: "#ad5726", paper: "#ffeadb", art: "pendulum" },
-  { start: 17, end: 20, title: "โลกที่ไหลและเปลี่ยนแปลง", topic: "ของไหลและความร้อน", note: "สำรวจสิ่งที่เกิดขึ้นในน้ำ อากาศ และอุณหภูมิ", color: "#147b83", paper: "#dbf3ec", art: "fluid" },
-  { start: 21, end: 27, title: "จุดประกายความเข้าใจ", topic: "ประจุไฟฟ้าและวงจร", note: "ตามรอยประจุ จากสนามที่มองไม่เห็นสู่หลอดไฟ", color: "#7350aa", paper: "#ece2ff", art: "circuit" },
-  { start: 28, end: 29, title: "ตามลำแสงไป", topic: "แสง", note: "มองโลกอีกครั้ง ผ่านเลนส์และการหักเห", color: "#a55c53", paper: "#fcf0e9", art: "prism" },
-  { start: 30, end: 30, title: "สำรวจโลกของแก๊ส", topic: "แก๊สและความชื้น", note: "จากอนุภาคเล็ก ๆ สู่ปรากฏการณ์รอบตัว", color: "#527951", paper: "#edf4e7", art: "gas" },
-  { start: 31, end: 31, title: "อีกหนึ่งแรงที่มองไม่เห็น", topic: "แม่เหล็ก", note: "จุดหมายสุดท้ายของ Pre-POSN และจุดเริ่มต้นถัดไป", color: "#536695", paper: "#edf0f9", art: "field" },
-];
-
-function PhysicsSketch({ kind }: { kind: string }) {
-  return <svg aria-hidden="true" viewBox="0 0 240 140" className="h-full w-full" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M15 123H225" opacity=".2"/>
-    {kind === "motion" ? <><path d="M25 108Q100 -20 208 94" strokeDasharray="5 7"/><circle cx="112" cy="40" r="12" fill="currentColor" fillOpacity=".15"/><path d="M30 110H77M68 102L77 110L68 118"/><text x="168" y="35" fill="currentColor" stroke="none" fontSize="16">v = u + at</text><path d="M30 112V45" opacity=".4"/></>
-    : kind === "orbit" ? <><ellipse cx="120" cy="70" rx="91" ry="36" transform="rotate(-20 120 70)" strokeDasharray="4 6"/><circle cx="120" cy="70" r="23" fill="currentColor" fillOpacity=".12"/><circle cx="201" cy="38" r="10" fill="currentColor"/><path d="M192 47L154 62M163 52L154 62L168 62"/><text x="23" y="30" fill="currentColor" stroke="none" fontSize="17">F = ma</text></>
-    : kind === "pendulum" ? <><path d="M62 20H176M118 20V103M118 20L173 91"/><path d="M68 91Q118 143 173 91" strokeDasharray="4 6" opacity=".4"/><circle cx="118" cy="105" r="15" fill="currentColor" fillOpacity=".12"/><circle cx="173" cy="94" r="15" fill="currentColor" fillOpacity=".25"/><path d="M110 18L116 25L124 18"/><text x="20" y="62" fill="currentColor" stroke="none" fontSize="15">E = K + U</text></>
-    : kind === "fluid" ? <><path d="M48 25V104Q48 117 63 117H105Q118 117 118 104V25M39 25H58M109 25H127"/><path d="M49 70Q67 60 83 70T117 70V103Q117 116 104 116H62Q49 116 49 103Z" fill="currentColor" fillOpacity=".15"/><path d="M163 24V95M153 95A19 19 0 1 0 173 95V24Q173 14 163 14Q153 14 153 24V95M163 56V105"/><circle cx="163" cy="110" r="9" fill="currentColor"/><circle cx="69" cy="91" r="3"/><circle cx="97" cy="81" r="4"/></>
-    : kind === "circuit" ? <><path d="M31 70V29H101M141 29H208V110H135M104 110H31V70M104 98V122M134 103V117"/><circle cx="121" cy="29" r="20" fill="currentColor" fillOpacity=".13"/><path d="M110 17L133 41M132 17L109 41M87 16L80 9M121 0V5M155 16L162 9"/><path d="M200 65L208 73L216 65"/><text x="67" y="77" fill="currentColor" stroke="none" fontSize="18">V = IR</text></>
-    : kind === "prism" ? <><path d="M114 21L164 113H63Z" fill="currentColor" fillOpacity=".1"/><path d="M12 65H88L142 76L226 35"/><path d="M143 79L227 57" stroke="#ca9560"/><path d="M146 82L228 79" stroke="#699c82"/><path d="M150 85L228 103" stroke="#7b79ae"/><circle cx="114" cy="21" r="3"/></>
-    : kind === "gas" ? <><path d="M55 21H177V119H55Z"/><path d="M45 30H187M115 5V28"/><circle cx="77" cy="59" r="6"/><circle cx="137" cy="53" r="6"/><circle cx="105" cy="97" r="6"/><circle cx="157" cy="92" r="6"/><path d="M80 65L90 76M131 55L121 67M151 86L141 76"/><text x="183" y="61" fill="currentColor" stroke="none" fontSize="14">pV</text></>
-    : <><path d="M77 60V86Q77 120 120 120Q163 120 163 86V60H143V86Q143 100 120 100Q97 100 97 86V60Z" fill="currentColor" fillOpacity=".15"/><path d="M87 55Q87 -2 153 55M65 59Q65 -30 177 59M45 70Q35 -48 197 70" strokeDasharray="4 6" opacity=".55"/><text x="80" y="80" fill="currentColor" stroke="none" fontSize="12">N</text><text x="149" y="80" fill="currentColor" stroke="none" fontSize="12">S</text></>}
-  </svg>;
-}
-
-function LevelPathway({ levels, unlockedLevel, selectedLevel, completedItemIds, items, demo, onSelect, themed }: {
+function LevelPathway({ levels, unlockedLevel, selectedLevel, completedItemIds, items, demo, onSelect }: {
   levels: CourseLevel[]; unlockedLevel: number; selectedLevel: number | null;
-  completedItemIds: string[]; items: LearningItem[]; demo: boolean; onSelect: (level: number) => void; themed: boolean;
+  completedItemIds: string[]; items: LearningItem[]; demo: boolean; onSelect: (level: number) => void; themed?: boolean;
 }) {
-  const chapters = themed ? EXPEDITIONS : [{ start: 1, end: Infinity, title: "เส้นทางการเรียนรู้", topic: "ทีละก้าว สู่ความเข้าใจ", note: "เลือกด่านที่เปิดแล้วเพื่อเริ่มเรียน", color: "#3554aa", paper: "#e8efff", art: "motion" }];
-  return <div>
-    <nav aria-label="เลือกหมวดบทเรียน" className="mb-7 flex gap-2 overflow-x-auto pb-3">{chapters.filter(ch => levels.some(l => l.number >= ch.start && l.number <= ch.end)).map(ch => <a key={ch.start} href={`#expedition-${ch.start}`} className="shrink-0 rounded-full border border-[#d4ded3] bg-white px-4 py-2 text-xs font-medium text-[#435749]">{ch.topic}</a>)}</nav>
-    <div className="space-y-7">{chapters.map((chapter, chapterIndex) => {
-      const chapterLevels = levels.filter(l => l.number >= chapter.start && l.number <= chapter.end);
-      if (!chapterLevels.length) return null;
-      const active = chapterLevels.some(l => l.number === unlockedLevel);
-      const passed = chapterLevels.filter(l => l.number < unlockedLevel).length;
-      return <section key={chapter.start} id={`expedition-${chapter.start}`} aria-label={chapter.topic} style={{"--chapter-color":chapter.color} as React.CSSProperties} className={`expedition scroll-mt-6 overflow-hidden rounded-[24px] border ${active ? "border-[#a2bdab] shadow-[0_8px_32px_#183e2310]" : "border-[#dfe5db]"}`}>
-        <div className="lab-chapter-head relative flex min-h-40 items-center justify-between gap-3 overflow-hidden px-5 py-6 sm:px-7" style={{backgroundColor:chapter.paper}}>
-          <div className="relative z-10 max-w-[65%]"><p className="text-[10px] font-bold uppercase tracking-[.18em]" style={{color:chapter.color}}>EXPEDITION {String(chapterIndex+1).padStart(2,"0")} · LEVEL {chapterLevels[0].number}–{chapterLevels.at(-1)?.number}</p><h3 className="mt-2 text-xl font-semibold leading-8 tracking-tight text-[#203b3b] sm:text-2xl">{chapter.title}</h3><p className="mt-2 text-sm font-medium" style={{color:chapter.color}}>{chapter.topic}</p><p className="mt-2 hidden text-xs leading-6 text-[#5f7065] sm:block">{chapter.note}</p></div>
-          <div className="absolute -right-5 top-4 h-40 w-48 opacity-90 sm:right-3 sm:h-48 sm:w-64" style={{color:chapter.color}}><PhysicsSketch kind={chapter.art}/></div>
-        </div>
-        <div className="bg-white px-4 pb-6 pt-4 sm:px-7"><div className="mb-5 flex items-center justify-between gap-3 text-xs text-[#657568]"><span>{active ? "คุณกำลังสำรวจหมวดนี้" : passed === chapterLevels.length ? "ผ่านหมวดนี้แล้ว" : "เส้นทางข้างหน้า"}</span><span>{passed} / {chapterLevels.length} ด่านที่ผ่าน</span></div>
-          <div className="expedition-trail relative flex flex-col gap-6 py-3">{chapterLevels.map(level => {
-            const locked = level.number > unlockedLevel;
-            const tasks = items.filter(item => item.levelNumber === level.number);
-            const done = tasks.filter(item => completedItemIds.includes(item.id)).length;
-            const waiting = level.number === unlockedLevel && tasks.length > 0 && done === tasks.length;
-            const current = level.number === unlockedLevel;
-            const passedLevel = level.number < unlockedLevel;
-            return <button id={`level-${level.number}`} key={level.number} type="button" disabled={locked} onClick={() => onSelect(level.number)} aria-pressed={selectedLevel===level.number} aria-label={`Level ${level.number} ${level.title}${locked ? " ยังไม่ปลดล็อก" : current ? " เลเวลปัจจุบัน" : " เปิดบทเรียน"}`} className={`lab-level relative scroll-mt-6 flex min-h-28 items-center gap-3 rounded-2xl border p-4 text-left transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#167a72] ${current ? waiting ? "border-[#c5a56c] bg-[#fff7e4]" : "border-[#526ec2] bg-[#e8eeff] shadow-[0_5px_0_#3a55aa25]" : locked ? "border-[#e4e8e0] bg-[#f7f8f4]" : "border-[#cbdccc] bg-white hover:-translate-y-0.5 hover:border-[#167a72]"}`}>
-              <span className={`relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-lg font-bold ${current ? waiting ? "bg-[#a77d39] text-white" : "bg-[#3554aa] text-white" : passedLevel ? "bg-[#deeddf] text-[#377549]" : "bg-[#e9ede5] text-[#637365]"}`}>{level.number}{passedLevel && <Check size={14} className="absolute -bottom-1 -right-1 rounded-full bg-[#387f51] p-0.5 text-white"/>}{locked && <LockKeyhole size={12} className="absolute -right-1 -top-1 rounded-full bg-[#e1e7da] p-0.5"/>}</span>
-              <span className="min-w-0 flex-1"><span className="block text-sm font-semibold leading-6 text-[#30483e]">{level.title}</span><span className="mt-1 flex items-center gap-1 text-[11px] text-[#627465]"><Clock3 size={11}/>{formatStudyTime(level.durationMinutes)}{demo && level.durationMinutes!==null ? " · ตัวอย่าง" : ""}</span>{current && <span className={`mt-2 block text-[11px] font-semibold ${waiting ? "text-[#8a652c]" : "text-[#167a72]"}`}>{waiting ? "ทำครบแล้ว · ติดต่อ LINE" : "เริ่มภารกิจ →"}</span>}{!locked && tasks.length>0 && <span className="mt-2 block h-1 rounded-full bg-[#dfe8dd]"><span className="block h-1 rounded-full bg-[#438c66]" style={{width:`${done/tasks.length*100}%`}}/></span>}</span>
-            </button>;
-          })}</div>
-        </div>
-      </section>;
-    })}</div>
-    <style>{`
-      .expedition-trail::before{content:"";position:absolute;left:39px;top:20px;bottom:20px;width:3px;background:repeating-linear-gradient(to bottom,#bdcbe3 0 8px,transparent 8px 15px)}
-      .lab-level{z-index:1;box-shadow:0 4px 0 #1028540b}
-      .lab-chapter-head{background-image:radial-gradient(currentColor .6px,transparent .6px);background-size:18px 18px}
-      @media(min-width:640px){.expedition-trail{padding:12px 0 20px}.expedition-trail::before{left:50%;width:3px}.lab-level{width:68%;min-height:104px}.lab-level:nth-child(odd){align-self:flex-start}.lab-level:nth-child(even){align-self:flex-end}.lab-level::before{content:"";position:absolute;top:-20px;left:calc(50% - 2px);height:18px;border-left:3px dotted #bdcbe3}.lab-level:first-child::before{display:none}}
-    `}</style>
-    <div className="mt-8 flex items-center justify-center gap-2 rounded-2xl border border-dashed border-[#cdd9c8] px-5 py-6 text-sm text-[#657a60]"><Flag size={18}/><span>ทุกด่านคืออีกก้าวของความเข้าใจ · แล้วเจอกันที่ค่าย สอวน.</span></div>
-  </div>;
+ const rows:CourseLevel[][]=[];
+ for(let i=0;i<levels.length;i+=4) rows.push(levels.slice(i,i+4));
+ return <div className="compact-path space-y-7 py-3 sm:space-y-10">{rows.map((row,rowIndex)=><div key={row[0].number} className="compact-path-row relative grid grid-cols-1 gap-3 sm:grid-cols-4 sm:gap-4">{row.map((entry,column)=>{
+ const locked=entry.number>unlockedLevel,current=entry.number===unlockedLevel;
+ const tasks=items.filter(item=>item.levelNumber===entry.number),done=tasks.filter(item=>completedItemIds.includes(item.id)).length;
+ const passed=entry.number<unlockedLevel,waiting=current&&tasks.length>0&&done===tasks.length;
+ return <button id={`level-${entry.number}`} key={entry.number} type="button" disabled={locked} aria-pressed={entry.number===selectedLevel} aria-label={`Level ${entry.number} ${entry.title}${locked?" ยังไม่ปลดล็อก":current?" เลเวลปัจจุบัน":" เปิดบทเรียน"}`} onClick={()=>onSelect(entry.number)} style={{"--path-column":rowIndex%2?4-column:column+1} as React.CSSProperties} className="compact-path-node relative z-10 flex scroll-mt-5 items-center gap-3 rounded-xl border border-[#e0e6e1] bg-white p-3 text-left sm:flex-col sm:border-0 sm:bg-[#fbfcfa] sm:p-1 sm:text-center">
+ <span className={`relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border text-base font-semibold sm:h-14 sm:w-14 ${current?waiting?"border-[#d6be90] bg-[#f6ecd7] text-[#876326]":"border-[#4f897b] bg-[#407d70] text-white shadow-[0_0_0_4px_#e8efea]":passed?"border-[#c4d8cc] bg-[#e9f1eb] text-[#437459]":"border-[#dfe5df] bg-[#f1f3ef] text-[#69766c]"}`}>{entry.number}{locked&&<LockKeyhole size={12} className="absolute -right-1 -top-1 rounded-full bg-[#e5eae2] p-0.5"/>}{passed&&<Check size={13} className="absolute -bottom-1 -right-1 rounded-full bg-[#5c8c6c] p-0.5 text-white"/>}</span>
+ <span><span className="block text-sm font-semibold leading-6 text-[#35483e]">{entry.title}</span><span className="mt-1 block text-[11px] text-[#6e7c71]">{formatStudyTime(entry.durationMinutes)}{demo?" · ตัวอย่าง":""}</span>{current&&<span className="mt-1.5 inline-block rounded-full bg-[#e9efea] px-2 py-0.5 text-[10px] font-medium text-[#447869]">{waiting?"ทำครบแล้ว · ติดต่อ LINE":"คุณอยู่ตรงนี้"}</span>}</span></button>;
+ })}{rowIndex<rows.length-1&&<span aria-hidden="true" className={`pointer-events-none absolute top-7 hidden h-[calc(100%+2.5rem)] w-[12.5%] border-[#cddbd0] sm:block ${rowIndex%2?"left-0 rounded-l-2xl border-b border-l border-t":"right-0 rounded-r-2xl border-b border-r border-t"}`}/>}</div>)}<style>{`@media(min-width:640px){.compact-path-row::before{content:"";position:absolute;left:12.5%;right:12.5%;top:28px;height:1px;background:#cddbd0}.compact-path-node{grid-column:var(--path-column);grid-row:1}}`}</style></div>;
 }
 
 function StudyAdvice({ homework = false }: { homework?: boolean }) {
@@ -258,6 +206,7 @@ export function StudentClassroom({ demo = false, user, enrollments: initialEnrol
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
   const [pendingItem, setPendingItem] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [showStats, setShowStats] = useState(false);
   const detailRef = useRef<HTMLDivElement>(null);
   const pathwayRef = useRef<HTMLElement>(null);
   const selectedCourse = COURSES.find((course) => course.id === selectedCourseId);
@@ -351,47 +300,36 @@ export function StudentClassroom({ demo = false, user, enrollments: initialEnrol
       </div>
     </header>
     <style>{`
-      .physics-world{background-image:radial-gradient(#cad3e1 .7px,transparent .7px);background-size:22px 22px}
-      .physics-world .lab-header{background:#fff;border-color:#dce2ee}
-      .lab-hero{background-image:linear-gradient(115deg,#101b3d 0%,#172a59 68%,#284479 100%);box-shadow:0 16px 40px #172a591c}
-      .lab-hero::before{content:"";position:absolute;inset:0;background-image:linear-gradient(#ffffff06 1px,transparent 1px),linear-gradient(90deg,#ffffff06 1px,transparent 1px);background-size:36px 36px}
-      .lab-course{border-radius:20px}.lab-course:disabled{background:#eaf0f7;border-color:#d9e1ef;color:#627089}
-      .physics-world .expedition{border-color:#d0daeb;box-shadow:0 6px 0 #203b6810;border-radius:24px}
-      .lab-footer{background:#111d3d}.lab-footer span,.lab-footer a{color:#bdcae1}
-      @media(max-width:639px){.lab-hero{border-radius:20px}.lab-chapter-head h3{font-size:20px}}
+      .physics-world{background:#f7f8f5}.physics-world .lab-header{background:white;border-color:#e0e5df}
+      .study-sidebar{display:none}.study-sidebar.is-open{display:block}
+      .lab-course{min-height:100px;border-radius:14px;padding:14px;box-shadow:none}
+      .lab-course:disabled{background:#f0f2ee;border-color:#e0e5dc;color:#718073}
+      @media(min-width:1024px){.study-sidebar{display:block;position:sticky;top:16px;max-height:calc(100vh - 32px);overflow-y:auto}}
     `}</style>
     <main className="mx-auto max-w-[1440px] px-5 pb-16 sm:px-9 lg:px-12">
-      <section className="lab-hero relative my-7 overflow-hidden rounded-[28px] bg-[#111d44] px-6 py-9 text-white sm:px-10 sm:py-12">
-        <div aria-hidden="true" className="lab-orbit absolute -right-20 -top-16 hidden h-[440px] w-[440px] sm:block"><svg viewBox="0 0 440 440" className="h-full w-full" fill="none"><defs><radialGradient id="lab-sphere"><stop stopColor="#7ad8ff"/><stop offset=".5" stopColor="#4776e8"/><stop offset="1" stopColor="#1c3476"/></radialGradient></defs><circle cx="220" cy="220" r="92" fill="url(#lab-sphere)"/><ellipse cx="220" cy="220" rx="190" ry="65" stroke="#82c9ff" strokeWidth="2" transform="rotate(-32 220 220)"/><ellipse cx="220" cy="220" rx="182" ry="66" stroke="#ffb270" strokeWidth="2" transform="rotate(48 220 220)"/><circle cx="62" cy="309" r="15" fill="#ff985b"/><circle cx="352" cy="346" r="8" fill="#b9ef83"/><path d="M135 20V40M125 30H145M345 100V118M336 109H354" stroke="#c6dcff" strokeWidth="2"/><text x="60" y="130" fill="#91b6ee" fontSize="20" fontFamily="monospace">F = ma</text><text x="270" y="395" fill="#91b6ee" fontSize="18" fontFamily="monospace">E = K + U</text></svg></div>
-        <div className="relative z-10 max-w-[620px]"><p className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-2 text-[10px] font-bold tracking-[.18em] text-[#a9d6ff]"><span className="h-2 w-2 rounded-full bg-[#b9ef83]"/>BAANPHYS · THE PHYSICS LAB</p><p className="text-sm text-[#b7c8e9]">สวัสดี {user.displayName} พร้อมออกสำรวจกันหรือยัง?</p><h1 className="mt-4 text-[34px] font-bold leading-[1.45] tracking-tight sm:text-[52px]">ฟิสิกส์ไม่ใช่แค่สูตร<br/><span className="text-[#ffad72]">แต่คือวิธีมองโลก</span></h1><p className="mt-4 max-w-md text-sm leading-7 text-[#c2d0eb]">ลองคิด ทดลองทำ แล้วค่อย ๆ ต่อภาพให้เข้าใจ<br className="hidden sm:block"/>เส้นทางสู่โอลิมปิกของคุณ เริ่มจากก้าวนี้</p></div>
-        <div className="relative z-10 mt-8 flex flex-wrap items-center justify-between gap-5 rounded-2xl border border-white/15 bg-[#0c1534]/90 px-5 py-5 sm:max-w-[670px]"><div><p className="text-[10px] font-bold tracking-[.14em] text-[#a9c5e9]">YOUR NEXT MISSION</p><p className="mt-2 text-base font-semibold">{enrollment && selectedCourse ? `${selectedCourse.title} · Level ${currentLevel}` : "รอติวเตอร์เปิดสิทธิ์คอร์ส"}</p>{enrollment && <p className="mt-1 text-sm text-[#b9cce9]">{levels.find(entry => entry.number === currentLevel)?.title}</p>}</div>{enrollment && levels.length>0 && <button type="button" onClick={() => openLevel(currentLevel)} className="inline-flex items-center gap-3 rounded-xl bg-[#ff9d62] px-5 py-3 text-sm font-bold text-[#17213d] shadow-[0_4px_0_#bd6537] transition hover:bg-[#ffb27f]">เริ่มภารกิจ <ArrowRight size={17}/></button>}</div>
-      </section>
-
-      {selectedCourse && enrollment && <StudyDashboard key={`${user.id}-${selectedCourse.id}`} userId={user.id} courseId={selectedCourse.id} courseTitle={selectedCourse.title} passedLevels={Math.min(levels.length, Math.max(0,currentLevel-1)+(currentLevel===levels.length && courseItems.some(item=>item.levelNumber===currentLevel) && courseItems.filter(item=>item.levelNumber===currentLevel).every(item=>completedIds.includes(item.id)) ? 1 : 0))} levelCount={levels.length} demo={demo}/>}
+      <section className="flex flex-wrap items-center justify-between gap-4 py-5"><div><h1 className="text-xl font-semibold text-[#2e443a]">ห้องเรียนของฉัน</h1><p className="mt-1 text-xs text-[#758174]">{user.displayName}{selectedCourse?` · ${selectedCourse.title}`:""}</p></div><div className="flex items-center gap-2"><button type="button" onClick={()=>setShowStats(!showStats)} aria-expanded={showStats} className="rounded-lg border border-[#d5dfd5] bg-white px-3 py-2 text-xs text-[#4a6c5a] lg:hidden">{showStats?"ซ่อนสถิติ":"ความคืบหน้า / บันทึกข้อ"}</button>{enrollment&&levels.length>0&&<button type="button" onClick={()=>openLevel(currentLevel)} className="inline-flex items-center gap-2 rounded-lg bg-[#447d6e] px-4 py-2.5 text-sm font-semibold text-white">เรียนต่อ · Level {currentLevel}<ArrowRight size={14}/></button>}</div></section>
+      <div className={`grid items-start gap-6 ${level?"":"lg:grid-cols-[minmax(0,1fr)_340px]"}`}><div className="min-w-0">
       {setupRequired && <div role="status" className="mb-7 rounded-xl border border-[#eedfc4] bg-[#fff9ed] p-4 text-xs leading-6 text-[#977646]">ห้องเรียนยังอยู่ระหว่างตั้งค่าระบบ บัญชีและสิทธิ์จริงจะพร้อมเมื่อแอดมินตั้งค่าฐานข้อมูลเรียบร้อยแล้ว <Link href="/preview/classroom" className="font-semibold underline">ดูหน้าตัวอย่าง</Link></div>}
 
       <section aria-labelledby="my-courses-heading">
         <div className="mb-4 flex items-center justify-between"><h2 id="my-courses-heading" className="text-sm font-semibold">คอร์สเรียนของคุณ</h2><span className="text-[10px] text-[#939e87]">{enrollments.length} คอร์สที่มีสิทธิ์เข้าเรียน</span></div>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">{COURSES.map((course) => <CourseCard key={course.id} course={{ ...course, levelCount: courseLevels?.[course.id]?.length || course.levelCount }} enrollment={enrollments.find((record) => record.courseId === course.id)} selected={selectedCourseId === course.id && courseIsEnrolled} onClick={() => { setSelectedCourseId(course.id); setSelectedLevel(null); setError(""); requestAnimationFrame(() => pathwayRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })); }}/>)}</div>
+        <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">{COURSES.map((course) => <CourseCard key={course.id} course={{ ...course, levelCount: courseLevels?.[course.id]?.length || course.levelCount }} enrollment={enrollments.find((record) => record.courseId === course.id)} selected={selectedCourseId === course.id && courseIsEnrolled} onClick={() => { setSelectedCourseId(course.id); setSelectedLevel(null); setError(""); requestAnimationFrame(() => pathwayRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })); }}/>)}</div>
       </section>
 
-      {selectedCourse && enrollment ? <section ref={pathwayRef} className="mt-10 scroll-mt-5 border-t border-[#e3e8dc] pt-8" aria-labelledby="pathway-heading">
-        <div className="mb-7 flex flex-wrap items-start justify-between gap-4"><div><p className="text-[9px] font-semibold uppercase tracking-[.17em] text-[#8c9a7b]">THE EXPEDITION MAP</p><h2 id="pathway-heading" className="mt-1.5 text-xl font-semibold tracking-tight">{selectedCourse.title}<span className="ml-3 text-xs font-normal text-[#9aa38c]">{selectedLevelCount ? `${selectedLevelCount} levels` : "รอรายละเอียดคอร์ส"}</span></h2></div><div className="flex flex-wrap items-center gap-4 pt-2 text-[10px] text-[#909b82]"><span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#b8d1b8]"/>เรียนผ่านมาแล้ว</span><span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#167a72]"/>เลเวลปัจจุบัน</span><span className="inline-flex items-center gap-1.5"><LockKeyhole size={10}/>ยังไม่ปลดล็อก</span></div></div>
-        <div className={`grid items-start gap-7 ${level ? "mx-auto max-w-[1120px]" : "lg:grid-cols-[minmax(0,1fr)_285px]"}`}>
-          <div hidden={Boolean(level)} className="min-w-0 rounded-2xl border border-[#e3e8dc] bg-[#eef2f9] p-3 sm:p-5">
+      {selectedCourse && enrollment ? <section ref={pathwayRef} className="mt-5 scroll-mt-5 border-t border-[#e3e8dc] pt-5" aria-labelledby="pathway-heading">
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-3"><div><p className="text-[9px] font-semibold uppercase tracking-[.17em] text-[#8c9a7b]">เส้นทางการเรียน</p><h2 id="pathway-heading" className="mt-1.5 text-xl font-semibold tracking-tight">{selectedCourse.title}<span className="ml-3 text-xs font-normal text-[#9aa38c]">{selectedLevelCount ? `${selectedLevelCount} levels` : "รอรายละเอียดคอร์ส"}</span></h2></div><div className="flex flex-wrap items-center gap-4 pt-2 text-[10px] text-[#909b82]"><span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#b8d1b8]"/>เรียนผ่านมาแล้ว</span><span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#167a72]"/>เลเวลปัจจุบัน</span><span className="inline-flex items-center gap-1.5"><LockKeyhole size={10}/>ยังไม่ปลดล็อก</span></div></div>
+        <div className={`grid items-start gap-7 ${level ? "mx-auto max-w-[1120px]" : ""}`}>
+          <div hidden={Boolean(level)} className="min-w-0 rounded-2xl border border-[#e3e8dc] bg-[#fbfcfa] p-3 sm:p-5">
             <div className="mb-7 flex flex-wrap items-center justify-between gap-3 border-b border-[#e8ecdf] pb-5"><div className="flex items-center gap-2 text-[11px] text-[#7e8f70]"><Route size={15}/><span>แผนที่การเรียนของคุณ</span>{!level && <a href={`#level-${currentLevel}`} className="rounded-full bg-white px-3 py-2 text-xs font-semibold text-[#167a72]">ไปด่านปัจจุบัน ↓</a>}</div><span className="font-mono text-[10px] text-[#9aa68b]">{String(currentLevel).padStart(2, "0")} / {selectedLevelCount ?? "—"}</span></div>
             {levels.length > 0 ? <LevelPathway themed={selectedCourseId === "pre-posn"} levels={levels} unlockedLevel={enrollment.unlockedLevel} selectedLevel={selectedLevel} items={courseItems} completedItemIds={completedIds} demo={demo} onSelect={openLevel}/> : <div className="py-16 text-center"><BookOpen size={30} className="mx-auto text-[#a5b192]"/><p className="mt-4 text-sm text-[#738463]">รอรายละเอียดเส้นทางคอร์สนี้</p><p className="mt-2 text-xs text-[#9ba68d]">ติวเตอร์กำลังจัดเตรียมเลเวลและเนื้อหา</p></div>}
           </div>
           <div ref={detailRef} className="min-w-0 scroll-mt-5">
-            {level ? <LessonPanel key={`${selectedCourseId}-${level.number}`} level={level} items={courseItems.filter((item) => item.levelNumber === level.number)} completedIds={completedIds} pendingItem={pendingItem} error={error} demo={demo} directDrive={directDrive} watermarkLabel={`${user.displayName} · ${user.username}`} onToggle={(itemId, completed) => void toggleTask(itemId, completed)} onClose={() => setSelectedLevel(null)}/> : <aside className="space-y-5">
-              <div className="relative overflow-hidden rounded-2xl bg-[#e1e9fc] p-6"><div className="relative z-10"><p className="text-[9px] font-semibold uppercase tracking-[.18em] text-[#94a078]">ONE LEVEL AT A TIME</p><div className="my-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-[#d7dec4] bg-[#f5f7ed] text-[#8b9b69]"><Atom size={31} strokeWidth={1}/></div><h3 className="text-lg font-medium leading-8 text-[#253e76]">เข้าใจทีละเรื่อง<br/>ไปได้ไกลกว่าที่คิด</h3><p className="mt-3 text-[11px] leading-6 text-[#526889]">คลิกเลเวลที่ปลดล็อก เพื่อดูวิดีโอ การบ้าน และเวลาแนะนำในการเรียน</p><button type="button" onClick={() => openLevel(currentLevel)} disabled={levels.length === 0} className="mt-5 inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-[11px] font-semibold text-[#567243] disabled:opacity-50">เปิด Level {currentLevel}<ArrowRight size={13}/></button></div><span className="pointer-events-none absolute -right-16 -top-12 h-44 w-44 rounded-full border border-[#dce3ca]"/><span className="pointer-events-none absolute -bottom-20 -left-10 h-44 w-44 rounded-full border border-[#dce3ca]"/></div>
-              <div className="rounded-xl border border-[#e3e7d9] bg-white p-5"><div className="flex items-center gap-2 text-xs font-semibold text-[#71845b]"><MessageCircle size={15}/>เรียนครบแล้ว ทักติวเตอร์</div><p className="mt-2 text-[11px] leading-6 text-[#97a187]">เมื่อเรียนและทำ HW ครบ ให้ทัก LINE หาติวเตอร์ด้วยตัวเอง ติวเตอร์จะตรวจและปลดล็อกเลเวลถัดไปให้</p></div>
-              <div className="flex items-start gap-2 px-1 text-[10px] leading-5 text-[#a0a990]"><ShieldCheck size={14} className="mt-0.5 shrink-0"/><p>สื่อการเรียนสำหรับบัญชีของคุณเท่านั้น กรุณาไม่ส่งต่อให้ผู้อื่น</p></div>
-            </aside>}
+            {level ? <LessonPanel key={`${selectedCourseId}-${level.number}`} level={level} items={courseItems.filter((item) => item.levelNumber === level.number)} completedIds={completedIds} pendingItem={pendingItem} error={error} demo={demo} directDrive={directDrive} watermarkLabel={`${user.displayName} · ${user.username}`} onToggle={(itemId, completed) => void toggleTask(itemId, completed)} onClose={() => setSelectedLevel(null)}/> : null}
           </div>
         </div>
       </section> : <section className="mt-9 rounded-2xl border border-dashed border-[#dbe3d1] p-8 text-center"><LockKeyhole size={28} className="mx-auto text-[#99a785]"/><h2 className="mt-4 text-base font-semibold text-[#657d50]">ยังไม่มีคอร์สที่ปลดล็อก</h2><p className="mt-2 text-xs leading-6 text-[#95a086]">ติดต่อแอดมินเพื่อเปิดสิทธิ์คอร์สในบัญชีของคุณ</p></section>}
       {error && !level && <p role="alert" className="mt-5 rounded-lg bg-[#fff2ed] p-3 text-xs text-[#b15d43]">{error}</p>}
+      </div>{!level&&<aside className={`study-sidebar order-first lg:order-last ${showStats?"is-open":""}`}>{selectedCourse && enrollment && <StudyDashboard key={`${user.id}-${selectedCourse.id}`} userId={user.id} courseId={selectedCourse.id} courseTitle={selectedCourse.title} passedLevels={Math.min(levels.length, Math.max(0,currentLevel-1)+(currentLevel===levels.length && courseItems.some(item=>item.levelNumber===currentLevel) && courseItems.filter(item=>item.levelNumber===currentLevel).every(item=>completedIds.includes(item.id)) ? 1 : 0))} levelCount={levels.length} demo={demo}/>}</aside>}</div>
     </main>
     <footer className="lab-footer border-t border-[#e3e8dc]"><div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-3 px-5 py-6 text-[10px] text-[#a1aa92] sm:px-9 lg:px-12"><span>© 2026 บ้านฟิสิกส์ by P&apos;Tape</span>{demo ? <Link href="/" className="inline-flex items-center gap-1.5 hover:text-[#167a72]"><ArrowLeft size={11}/>กลับหน้าหลัก</Link> : <span>เรียนรู้ด้วยความเข้าใจ เติบโตทีละก้าว</span>}</div></footer>
   </div>;

@@ -6,6 +6,7 @@ describe("study dashboard",()=>{
  it("saves daily totals without counting the same date twice and recalculates goals",async()=>{
  render(<StudyDashboard demo userId="demo" courseId="pre-posn" courseTitle="Pre-POSN" passedLevels={3} levelCount={31}/>);
  await screen.findByRole("img",{name:"ความคืบหน้าตามจำนวนข้อ 25%"});
+ fireEvent.click(screen.getByText("สถิติรายสัปดาห์ / ตั้งเป้า / บันทึกข้อ"));
  fireEvent.change(screen.getByLabelText("รวมข้อของวันนี้"),{target:{value:"12"}});
  fireEvent.click(screen.getByRole("button",{name:"บันทึกจำนวนข้อ"}));
  expect(await screen.findByRole("img",{name:"ความคืบหน้าตามจำนวนข้อ 31%"})).toBeInTheDocument();
