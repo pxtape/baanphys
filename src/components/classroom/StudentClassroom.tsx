@@ -71,52 +71,66 @@ function getLevels(course: CourseDefinition): CourseLevel[] {
   }));
 }
 
-function LevelPathway({ levels, unlockedLevel, selectedLevel, completedItemIds, items, demo, onSelect }: {
+const EXPEDITIONS = [
+  { start: 1, end: 3, title: "เริ่มออกเดินทาง", topic: "การเคลื่อนที่แนวตรง", note: "อ่านการเคลื่อนที่ให้เป็นภาษาเดียวกับธรรมชาติ", color: "#167a72", paper: "#eaf3ed", art: "motion" },
+  { start: 4, end: 8, title: "ทำความรู้จักกับแรง", topic: "นิวตันและการเคลื่อนที่", note: "จากลูกบอลหนึ่งลูก สู่กฎที่อธิบายทั้งโลก", color: "#3e7095", paper: "#edf3f8", art: "orbit" },
+  { start: 9, end: 16, title: "มองให้เห็นสิ่งที่ซ่อนอยู่", topic: "พลังงาน โมเมนตัม และการสั่น", note: "เชื่อมแรงโน้มถ่วง พลังงาน การชน และการหมุน", color: "#89602e", paper: "#faf1df", art: "pendulum" },
+  { start: 17, end: 20, title: "โลกที่ไหลและเปลี่ยนแปลง", topic: "ของไหลและความร้อน", note: "สำรวจสิ่งที่เกิดขึ้นในน้ำ อากาศ และอุณหภูมิ", color: "#387c91", paper: "#e9f4f5", art: "fluid" },
+  { start: 21, end: 27, title: "จุดประกายความเข้าใจ", topic: "ประจุไฟฟ้าและวงจร", note: "ตามรอยประจุ จากสนามที่มองไม่เห็นสู่หลอดไฟ", color: "#7a6197", paper: "#f2edf7", art: "circuit" },
+  { start: 28, end: 29, title: "ตามลำแสงไป", topic: "แสง", note: "มองโลกอีกครั้ง ผ่านเลนส์และการหักเห", color: "#a55c53", paper: "#fcf0e9", art: "prism" },
+  { start: 30, end: 30, title: "สำรวจโลกของแก๊ส", topic: "แก๊สและความชื้น", note: "จากอนุภาคเล็ก ๆ สู่ปรากฏการณ์รอบตัว", color: "#527951", paper: "#edf4e7", art: "gas" },
+  { start: 31, end: 31, title: "อีกหนึ่งแรงที่มองไม่เห็น", topic: "แม่เหล็ก", note: "จุดหมายสุดท้ายของ Pre-POSN และจุดเริ่มต้นถัดไป", color: "#536695", paper: "#edf0f9", art: "field" },
+];
+
+function PhysicsSketch({ kind }: { kind: string }) {
+  return <svg aria-hidden="true" viewBox="0 0 240 140" className="h-full w-full" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M15 123H225" opacity=".2"/>
+    {kind === "motion" ? <><path d="M25 108Q100 -20 208 94" strokeDasharray="5 7"/><circle cx="112" cy="40" r="12" fill="currentColor" fillOpacity=".15"/><path d="M30 110H77M68 102L77 110L68 118"/><text x="168" y="35" fill="currentColor" stroke="none" fontSize="16">v = u + at</text><path d="M30 112V45" opacity=".4"/></>
+    : kind === "orbit" ? <><ellipse cx="120" cy="70" rx="91" ry="36" transform="rotate(-20 120 70)" strokeDasharray="4 6"/><circle cx="120" cy="70" r="23" fill="currentColor" fillOpacity=".12"/><circle cx="201" cy="38" r="10" fill="currentColor"/><path d="M192 47L154 62M163 52L154 62L168 62"/><text x="23" y="30" fill="currentColor" stroke="none" fontSize="17">F = ma</text></>
+    : kind === "pendulum" ? <><path d="M62 20H176M118 20V103M118 20L173 91"/><path d="M68 91Q118 143 173 91" strokeDasharray="4 6" opacity=".4"/><circle cx="118" cy="105" r="15" fill="currentColor" fillOpacity=".12"/><circle cx="173" cy="94" r="15" fill="currentColor" fillOpacity=".25"/><path d="M110 18L116 25L124 18"/><text x="20" y="62" fill="currentColor" stroke="none" fontSize="15">E = K + U</text></>
+    : kind === "fluid" ? <><path d="M48 25V104Q48 117 63 117H105Q118 117 118 104V25M39 25H58M109 25H127"/><path d="M49 70Q67 60 83 70T117 70V103Q117 116 104 116H62Q49 116 49 103Z" fill="currentColor" fillOpacity=".15"/><path d="M163 24V95M153 95A19 19 0 1 0 173 95V24Q173 14 163 14Q153 14 153 24V95M163 56V105"/><circle cx="163" cy="110" r="9" fill="currentColor"/><circle cx="69" cy="91" r="3"/><circle cx="97" cy="81" r="4"/></>
+    : kind === "circuit" ? <><path d="M31 70V29H101M141 29H208V110H135M104 110H31V70M104 98V122M134 103V117"/><circle cx="121" cy="29" r="20" fill="currentColor" fillOpacity=".13"/><path d="M110 17L133 41M132 17L109 41M87 16L80 9M121 0V5M155 16L162 9"/><path d="M200 65L208 73L216 65"/><text x="67" y="77" fill="currentColor" stroke="none" fontSize="18">V = IR</text></>
+    : kind === "prism" ? <><path d="M114 21L164 113H63Z" fill="currentColor" fillOpacity=".1"/><path d="M12 65H88L142 76L226 35"/><path d="M143 79L227 57" stroke="#ca9560"/><path d="M146 82L228 79" stroke="#699c82"/><path d="M150 85L228 103" stroke="#7b79ae"/><circle cx="114" cy="21" r="3"/></>
+    : kind === "gas" ? <><path d="M55 21H177V119H55Z"/><path d="M45 30H187M115 5V28"/><circle cx="77" cy="59" r="6"/><circle cx="137" cy="53" r="6"/><circle cx="105" cy="97" r="6"/><circle cx="157" cy="92" r="6"/><path d="M80 65L90 76M131 55L121 67M151 86L141 76"/><text x="183" y="61" fill="currentColor" stroke="none" fontSize="14">pV</text></>
+    : <><path d="M77 60V86Q77 120 120 120Q163 120 163 86V60H143V86Q143 100 120 100Q97 100 97 86V60Z" fill="currentColor" fillOpacity=".15"/><path d="M87 55Q87 -2 153 55M65 59Q65 -30 177 59M45 70Q35 -48 197 70" strokeDasharray="4 6" opacity=".55"/><text x="80" y="80" fill="currentColor" stroke="none" fontSize="12">N</text><text x="149" y="80" fill="currentColor" stroke="none" fontSize="12">S</text></>}
+  </svg>;
+}
+
+function LevelPathway({ levels, unlockedLevel, selectedLevel, completedItemIds, items, demo, onSelect, themed }: {
   levels: CourseLevel[]; unlockedLevel: number; selectedLevel: number | null;
-  completedItemIds: string[]; items: LearningItem[]; demo: boolean; onSelect: (level: number) => void;
+  completedItemIds: string[]; items: LearningItem[]; demo: boolean; onSelect: (level: number) => void; themed: boolean;
 }) {
-  const rows: CourseLevel[][] = [];
-  for (let index = 0; index < levels.length; index += 4) rows.push(levels.slice(index, index + 4));
-  return <div className="classroom-path space-y-8 pt-3 sm:space-y-12">
-    {rows.map((row, rowIndex) => <div key={row[0].number}
-      className={`classroom-path-row relative grid grid-cols-1 gap-5 sm:grid-cols-4 sm:gap-4 ${rowIndex % 2 === 1 ? "classroom-path-reverse" : ""}`}>
-      {row.map((level, columnIndex) => {
-        const locked = level.number > unlockedLevel;
-        const levelItems = items.filter((item) => item.levelNumber === level.number);
-        const checklistDone = levelItems.length > 0 && levelItems.every((item) => completedItemIds.includes(item.id));
-        const completed = level.number < unlockedLevel || checklistDone;
-        const current = level.number === unlockedLevel;
-        const selected = level.number === selectedLevel;
-        return <button key={level.number} type="button" disabled={locked}
-          onClick={() => onSelect(level.number)}
-          aria-label={`Level ${level.number} ${level.title}${locked ? " ยังไม่ปลดล็อก" : current ? " เลเวลปัจจุบัน" : " เปิดบทเรียน"}`}
-          aria-pressed={selected}
-          style={{ "--path-column": rowIndex % 2 === 1 ? 4 - columnIndex : columnIndex + 1 } as React.CSSProperties}
-          className={`classroom-path-node group relative z-10 flex items-center gap-4 rounded-xl border bg-[#fafaf7] px-4 py-3 text-left transition sm:flex-col sm:gap-3 sm:border-transparent sm:px-1 sm:py-0 sm:text-center ${locked ? "border-[#edf0eb] text-[#8d9890]" : "border-[#dce4de] text-[#172b3a]"}`}>
-          <span className={`relative flex h-14 w-14 shrink-0 items-center justify-center rounded-[18px] border text-lg font-semibold transition sm:h-16 sm:w-16 ${current ? "border-[#167a72] bg-[#167a72] text-white shadow-[0_0_0_6px_#e5eeea]" : completed ? "border-[#bfd9cc] bg-[#e4eee7] text-[#25745a]" : locked ? "border-[#e2e7df] bg-[#f0f2ed] text-[#637261]" : "border-[#c8dace] bg-white text-[#167a72] group-hover:border-[#167a72]"} ${selected ? "ring-2 ring-[#ac733e] ring-offset-4 ring-offset-[#fafaf7]" : ""}`}>
-            {level.number}
-            {locked && <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[#e6e9e2] text-[#929c8b]"><LockKeyhole size={11}/></span>}
-            {completed && !locked && <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-[#fafaf7] bg-[#27795c] text-white"><Check size={11} strokeWidth={3}/></span>}
-          </span>
-          <span className="min-w-0"><span className={`block text-xs font-semibold leading-5 ${locked ? "text-[#59675f]" : "text-[#273e3b]"}`}>{level.title}</span>
-            <span className={`mt-1 block text-[10px] leading-4 ${locked ? "text-[#647267]" : "text-[#819087]"}`}>{formatStudyTime(level.durationMinutes)}{demo && level.durationMinutes !== null ? " · ตัวอย่าง" : ""}</span>
-            {current && <span className="mt-1.5 inline-block rounded-full bg-[#e5eee8] px-2 py-0.5 text-[9px] font-semibold text-[#167a72]">คุณอยู่ตรงนี้</span>}
-          </span>
-          {!locked && <ChevronRight size={16} className="ml-auto text-[#167a72] sm:hidden"/>}
-        </button>;
-      })}
-      {rowIndex < rows.length - 1 && <span aria-hidden="true" className={`classroom-path-turn pointer-events-none absolute top-8 hidden h-[calc(100%+3rem)] w-[calc(25%/2)] border-[#d7e1d6] sm:block ${rowIndex % 2 === 0 ? "right-0 rounded-r-[24px] border-r-2 border-t-2 border-b-2" : "left-0 rounded-l-[24px] border-l-2 border-t-2 border-b-2"}`}/>}
-    </div>)}
-    <div className="flex items-center justify-center gap-2 border-t border-dashed border-[#d9e1d6] pt-7 text-[11px] text-[#879087]"><Flag size={14}/><span>ทุกก้าวเล็ก ๆ คือความก้าวหน้า</span></div>
-    <style>{`
-      @media (min-width: 640px) {
-        .classroom-path-row::before { content: ''; position: absolute; top: 32px; left: 12.5%; right: 12.5%; height: 2px; background: #9eb79e; }
-        .classroom-path-node { grid-column: var(--path-column); grid-row: 1; }
-      }
-      @media (max-width: 639px) {
-        .classroom-path-row::before { content: ''; position: absolute; top: 40px; bottom: -36px; left: 43px; width: 2px; background: #9eb79e; }
-      }
-    `}</style>
+  const chapters = themed ? EXPEDITIONS : [{ start: 1, end: Infinity, title: "เส้นทางการเรียนรู้", topic: "ทีละก้าว สู่ความเข้าใจ", note: "เลือกด่านที่เปิดแล้วเพื่อเริ่มเรียน", color: "#167a72", paper: "#eaf3ed", art: "motion" }];
+  return <div>
+    <nav aria-label="เลือกหมวดบทเรียน" className="mb-7 flex gap-2 overflow-x-auto pb-3">{chapters.filter(ch => levels.some(l => l.number >= ch.start && l.number <= ch.end)).map(ch => <a key={ch.start} href={`#expedition-${ch.start}`} className="shrink-0 rounded-full border border-[#d4ded3] bg-white px-4 py-2 text-xs font-medium text-[#435749]">{ch.topic}</a>)}</nav>
+    <div className="space-y-7">{chapters.map((chapter, chapterIndex) => {
+      const chapterLevels = levels.filter(l => l.number >= chapter.start && l.number <= chapter.end);
+      if (!chapterLevels.length) return null;
+      const active = chapterLevels.some(l => l.number === unlockedLevel);
+      const passed = chapterLevels.filter(l => l.number < unlockedLevel).length;
+      return <section key={chapter.start} id={`expedition-${chapter.start}`} aria-label={chapter.topic} style={{"--chapter-color":chapter.color} as React.CSSProperties} className={`expedition scroll-mt-6 overflow-hidden rounded-[24px] border ${active ? "border-[#a2bdab] shadow-[0_8px_32px_#183e2310]" : "border-[#dfe5db]"}`}>
+        <div className="relative flex min-h-40 items-center justify-between gap-3 overflow-hidden px-5 py-6 sm:px-7" style={{backgroundColor:chapter.paper}}>
+          <div className="relative z-10 max-w-[65%]"><p className="text-[10px] font-bold uppercase tracking-[.18em]" style={{color:chapter.color}}>EXPEDITION {String(chapterIndex+1).padStart(2,"0")} · LEVEL {chapterLevels[0].number}–{chapterLevels.at(-1)?.number}</p><h3 className="mt-2 text-xl font-semibold leading-8 tracking-tight text-[#203b3b] sm:text-2xl">{chapter.title}</h3><p className="mt-2 text-sm font-medium" style={{color:chapter.color}}>{chapter.topic}</p><p className="mt-2 hidden text-xs leading-6 text-[#5f7065] sm:block">{chapter.note}</p></div>
+          <div className="absolute -right-5 top-4 h-36 w-44 opacity-65 sm:right-3 sm:h-40 sm:w-56" style={{color:chapter.color}}><PhysicsSketch kind={chapter.art}/></div>
+        </div>
+        <div className="bg-white px-4 pb-6 pt-4 sm:px-7"><div className="mb-5 flex items-center justify-between gap-3 text-xs text-[#657568]"><span>{active ? "คุณกำลังสำรวจหมวดนี้" : passed === chapterLevels.length ? "ผ่านหมวดนี้แล้ว" : "เส้นทางข้างหน้า"}</span><span>{passed} / {chapterLevels.length} ด่านที่ผ่าน</span></div>
+          <div className="expedition-trail relative grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">{chapterLevels.map(level => {
+            const locked = level.number > unlockedLevel;
+            const tasks = items.filter(item => item.levelNumber === level.number);
+            const done = tasks.filter(item => completedItemIds.includes(item.id)).length;
+            const waiting = level.number === unlockedLevel && tasks.length > 0 && done === tasks.length;
+            const current = level.number === unlockedLevel;
+            const passedLevel = level.number < unlockedLevel;
+            return <button key={level.number} type="button" disabled={locked} onClick={() => onSelect(level.number)} aria-pressed={selectedLevel===level.number} aria-label={`Level ${level.number} ${level.title}${locked ? " ยังไม่ปลดล็อก" : current ? " เลเวลปัจจุบัน" : " เปิดบทเรียน"}`} className={`relative flex min-h-28 items-center gap-3 rounded-2xl border p-4 text-left transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#167a72] ${current ? waiting ? "border-[#c5a56c] bg-[#fff7e4]" : "border-[#167a72] bg-[#edf7f1] shadow-[0_4px_0_#167a7220]" : locked ? "border-[#e4e8e0] bg-[#f7f8f4]" : "border-[#cbdccc] bg-white hover:-translate-y-0.5 hover:border-[#167a72]"}`}>
+              <span className={`relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-lg font-bold ${current ? waiting ? "bg-[#a77d39] text-white" : "bg-[#167a72] text-white" : passedLevel ? "bg-[#deeddf] text-[#377549]" : "bg-[#e9ede5] text-[#637365]"}`}>{level.number}{passedLevel && <Check size={14} className="absolute -bottom-1 -right-1 rounded-full bg-[#387f51] p-0.5 text-white"/>}{locked && <LockKeyhole size={12} className="absolute -right-1 -top-1 rounded-full bg-[#e1e7da] p-0.5"/>}</span>
+              <span className="min-w-0 flex-1"><span className="block text-sm font-semibold leading-6 text-[#30483e]">{level.title}</span><span className="mt-1 flex items-center gap-1 text-[11px] text-[#627465]"><Clock3 size={11}/>{formatStudyTime(level.durationMinutes)}{demo && level.durationMinutes!==null ? " · ตัวอย่าง" : ""}</span>{current && <span className={`mt-2 block text-[11px] font-semibold ${waiting ? "text-[#8a652c]" : "text-[#167a72]"}`}>{waiting ? "ทำครบแล้ว · ติดต่อ LINE" : "เรียนต่อจากตรงนี้ →"}</span>}{!locked && tasks.length>0 && <span className="mt-2 block h-1 rounded-full bg-[#dfe8dd]"><span className="block h-1 rounded-full bg-[#438c66]" style={{width:`${done/tasks.length*100}%`}}/></span>}</span>
+            </button>;
+          })}</div>
+        </div>
+      </section>;
+    })}</div>
+    <style>{`.expedition-trail::before {content:"";position:absolute;left:38px;top:30px;bottom:30px;border-left:2px dashed #c6d6c3;} @media(min-width:640px){.expedition-trail::before{left:25px;right:25px;top:55px;bottom:auto;border-left:0;border-top:2px dashed #c6d6c3;}}`}</style>
+    <div className="mt-8 flex items-center justify-center gap-2 rounded-2xl border border-dashed border-[#cdd9c8] px-5 py-6 text-sm text-[#657a60]"><Flag size={18}/><span>ทุกด่านคืออีกก้าวของความเข้าใจ · แล้วเจอกันที่ค่าย สอวน.</span></div>
   </div>;
 }
 
@@ -332,8 +346,8 @@ export function StudentClassroom({ demo = false, user, enrollments: initialEnrol
     </header>
     <main className="mx-auto max-w-[1440px] px-5 pb-16 sm:px-9 lg:px-12">
       <section className="flex flex-col justify-between gap-7 py-9 sm:py-11 lg:flex-row lg:items-center">
-        <div><div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.17em] text-[#88967a]"><span className="h-1.5 w-1.5 rounded-full bg-[#9aa776]"/>YOUR LEARNING JOURNEY</div><p className="mb-2 text-xs text-[#7b8a70]">สวัสดี {user.displayName} 👋</p><h1 className="text-2xl font-semibold leading-[1.55] tracking-tight sm:text-[32px]">เส้นทางสู่โอลิมปิก<br className="sm:hidden"/><span className="font-normal text-[#748368]"> เริ่มทีละเลเวล</span></h1><p className="mt-3 text-xs leading-6 text-[#939d87]">เลือกคอร์สของคุณ ดูเส้นทาง และเรียนรู้ตามจังหวะของตัวเอง</p></div>
-        <div className="flex items-center gap-5 rounded-2xl border border-[#e3e8da] bg-[#f1f4e9] px-6 py-5 lg:min-w-[280px]"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-[#8b9e6e]"><Route size={23} strokeWidth={1.5}/></span><div><p className="text-[10px] text-[#8b987c]">ก้าวถัดไปของคุณ</p><p className="mt-1 text-sm font-semibold text-[#546d44]">{enrollment && selectedCourse ? `${selectedCourse.title} · Level ${currentLevel}` : "รอติวเตอร์เปิดสิทธิ์คอร์ส"}</p>{enrollment && levels.length > 0 && <button type="button" onClick={() => openLevel(currentLevel)} className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-semibold text-[#167a72]">เรียนต่อจากตรงนี้ <ArrowRight size={12}/></button>}</div></div>
+        <div><div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.17em] text-[#88967a]"><span className="h-1.5 w-1.5 rounded-full bg-[#9aa776]"/>YOUR PHYSICS EXPEDITION</div><p className="mb-2 text-xs text-[#7b8a70]">สวัสดี {user.displayName} 👋</p><h1 className="text-2xl font-semibold leading-[1.55] tracking-tight sm:text-[32px]">ออกสำรวจโลกฟิสิกส์<br className="sm:hidden"/><span className="font-normal text-[#748368]"> ทีละความเข้าใจ</span></h1><p className="mt-3 text-xs leading-6 text-[#939d87]">จากการเคลื่อนที่ของลูกบอล สู่แรงที่ขับเคลื่อนจักรวาล — ค่อย ๆ เข้าใจไปด้วยกัน</p></div>
+        <div className="flex items-center gap-5 rounded-2xl border border-[#c1d7c8] bg-[#e9f2e8] px-6 py-6 shadow-[0_5px_0_#dce8d9] lg:min-w-[320px]"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-[#8b9e6e]"><Route size={23} strokeWidth={1.5}/></span><div><p className="text-[10px] text-[#8b987c]">ภารกิจปัจจุบัน</p><p className="mt-1 text-sm font-semibold text-[#546d44]">{enrollment && selectedCourse ? `${selectedCourse.title} · Level ${currentLevel}` : "รอติวเตอร์เปิดสิทธิ์คอร์ส"}</p>{enrollment && levels.length > 0 && <button type="button" onClick={() => openLevel(currentLevel)} className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-[#167a72] px-4 py-2 text-xs font-semibold text-white">เปิดภารกิจ เรียนต่อ <ArrowRight size={12}/></button>}</div></div>
       </section>
 
       {setupRequired && <div role="status" className="mb-7 rounded-xl border border-[#eedfc4] bg-[#fff9ed] p-4 text-xs leading-6 text-[#977646]">ห้องเรียนยังอยู่ระหว่างตั้งค่าระบบ บัญชีและสิทธิ์จริงจะพร้อมเมื่อแอดมินตั้งค่าฐานข้อมูลเรียบร้อยแล้ว <Link href="/preview/classroom" className="font-semibold underline">ดูหน้าตัวอย่าง</Link></div>}
@@ -344,11 +358,11 @@ export function StudentClassroom({ demo = false, user, enrollments: initialEnrol
       </section>
 
       {selectedCourse && enrollment ? <section ref={pathwayRef} className="mt-10 scroll-mt-5 border-t border-[#e3e8dc] pt-8" aria-labelledby="pathway-heading">
-        <div className="mb-7 flex flex-wrap items-start justify-between gap-4"><div><p className="text-[9px] font-semibold uppercase tracking-[.17em] text-[#8c9a7b]">THE PATHWAY</p><h2 id="pathway-heading" className="mt-1.5 text-xl font-semibold tracking-tight">{selectedCourse.title}<span className="ml-3 text-xs font-normal text-[#9aa38c]">{selectedLevelCount ? `${selectedLevelCount} levels` : "รอรายละเอียดคอร์ส"}</span></h2></div><div className="flex flex-wrap items-center gap-4 pt-2 text-[10px] text-[#909b82]"><span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#b8d1b8]"/>เรียนผ่านมาแล้ว</span><span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#167a72]"/>เลเวลปัจจุบัน</span><span className="inline-flex items-center gap-1.5"><LockKeyhole size={10}/>ยังไม่ปลดล็อก</span></div></div>
+        <div className="mb-7 flex flex-wrap items-start justify-between gap-4"><div><p className="text-[9px] font-semibold uppercase tracking-[.17em] text-[#8c9a7b]">THE EXPEDITION MAP</p><h2 id="pathway-heading" className="mt-1.5 text-xl font-semibold tracking-tight">{selectedCourse.title}<span className="ml-3 text-xs font-normal text-[#9aa38c]">{selectedLevelCount ? `${selectedLevelCount} levels` : "รอรายละเอียดคอร์ส"}</span></h2></div><div className="flex flex-wrap items-center gap-4 pt-2 text-[10px] text-[#909b82]"><span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#b8d1b8]"/>เรียนผ่านมาแล้ว</span><span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#167a72]"/>เลเวลปัจจุบัน</span><span className="inline-flex items-center gap-1.5"><LockKeyhole size={10}/>ยังไม่ปลดล็อก</span></div></div>
         <div className={`grid items-start gap-7 ${level ? "mx-auto max-w-[1120px]" : "lg:grid-cols-[minmax(0,1fr)_285px]"}`}>
-          <div hidden={Boolean(level)} className="min-w-0 rounded-2xl border border-[#e3e8dc] bg-[#fafaf7] p-5 sm:p-8">
+          <div hidden={Boolean(level)} className="min-w-0 rounded-2xl border border-[#e3e8dc] bg-[#f3f5ee] p-3 sm:p-5">
             <div className="mb-7 flex items-center justify-between border-b border-[#e8ecdf] pb-5"><div className="flex items-center gap-2 text-[11px] text-[#7e8f70]"><Route size={15}/><span>เส้นทางการเรียนของคุณ</span></div><span className="font-mono text-[10px] text-[#9aa68b]">{String(currentLevel).padStart(2, "0")} / {selectedLevelCount ?? "—"}</span></div>
-            {levels.length > 0 ? <LevelPathway levels={levels} unlockedLevel={enrollment.unlockedLevel} selectedLevel={selectedLevel} items={courseItems} completedItemIds={completedIds} demo={demo} onSelect={openLevel}/> : <div className="py-16 text-center"><BookOpen size={30} className="mx-auto text-[#a5b192]"/><p className="mt-4 text-sm text-[#738463]">รอรายละเอียดเส้นทางคอร์สนี้</p><p className="mt-2 text-xs text-[#9ba68d]">ติวเตอร์กำลังจัดเตรียมเลเวลและเนื้อหา</p></div>}
+            {levels.length > 0 ? <LevelPathway themed={selectedCourseId === "pre-posn"} levels={levels} unlockedLevel={enrollment.unlockedLevel} selectedLevel={selectedLevel} items={courseItems} completedItemIds={completedIds} demo={demo} onSelect={openLevel}/> : <div className="py-16 text-center"><BookOpen size={30} className="mx-auto text-[#a5b192]"/><p className="mt-4 text-sm text-[#738463]">รอรายละเอียดเส้นทางคอร์สนี้</p><p className="mt-2 text-xs text-[#9ba68d]">ติวเตอร์กำลังจัดเตรียมเลเวลและเนื้อหา</p></div>}
           </div>
           <div ref={detailRef} className="min-w-0 scroll-mt-5">
             {level ? <LessonPanel key={`${selectedCourseId}-${level.number}`} level={level} items={courseItems.filter((item) => item.levelNumber === level.number)} completedIds={completedIds} pendingItem={pendingItem} error={error} demo={demo} directDrive={directDrive} watermarkLabel={`${user.displayName} · ${user.username}`} onToggle={(itemId, completed) => void toggleTask(itemId, completed)} onClose={() => setSelectedLevel(null)}/> : <aside className="space-y-5">

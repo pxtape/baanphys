@@ -42,22 +42,17 @@ export const COURSES: CourseDefinition[] = [
   { id: "tpho", title: "TPhO", subtitle: "ฟิสิกส์โอลิมปิกระดับชาติ", levelCount: null, description: "เตรียมตัวสู่การแข่งขันฟิสิกส์โอลิมปิกระดับชาติ", accent: "#ad713e" },
 ];
 
-// Topic labels are transcribed from the owner's draft. The final syllabus and
-// all real durations are intentionally left unconfirmed until supplied in chat.
-const draftTitles: Record<number, string> = {
-  1: "Linear Motion", 4: "Newton’s Laws", 6: "Projectile", 7: "Circular Motion",
-  8: "Relative Motion", 9: "Gravity", 10: "Energy", 12: "Momentum",
-  14: "Rotation", 16: "รอยืนยันหัวข้อ SHM / Fluid", 19: "Heat",
-  22: "Electrostatics", 24: "DC Circuit", 28: "Geometric Optics",
-  30: "Ideal Gas & Humidity", 31: "Magnetism",
-};
-
-export const PRE_POSN_LEVELS: CourseLevel[] = Array.from({ length: 31 }, (_, index) => ({
-  number: index + 1,
-  title: draftTitles[index + 1] ?? "รอรายละเอียดบทเรียน",
-  section: index < 16 ? "กลศาสตร์" : index < 21 ? "ของไหลและความร้อน" : index < 27 ? "ไฟฟ้า" : "แสง ความร้อน และแม่เหล็ก",
-  durationMinutes: null,
-  isPlaceholder: true,
+// Owner-supplied Pre-POSN syllabus. Live course metadata is loaded from the database.
+const syllabus: [string, number][] = [
+  ["Linear Motion",130],["SUVAT",210],["Graph",50],["Newton I",70],["Newton II & III",270],
+  ["Projectile",170],["Circular",190],["Relative",50],["Gravity",80],["Energy I",90],["Energy II",90],
+  ["Momentum I",130],["Momentum II",190],["Rotation I",90],["Rotation II",120],["SHM",70],
+  ["Fluid I & II",170],["Fluid III",90],["Heat I",110],["Heat II",120],["ElectroStatics I",110],
+  ["ElectroStatics II",80],["ElectroStatics III",90],["DC circuit I",140],["DC circuit II",160],
+  ["DC circuit III",210],["DC circuit IV",220],["Light I",210],["Light II",220],["Ideal gas & Humidity",50],["Magnetic",100],
+];
+export const PRE_POSN_LEVELS: CourseLevel[] = syllabus.map(([title,durationMinutes],index) => ({
+  number:index+1, title, durationMinutes, section:index<16 ? "กลศาสตร์" : index<20 ? "ของไหลและความร้อน" : index<27 ? "ไฟฟ้า" : "แสง แก๊ส และแม่เหล็ก", isPlaceholder:false,
 }));
 
 export function formatStudyTime(minutes: number | null | undefined): string {
