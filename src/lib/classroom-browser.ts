@@ -22,7 +22,7 @@ export async function loadClassroom() {
   ]);
   for (const result of [profile, account, courses, levels, enrollments, items, progress]) if (result.error) throw new Error("โหลดข้อมูลห้องเรียนไม่สำเร็จ กรุณาลองใหม่");
   const courseLevels: Partial<Record<CourseId, CourseLevel[]>> = {};
-  for (const level of levels.data ?? []) (courseLevels[level.course_id as CourseId] ??= []).push({ number: level.number, title: level.title, durationMinutes: level.duration_minutes, section: "", isPlaceholder: level.title.includes("รอ") });
+  for (const level of levels.data ?? []) (courseLevels[level.course_id as CourseId] ??= []).push({ number: level.number, title: level.title, durationMinutes: level.duration_minutes, questionCount: level.question_count, section: "", isPlaceholder: level.title.includes("รอ") });
   return {
     role: profile.data?.role as string,
     user: { id: user.id, displayName: account.data?.display_name ?? profile.data?.display_name ?? "นักเรียน", username: account.data?.username ?? user.email ?? "" },

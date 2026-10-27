@@ -10,6 +10,7 @@ export type CourseDefinition = {
 };
 
 export type CourseLevel = {
+  questionCount?: number | null;
   number: number;
   title: string;
   section: string;

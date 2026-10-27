@@ -1,0 +1,13 @@
+import {render,screen,fireEvent,waitFor,cleanup} from "@testing-library/react";
+import {describe,it,expect,vi,afterEach} from "vitest";
+import {TutorCalendar} from "./TutorCalendar";
+import {COURSES} from "@/lib/course-catalog";
+const {upsert,insert}=vi.hoisted(()=>({upsert:vi.fn(async(_value:Record<string,unknown>)=>({error:null})),insert:vi.fn(async(_value:Record<string,unknown>)=>({error:null}))}));
+vi.mock("@/lib/classroom-browser",()=>({classroomClient:()=>({from:()=>{const result={data:[],error:null};const q:{[key:string]:unknown}={then:(resolve:(r:typeof result)=>unknown)=>Promise.resolve(result).then(resolve),upsert,insert};for(const key of ["select","eq","gte","lte","order"])q[key]=()=>q;return q;}})}));
+afterEach(()=>{cleanup();vi.clearAllMocks();});
+const students=[{id:"student",username:"test",displayName:"Test Student",enrollments:[{studentId:"student",courseId:"pre-posn" as const,unlockedLevel:8}]}];
+describe("tutor calendar setup",()=>{
+ it("starts with blank schedules and creates no appointments on load",async()=>{render(<TutorCalendar tutorId="tutor" students={students} courses={COURSES}/>);await screen.findByText("ยังไม่มีตารางจริง เลือกนักเรียนและกรอกด้านข้างได้เลย");expect(upsert).not.toHaveBeenCalled();expect(insert).not.toHaveBeenCalled();expect(screen.getByLabelText("วันสอบ")).toHaveValue("");});
+ it("saves LINE without a booked weekday or time",async()=>{render(<TutorCalendar tutorId="tutor" students={students} courses={COURSES}/>);await screen.findByText("ยังไม่มีตารางจริง เลือกนักเรียนและกรอกด้านข้างได้เลย");fireEvent.change(screen.getByLabelText("นักเรียน"),{target:{value:"student"}});fireEvent.click(screen.getByRole("button",{name:"บันทึกรูปแบบและนัด"}));await waitFor(()=>expect(upsert).toHaveBeenCalled());expect(upsert.mock.calls[0][0]).toMatchObject({user_id:"student",mode:"line",first_on:null,meeting_time:null});});
+ it("defaults a Mock scope to the student's current level and stores Thai time",async()=>{render(<TutorCalendar tutorId="tutor" students={students} courses={COURSES}/>);await screen.findByText("ยังไม่มีตารางจริง เลือกนักเรียนและกรอกด้านข้างได้เลย");fireEvent.change(screen.getByLabelText("นักเรียน"),{target:{value:"student"}});await waitFor(()=>expect(screen.getByLabelText("สอบครอบคลุม Level 1 ถึง")).toHaveValue(8));fireEvent.change(screen.getByLabelText("วันสอบ"),{target:{value:"2026-11-04"}});fireEvent.change(screen.getByLabelText("เวลาเริ่ม"),{target:{value:"19:00"}});fireEvent.click(screen.getByRole("button",{name:"เพิ่มนัดสอบ"}));await waitFor(()=>expect(insert).toHaveBeenCalled());expect(insert.mock.calls[0][0]).toMatchObject({starts_at:"2026-11-04T12:00:00.000Z",ends_at:"2026-11-04T13:00:00.000Z",through_level:8});});
+});
