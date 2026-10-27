@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { StudentPlanEditor } from "./StudyDashboard";
 import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, ArrowUpRight, BookOpen, Check, ChevronRight, GraduationCap, LockKeyhole, Search, ShieldCheck, UserPlus, Users } from "lucide-react";
 import { advanceClassroomStudent, enrollClassroomStudent, revokeClassroomEnrollment } from "@/app/courses/actions";
@@ -144,7 +145,8 @@ export function ClassroomAdmin({ demo = false, students: initialStudents, setupR
         </aside>
         <section className="rounded-2xl border border-[var(--line)] bg-white p-5 sm:p-7">
           {selected ? <><div className="flex items-center gap-4 border-b border-[var(--line)] pb-6"><span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--soft)] text-[var(--accent)]"><GraduationCap size={25}/></span><div><h2 className="text-xl font-semibold">{selected.displayName}</h2><p className="mt-1 text-xs text-[var(--muted)]">@{selected.username} · สิทธิ์คอร์สและเลเวล</p></div></div>
-            <div className="divide-y divide-[var(--line)]">{courses.map((course) => {
+            {!demo && <StudentPlanEditor key={selected.id} userId={selected.id} courses={courses}/>}
+              <div className="divide-y divide-[var(--line)]">{courses.map((course) => {
               const enrollment = selected.enrollments.find((row) => row.courseId === course.id);
               const tasks = demo && enrollment ? DEMO_ITEMS.filter((item) => item.courseId === course.id && item.levelNumber === enrollment.unlockedLevel) : [];
               const done = tasks.filter((item) => completed.includes(item.id)).length;

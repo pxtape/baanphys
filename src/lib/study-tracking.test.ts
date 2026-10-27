@@ -1,0 +1,8 @@
+import {describe,it,expect} from "vitest";
+import {studySummary,addDays,bangkokDay} from "./study-tracking";
+describe("course weeks in Bangkok",()=>{
+ it("counts seven-day weeks from enrollment and renews after exactly 28 days",()=>{const s=studySummary("2026-10-01",null,20,100,[{study_on:"2026-10-01",questions:10},{study_on:"2026-10-08",questions:5}],new Date("2026-10-08T00:00:00+07:00"));expect(s.weekNumber).toBe(2);expect(s.weekly).toBe(5);expect(s.completed).toBe(15);expect(s.coursePercent).toBe(15);expect(s.due).toBe("2026-10-29");expect(s.weekTimePercent).toBe(0);expect(s.goalPercent).toBe(25);});
+ it("does not invent question percentages, dates or estimates",()=>{const s=studySummary(null,null,null,null,[],new Date("2026-10-08"));expect(s.coursePercent).toBeNull();expect(s.estimatedFinish).toBeNull();expect(s.due).toBeNull();expect(s.weekNumber).toBe(0);});
+ it("excludes future and pre-course logs and respects paid-through date",()=>{const s=studySummary("2026-10-01","2026-11-26",10,30,[{study_on:"2026-09-30",questions:99},{study_on:"2026-10-07",questions:10},{study_on:"2026-10-09",questions:99}],new Date("2026-10-08T12:00:00+07:00"));expect(s.completed).toBe(10);expect(s.estimatedDays).toBe(14);expect(s.estimatedFinish).toBe("2026-10-22");expect(s.due).toBe("2026-11-26");});
+ it("handles month rollover, Bangkok midnight and future starts",()=>{expect(addDays("2026-01-31",28)).toBe("2026-02-28");expect(bangkokDay(new Date("2026-10-01T18:00:00Z"))).toBe("2026-10-02");expect(studySummary("2026-11-01",null,10,30,[],new Date("2026-10-01")).weekNumber).toBe(0);});
+});

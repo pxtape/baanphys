@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { StudyDashboard } from "./StudyDashboard";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft, ArrowRight, Atom, BookOpen, Check, CheckCheck,
@@ -366,6 +367,7 @@ export function StudentClassroom({ demo = false, user, enrollments: initialEnrol
         <div className="relative z-10 mt-8 flex flex-wrap items-center justify-between gap-5 rounded-2xl border border-white/15 bg-[#0c1534]/90 px-5 py-5 sm:max-w-[670px]"><div><p className="text-[10px] font-bold tracking-[.14em] text-[#a9c5e9]">YOUR NEXT MISSION</p><p className="mt-2 text-base font-semibold">{enrollment && selectedCourse ? `${selectedCourse.title} · Level ${currentLevel}` : "รอติวเตอร์เปิดสิทธิ์คอร์ส"}</p>{enrollment && <p className="mt-1 text-sm text-[#b9cce9]">{levels.find(entry => entry.number === currentLevel)?.title}</p>}</div>{enrollment && levels.length>0 && <button type="button" onClick={() => openLevel(currentLevel)} className="inline-flex items-center gap-3 rounded-xl bg-[#ff9d62] px-5 py-3 text-sm font-bold text-[#17213d] shadow-[0_4px_0_#bd6537] transition hover:bg-[#ffb27f]">เริ่มภารกิจ <ArrowRight size={17}/></button>}</div>
       </section>
 
+      {selectedCourse && enrollment && <StudyDashboard key={`${user.id}-${selectedCourse.id}`} userId={user.id} courseId={selectedCourse.id} courseTitle={selectedCourse.title} passedLevels={Math.min(levels.length, Math.max(0,currentLevel-1)+(currentLevel===levels.length && courseItems.some(item=>item.levelNumber===currentLevel) && courseItems.filter(item=>item.levelNumber===currentLevel).every(item=>completedIds.includes(item.id)) ? 1 : 0))} levelCount={levels.length} demo={demo}/>}
       {setupRequired && <div role="status" className="mb-7 rounded-xl border border-[#eedfc4] bg-[#fff9ed] p-4 text-xs leading-6 text-[#977646]">ห้องเรียนยังอยู่ระหว่างตั้งค่าระบบ บัญชีและสิทธิ์จริงจะพร้อมเมื่อแอดมินตั้งค่าฐานข้อมูลเรียบร้อยแล้ว <Link href="/preview/classroom" className="font-semibold underline">ดูหน้าตัวอย่าง</Link></div>}
 
       <section aria-labelledby="my-courses-heading">
