@@ -16,12 +16,12 @@ export function questionTotal(rows: {question_count:number|null}[], expected: nu
  return expected>0 && rows.length===expected && rows.every(r=>r.question_count!==null && Number.isInteger(r.question_count) && r.question_count>=0) ? rows.reduce((sum,r)=>sum+r.question_count!,0) : null;
 }
 export function percent(value: number, total: number) { return total>0 ? Math.min(100,Math.max(0,Math.round(value/total*100))) : 0; }
-export function studySummary(start: string|null, paidUntil: string|null, goal: number|null, total: number|null, days: PracticeDay[], now=new Date()) {
+export function studySummary(start: string|null, paidUntil: string|null, goal: number|null, total: number|null, days: PracticeDay[], now=new Date(), countAll=false) {
  const today=bangkokDay(now), started=Boolean(start && dayStart(start)<=now.getTime());
  const elapsed=start ? Math.max(0,(now.getTime()-dayStart(start))/DAY_MS) : 0;
  const weekIndex=Math.floor(elapsed/7), weekStart=start ? addDays(start,weekIndex*7) : null;
  const weekEnd=weekStart ? addDays(weekStart,7) : null;
- const valid=days.filter(d=>d.study_on<=today && (!start || d.study_on>=start));
+ const valid=days.filter(d=>d.study_on<=today && (countAll || !start || d.study_on>=start));
  const completed=valid.reduce((sum,d)=>sum+d.questions,0);
  const weekly=started && weekStart && weekEnd ? valid.filter(d=>d.study_on>=weekStart && d.study_on<weekEnd).reduce((sum,d)=>sum+d.questions,0) : 0;
  const due=paidUntil ?? (start ? addCalendarMonths(start) : null);

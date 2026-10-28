@@ -19,6 +19,7 @@ export type CourseLevel = {
 };
 
 export type LearningItem = {
+  questionCount?: number | null;
   id: string;
   courseId: CourseId;
   levelNumber: number;

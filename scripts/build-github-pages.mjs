@@ -18,6 +18,7 @@ async function copy(relative, transform = (source) => source) { await write(rela
 // privileged credentials never enter the static site. Live mutations use RLS
 // or the authenticated classroom-admin Edge Function.
 for (const relative of [
+  "src/components/classroom/QuestionChecklist.tsx", "src/lib/question-progress.ts",
   "src/components/classroom/StudentAdminHub.tsx", "src/components/classroom/StudentCourseAdmin.tsx", "src/components/classroom/StudentScheduleEditor.tsx", "src/components/classroom/StudyCharts.tsx", "src/components/classroom/MonthCalendar.tsx", "src/components/classroom/CalendarOverview.tsx", "src/lib/student-planning.ts",
   "src/components/classroom/TutorCalendar.tsx", "src/components/classroom/StudentSupport.tsx", "src/lib/tutor-calendar.ts",
   "src/components/classroom/StudyDashboard.tsx", "src/lib/study-tracking.ts",

@@ -1,0 +1,10 @@
+import {render,screen,fireEvent,waitFor,cleanup} from "@testing-library/react";
+import {afterEach,describe,it,expect,vi} from "vitest";
+import {QuestionChecklist} from "./QuestionChecklist";
+const {rpc}=vi.hoisted(()=>({rpc:vi.fn(async()=>({data:3,error:null}))}));
+vi.mock("@/lib/classroom-browser",()=>({classroomClient:()=>({rpc,from:()=>{const q:{[key:string]:unknown}={then:(resolve:(value:unknown)=>unknown)=>Promise.resolve({data:[],error:null}).then(resolve)};for(const k of ["select","eq","order","range"])q[k]=()=>q;return q;}})}));
+afterEach(()=>{cleanup();vi.clearAllMocks();localStorage.clear();});
+describe("question checklist",()=>{
+ it("saves out of order, fills remaining questions, and unchecks without duplicates",async()=>{const done=vi.fn();render(<QuestionChecklist userId="student" itemId="hw" title="HW" total={5} onCompletion={done}/>);await waitFor(()=>expect(screen.getByText("0 / 5 ข้อ")).toBeInTheDocument());fireEvent.click(screen.getByRole("button",{name:"อัปเดตข้อที่ทำ"}));fireEvent.click(screen.getByRole("checkbox",{name:"ข้อ 3 · HW"}));await waitFor(()=>expect(screen.getByText("1 / 5 ข้อ")).toBeInTheDocument());expect(rpc).toHaveBeenLastCalledWith("classroom_update_question",{p_item_id:"hw",p_question:3,p_done:true});fireEvent.click(screen.getByRole("button",{name:"ทำครบทุกข้อ"}));await waitFor(()=>expect(screen.getByText("5 / 5 ข้อ")).toBeInTheDocument());expect(done).toHaveBeenLastCalledWith(true,5);fireEvent.click(screen.getByRole("checkbox",{name:"ข้อ 3 · HW"}));await waitFor(()=>expect(screen.getByText("4 / 5 ข้อ")).toBeInTheDocument());expect(done).toHaveBeenLastCalledWith(false,4);});
+ it("keeps the previous total if saving fails",async()=>{rpc.mockResolvedValueOnce({data:0,error:{message:"offline"}} as never);render(<QuestionChecklist userId="student" itemId="hw" title="HW" total={5} onCompletion={vi.fn()}/>);await waitFor(()=>expect(screen.getByText("0 / 5 ข้อ")).toBeInTheDocument());fireEvent.click(screen.getByRole("button",{name:"ทำครบทุกข้อ"}));expect(await screen.findByRole("alert")).toHaveTextContent("บันทึกไม่ได้");expect(screen.getByText("0 / 5 ข้อ")).toBeInTheDocument();});
+});

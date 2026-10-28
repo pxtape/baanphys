@@ -11,7 +11,7 @@ export async function loadClassroom() {
   const client = classroomClient();
   const { data: { user }, error } = await client.auth.getUser();
   if (error || !user || user.is_anonymous) return null;
-  const [profile, account, courses, levels, enrollments, items, progress] = await Promise.all([
+  const [profile, account, courses, levels, enrollments, items, progress, questions] = await Promise.all([
     client.from("profiles").select("role,display_name").eq("id", user.id).single(),
     client.from("classroom_accounts").select("username,display_name").eq("user_id", user.id).maybeSingle(),
     client.from("classroom_courses").select("*"),
@@ -19,8 +19,9 @@ export async function loadClassroom() {
     client.from("classroom_enrollments").select("*").eq("user_id", user.id),
     client.from("classroom_items").select("*").order("sort_order"),
     client.from("classroom_progress").select("item_id").eq("user_id", user.id).eq("completed", true),
+    client.from("classroom_question_items").select("item_id,questions").eq("user_id",user.id),
   ]);
-  for (const result of [profile, account, courses, levels, enrollments, items, progress]) if (result.error) throw new Error("โหลดข้อมูลห้องเรียนไม่สำเร็จ กรุณาลองใหม่");
+  for (const result of [profile, account, courses, levels, enrollments, items, progress, questions]) if (result.error) throw new Error("โหลดข้อมูลห้องเรียนไม่สำเร็จ กรุณาลองใหม่");
   const courseLevels: Partial<Record<CourseId, CourseLevel[]>> = {};
   for (const level of levels.data ?? []) (courseLevels[level.course_id as CourseId] ??= []).push({ number: level.number, title: level.title, durationMinutes: level.duration_minutes, questionCount: level.question_count, section: "", isPlaceholder: level.title.includes("รอ") });
   return {
@@ -28,8 +29,8 @@ export async function loadClassroom() {
     user: { id: user.id, displayName: account.data?.display_name ?? profile.data?.display_name ?? "นักเรียน", username: account.data?.username ?? user.email ?? "" },
     courses: COURSES.map((course) => { const db = courses.data?.find((row) => row.id === course.id); return { ...course, levelCount: db?.level_count ?? null }; }),
     enrollments: (enrollments.data ?? []).map((row) => ({ studentId: row.user_id, courseId: row.course_id, unlockedLevel: row.unlocked_level })) as Enrollment[],
-    items: (items.data ?? []).map((row) => ({ id: row.id, courseId: row.course_id, levelNumber: row.level_number, kind: row.kind, title: row.title, durationMinutes: row.duration_minutes, recommendedMinutes: row.recommended_minutes, driveFileId: row.drive_file_id, hasMedia: Boolean(row.drive_file_id), instructions: row.instructions, answerFileId: row.answer_file_id, solutionFileId: row.solution_file_id })) as LearningItem[],
-    completedItemIds: (progress.data ?? []).map((row) => String(row.item_id)), courseLevels,
+    items: (items.data ?? []).map((row) => ({ id: row.id, courseId: row.course_id, levelNumber: row.level_number, kind: row.kind, questionCount: row.question_count, title: row.title, durationMinutes: row.duration_minutes, recommendedMinutes: row.recommended_minutes, driveFileId: row.drive_file_id, hasMedia: Boolean(row.drive_file_id), instructions: row.instructions, answerFileId: row.answer_file_id, solutionFileId: row.solution_file_id })) as LearningItem[],
+    completedItemIds: (items.data??[]).filter(item=>{if(item.kind!=="video"&&item.question_count>0)return (questions.data??[]).find(q=>q.item_id===item.id)?.questions===item.question_count;return (progress.data??[]).some(p=>p.item_id===item.id);}).map(item=>String(item.id)), courseLevels,
   };
 }
 

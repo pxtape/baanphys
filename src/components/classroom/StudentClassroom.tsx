@@ -1,4 +1,5 @@
 "use client";
+import {QuestionChecklist} from "./QuestionChecklist";
 
 import Link from "next/link";
 import {StudentSupport} from "./StudentSupport";
@@ -136,12 +137,16 @@ function LevelPathway({ levels, unlockedLevel, selectedLevel, completedItemIds, 
   </div>;
 }
 
-function LessonPanel({ level, items, completedIds, pendingItem, error, demo, directDrive, watermarkLabel, onToggle, onClose }: {
-  level: CourseLevel; items: LearningItem[]; completedIds: string[]; pendingItem: string | null;
+function LessonPanel({ userId,onQuestionCompletion, level, items, completedIds, pendingItem, error, demo, directDrive, watermarkLabel, onToggle, onClose }: {
+  userId:string; onQuestionCompletion:(itemId:string,done:boolean)=>void; level: CourseLevel; items: LearningItem[]; completedIds: string[]; pendingItem: string | null;
   error: string; demo: boolean;
   directDrive?: boolean; watermarkLabel?: string;
   onToggle: (itemId: string, done: boolean) => void; onClose: () => void;
 }) {
+  const [questionCounts,setQuestionCounts]=useState<Record<string,number>>({});
+  const questionItems=items.filter(i=>i.kind!=="video"&&i.questionCount!=null&&i.questionCount>0);
+  const questionTotal=questionItems.reduce((sum,i)=>sum+i.questionCount!,0);
+  const questionDone=questionItems.reduce((sum,i)=>sum+(questionCounts[i.id]??0),0);
   const [openMedia, setOpenMedia] = useState<string | null>(items.find(item => item.kind === "video" && (item.hasMedia ?? Boolean(item.driveFileId)))?.id ?? null);
   const [mediaError, setMediaError] = useState("");
   const [mediaFullscreen, setMediaFullscreen] = useState(false);
@@ -175,6 +180,7 @@ function LessonPanel({ level, items, completedIds, pendingItem, error, demo, dir
       <div className="mt-3 h-1 overflow-hidden rounded-full bg-[#eef1eb]"><div className="h-full rounded-full bg-[#167a72] transition-all" style={{ width: `${items.length ? doneCount / items.length * 100 : 0}%` }}/></div>
       {demo && <p className="mt-3 text-[10px] leading-5 text-[#92784f]">รายการและเวลาในหน้านี้เป็นตัวอย่างสำหรับลองระบบ</p>}
       {items.length === 0 && <div className="my-5 rounded-xl border border-dashed border-[#dce5d6] px-4 py-6 text-center"><BookOpen size={24} className="mx-auto text-[#9aaa95]"/><p className="mt-3 text-xs font-medium text-[#60705f]">กำลังจัดเตรียมเนื้อหาเลเวลนี้</p><p className="mt-1.5 text-[11px] leading-5 text-[#91998a]">จะมีรายการวิดีโอ การบ้าน และเวลาแนะนำที่นี่</p></div>}
+      {questionTotal>0&&<p className="mt-3 text-xs font-semibold text-teal-800">ข้อที่ทำใน Level นี้: {questionDone} / {questionTotal} ข้อ{questionItems.some(i=>questionCounts[i.id]===undefined)?" · กำลังโหลด…":""}</p>}
       <div className="mt-2 divide-y divide-[#edf0e9]">
         {items.map((item) => {
           const answerOpen = openMedia === `${item.id}:answer`;
@@ -184,14 +190,17 @@ function LessonPanel({ level, items, completedIds, pendingItem, error, demo, dir
           const validMediaFile = Boolean(mediaFileId && /^[a-zA-Z0-9_-]{10,200}$/.test(mediaFileId));
           const checked = completedIds.includes(item.id);
           const isVideo = item.kind === "video";
+          const hasQuestions = !isVideo && item.questionCount != null && item.questionCount > 0;
           const hasMedia = item.hasMedia ?? Boolean(item.driveFileId);
           return <article key={item.id} className="py-4">
-            <div className="flex items-start gap-3"><input type="checkbox" id={`task-${item.id}`} checked={checked} disabled={pendingItem !== null}
+            <div className="flex items-start gap-3">{!hasQuestions && <input type="checkbox" id={`task-${item.id}`} checked={checked} disabled={pendingItem !== null}
               onChange={(event) => onToggle(item.id, event.target.checked)} aria-label={`เรียนครบ ${item.title}`}
-              className="mt-1 h-4 w-4 shrink-0 accent-[#167a72] disabled:opacity-50"/>
+              className="mt-1 h-4 w-4 shrink-0 accent-[#167a72] disabled:opacity-50"/>}
               <div className="min-w-0 flex-1"><label htmlFor={`task-${item.id}`} className={`cursor-pointer text-xs font-semibold leading-6 ${checked ? "text-[#829080] line-through decoration-[#b4c2ae]" : "text-[#34483d]"}`}>{isVideo ? "ดูคลิป: " : item.kind === "sheet" ? "ชีทประกอบ: " : "ทำ HW: "}{item.title}</label>
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-[#586954]"><span className="inline-flex items-center gap-1">{isVideo ? <CirclePlay size={11}/> : <FileText size={11}/>} {isVideo ? "วิดีโอ" : item.kind === "sheet" ? "ชีท / เอกสาร" : "การบ้าน"}</span><span>·</span><span>{item.durationMinutes === null ? isVideo ? "ดูเวลาจากเครื่องเล่น" : "ยังไม่ระบุเวลาทำ" : `${isVideo ? "เวลาดู " : "เวลาประมาณ "}${formatStudyTime(item.durationMinutes)}`}</span></div>
                 {item.recommendedMinutes !== null && <p className="mt-1 text-[10px] leading-5 text-[#586954]">เวลาแนะนำ {formatStudyTime(item.recommendedMinutes)}</p>}
+                {!isVideo && item.questionCount == null && <p className="mt-2 text-[11px] text-[#71806a]">รอแอดมินกำหนดจำนวนข้อในไฟล์นี้ จึงจะแสดงปุ่มติ๊กทีละข้อ</p>}
+                {hasQuestions && <QuestionChecklist userId={userId} itemId={item.id} total={item.questionCount!} title={item.title} demo={demo} onCompletion={(done,count)=>{setQuestionCounts(previous=>({...previous,[item.id]:count}));onQuestionCompletion(item.id,done);}}/>}
                 {item.instructions && <p className="mt-2 whitespace-pre-line text-[11px] leading-6 text-[#71806a]">{item.instructions}</p>}
                 <button type="button" disabled={!hasMedia || demo} onClick={() => { setOpenMedia(openMedia === item.id ? null : item.id); setMediaError(""); }}
                   className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-[#dfe7d8] px-2.5 py-1.5 text-[10px] font-medium text-[#167a72] transition hover:bg-[#f3f7ee] disabled:cursor-default disabled:border-[#edf0e8] disabled:text-[#a0a895]">
@@ -348,7 +357,7 @@ export function StudentClassroom({ demo = false, user, enrollments: initialEnrol
             {levels.length > 0 ? <LevelPathway themed={selectedCourseId === "pre-posn"} levels={levels} unlockedLevel={enrollment.unlockedLevel} selectedLevel={selectedLevel} items={courseItems} completedItemIds={completedIds} demo={demo} onSelect={openLevel}/> : <div className="py-16 text-center"><BookOpen size={30} className="mx-auto text-[#a5b192]"/><p className="mt-4 text-sm text-[#738463]">รอรายละเอียดเส้นทางคอร์สนี้</p><p className="mt-2 text-xs text-[#9ba68d]">ติวเตอร์กำลังจัดเตรียมเลเวลและเนื้อหา</p></div>}
           </div>
           <div ref={detailRef} className="min-w-0 scroll-mt-5">
-            {level ? <LessonPanel key={`${selectedCourseId}-${level.number}`} level={level} items={courseItems.filter((item) => item.levelNumber === level.number)} completedIds={completedIds} pendingItem={pendingItem} error={error} demo={demo} directDrive={directDrive} watermarkLabel={`${user.displayName} · ${user.username}`} onToggle={(itemId, completed) => void toggleTask(itemId, completed)} onClose={() => setSelectedLevel(null)}/> : null}
+            {level ? <LessonPanel userId={user.id} onQuestionCompletion={(itemId,done)=>setCompletedIds(previous=>done?Array.from(new Set([...previous,itemId])):previous.filter(id=>id!==itemId))} key={`${selectedCourseId}-${level.number}`} level={level} items={courseItems.filter((item) => item.levelNumber === level.number)} completedIds={completedIds} pendingItem={pendingItem} error={error} demo={demo} directDrive={directDrive} watermarkLabel={`${user.displayName} · ${user.username}`} onToggle={(itemId, completed) => void toggleTask(itemId, completed)} onClose={() => setSelectedLevel(null)}/> : null}
           </div>
         </div>
       </section> : <section className="mt-9 rounded-2xl border border-dashed border-[#dbe3d1] p-8 text-center"><LockKeyhole size={28} className="mx-auto text-[#99a785]"/><h2 className="mt-4 text-base font-semibold text-[#657d50]">ยังไม่มีคอร์สที่ปลดล็อก</h2><p className="mt-2 text-xs leading-6 text-[#95a086]">ติดต่อแอดมินเพื่อเปิดสิทธิ์คอร์สในบัญชีของคุณ</p></section>}
