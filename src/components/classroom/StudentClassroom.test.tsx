@@ -22,8 +22,8 @@ describe("StudentClassroom access and progress", () => {
     const checkboxes = screen.getAllByRole("checkbox");
     fireEvent.click(checkboxes[0]);
     fireEvent.click(checkboxes[1]);
-    expect(await screen.findByText("ทำครบแล้ว · ติดต่อ LINE เพื่อขอปลดล็อก")).toBeInTheDocument();
-    expect(screen.getByText("การติ๊กครบเป็นการบันทึกงานของคุณ ยังไม่ได้ส่งคำขอให้ติวเตอร์ กรุณาทัก LINE ด้วยตัวเอง")).toBeInTheDocument();
+    expect(screen.queryByText("ทำครบแล้ว · ติดต่อ LINE เพื่อขอปลดล็อก")).not.toBeInTheDocument();
+    expect(screen.queryByText("ก่อนเริ่ม HW · ลองให้เต็มที่ แล้วค่อยขอคำใบ้")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /^Level 10 / })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "กลับไปเส้นทางเรียน" }));
     expect(screen.getByRole("button", { name: /^Level 10 / })).toBeDisabled();
