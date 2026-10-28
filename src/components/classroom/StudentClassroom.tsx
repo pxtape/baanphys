@@ -147,7 +147,7 @@ export function LessonPanel({ preview=false, userId,onQuestionCompletion, level,
   const questionItems=items.filter(i=>i.kind!=="video"&&i.questionCount!=null&&i.questionCount>0);
   const questionTotal=questionItems.reduce((sum,i)=>sum+i.questionCount!,0);
   const questionDone=questionItems.reduce((sum,i)=>sum+(questionCounts[i.id]??0),0);
-  const [openMedia, setOpenMedia] = useState<string | null>(items.find(item => item.kind === "video" && (item.hasMedia ?? Boolean(item.driveFileId)))?.id ?? null);
+  const [openMedia, setOpenMedia] = useState<string | null>(items.find(item => (preview || item.kind === "video") && (item.hasMedia ?? Boolean(item.driveFileId)))?.id ?? null);
   const [mediaError, setMediaError] = useState("");
   const [mediaFullscreen, setMediaFullscreen] = useState(false);
   const mediaWrapperRef = useRef<HTMLDivElement>(null);
