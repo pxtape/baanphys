@@ -18,6 +18,7 @@ async function copy(relative, transform = (source) => source) { await write(rela
 // privileged credentials never enter the static site. Live mutations use RLS
 // or the authenticated classroom-admin Edge Function.
 for (const relative of [
+  "src/components/classroom/StudentAdminHub.tsx", "src/components/classroom/StudentCourseAdmin.tsx", "src/components/classroom/StudentScheduleEditor.tsx", "src/components/classroom/StudyCharts.tsx", "src/components/classroom/MonthCalendar.tsx", "src/components/classroom/CalendarOverview.tsx", "src/lib/student-planning.ts",
   "src/components/classroom/TutorCalendar.tsx", "src/components/classroom/StudentSupport.tsx", "src/lib/tutor-calendar.ts",
   "src/components/classroom/StudyDashboard.tsx", "src/lib/study-tracking.ts",
   "src/components/classroom/ClassroomAdmin.tsx", "src/components/classroom/ClassroomContent.tsx",
@@ -52,6 +53,7 @@ await write("src/app/courses/page.tsx", 'import {LiveClassroom} from "@/componen
 for (const relative of ["src/app/admin/page.tsx", "src/app/admin/students/page.tsx"]) await write(relative, 'import {LiveClassroom} from "@/components/classroom/LiveClassroom"; export default function Page(){return <LiveClassroom admin/>;}\n');
 await write("src/app/admin/content/page.tsx", 'import {LiveClassroom} from "@/components/classroom/LiveClassroom"; export default function Page(){return <LiveClassroom admin content/>;}\n');
 await copy("src/app/admin/calendar/page.tsx");
+await copy("src/app/calendar/page.tsx");
 await write("src/app/login/page.tsx", 'import {LiveLogin} from "@/components/classroom/LiveLogin"; export default function Page(){return <LiveLogin/>;}\n');
 
 console.log(`Building GitHub Pages classroom at ${basePath || "/"}`);

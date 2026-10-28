@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import {StudentSupport} from "./StudentSupport";
 import { StudyDashboard } from "./StudyDashboard";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -253,7 +254,7 @@ export function StudentClassroom({ demo = false, user, enrollments: initialEnrol
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
   const [pendingItem, setPendingItem] = useState<string | null>(null);
   const [error, setError] = useState("");
-  const [showStats, setShowStats] = useState(false);
+
   const detailRef = useRef<HTMLDivElement>(null);
   const pathwayRef = useRef<HTMLElement>(null);
   const selectedCourse = COURSES.find((course) => course.id === selectedCourseId);
@@ -348,13 +349,13 @@ export function StudentClassroom({ demo = false, user, enrollments: initialEnrol
     </header>
     <style>{`
       .physics-world{background:#f7f8f5}.physics-world .lab-header{background:white;border-color:#e0e5df}
-      .study-sidebar{display:none}.study-sidebar.is-open{display:block}
+      .study-sidebar{display:block}
       .lab-course{min-height:100px;border-radius:14px;padding:14px;box-shadow:none}
       .lab-course:disabled{background:#f0f2ee;border-color:#e0e5dc;color:#718073}
       @media(min-width:1024px){.study-sidebar{display:block;position:sticky;top:16px;max-height:calc(100vh - 32px);overflow-y:auto}}
     `}</style>
     <main className="mx-auto max-w-[1440px] px-5 pb-16 sm:px-9 lg:px-12">
-      <section className="flex flex-wrap items-center justify-between gap-4 py-5"><div><h1 className="text-xl font-semibold text-[#2e443a]">ห้องเรียนของฉัน</h1><p className="mt-1 text-xs text-[#758174]">{user.displayName}{selectedCourse?` · ${selectedCourse.title}`:""}</p></div><div className="flex items-center gap-2"><button type="button" onClick={()=>setShowStats(!showStats)} aria-expanded={showStats} className="rounded-lg border border-[#d5dfd5] bg-white px-3 py-2 text-xs text-[#4a6c5a] lg:hidden">{showStats?"ซ่อนสถิติ":"ความคืบหน้า / บันทึกข้อ"}</button>{enrollment&&levels.length>0&&<button type="button" onClick={()=>openLevel(currentLevel)} className="inline-flex items-center gap-2 rounded-lg bg-[#447d6e] px-4 py-2.5 text-sm font-semibold text-white">เรียนต่อ · Level {currentLevel}<ArrowRight size={14}/></button>}</div></section>
+      <section className="flex flex-wrap items-center justify-between gap-4 py-5"><div><h1 className="text-xl font-semibold text-[#2e443a]">ห้องเรียนของฉัน</h1><p className="mt-1 text-xs text-[#758174]">{user.displayName}{selectedCourse?` · ${selectedCourse.title}`:""}</p></div><div className="flex items-center gap-2">{enrollment&&levels.length>0&&<button type="button" onClick={()=>openLevel(currentLevel)} className="inline-flex items-center gap-2 rounded-lg bg-[#447d6e] px-4 py-2.5 text-sm font-semibold text-white">เรียนต่อ · Level {currentLevel}<ArrowRight size={14}/></button>}</div></section>{!demo&&selectedCourse&&enrollment&&<StudentSupport key={`${user.id}-${selectedCourse.id}`} userId={user.id} courseId={selectedCourse.id}/>}
       <div className={`grid items-start gap-6 ${level?"":"lg:grid-cols-[minmax(0,1fr)_340px]"}`}><div className="min-w-0">
       {setupRequired && <div role="status" className="mb-7 rounded-xl border border-[#eedfc4] bg-[#fff9ed] p-4 text-xs leading-6 text-[#977646]">ห้องเรียนยังอยู่ระหว่างตั้งค่าระบบ บัญชีและสิทธิ์จริงจะพร้อมเมื่อแอดมินตั้งค่าฐานข้อมูลเรียบร้อยแล้ว <Link href="/preview/classroom" className="font-semibold underline">ดูหน้าตัวอย่าง</Link></div>}
 
@@ -376,7 +377,7 @@ export function StudentClassroom({ demo = false, user, enrollments: initialEnrol
         </div>
       </section> : <section className="mt-9 rounded-2xl border border-dashed border-[#dbe3d1] p-8 text-center"><LockKeyhole size={28} className="mx-auto text-[#99a785]"/><h2 className="mt-4 text-base font-semibold text-[#657d50]">ยังไม่มีคอร์สที่ปลดล็อก</h2><p className="mt-2 text-xs leading-6 text-[#95a086]">ติดต่อแอดมินเพื่อเปิดสิทธิ์คอร์สในบัญชีของคุณ</p></section>}
       {error && !level && <p role="alert" className="mt-5 rounded-lg bg-[#fff2ed] p-3 text-xs text-[#b15d43]">{error}</p>}
-      </div>{!level&&<aside className={`study-sidebar order-first lg:order-last ${showStats?"is-open":""}`}>{selectedCourse && enrollment && <StudyDashboard key={`${user.id}-${selectedCourse.id}`} userId={user.id} courseId={selectedCourse.id} courseTitle={selectedCourse.title} passedLevels={Math.min(levels.length, Math.max(0,currentLevel-1)+(currentLevel===levels.length && courseItems.some(item=>item.levelNumber===currentLevel) && courseItems.filter(item=>item.levelNumber===currentLevel).every(item=>completedIds.includes(item.id)) ? 1 : 0))} levelCount={levels.length} demo={demo}/>}</aside>}</div>
+      </div>{!level&&<aside className={`study-sidebar order-first lg:order-last `}>{selectedCourse && enrollment && <StudyDashboard key={`${user.id}-${selectedCourse.id}`} userId={user.id} courseId={selectedCourse.id} courseTitle={selectedCourse.title} passedLevels={Math.min(levels.length, Math.max(0,currentLevel-1)+(currentLevel===levels.length && courseItems.some(item=>item.levelNumber===currentLevel) && courseItems.filter(item=>item.levelNumber===currentLevel).every(item=>completedIds.includes(item.id)) ? 1 : 0))} levelCount={levels.length} demo={demo}/>}</aside>}</div>
     </main>
     <footer className="lab-footer border-t border-[#e3e8dc]"><div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-3 px-5 py-6 text-[10px] text-[#a1aa92] sm:px-9 lg:px-12"><span>© 2026 บ้านฟิสิกส์ by P&apos;Tape</span>{demo ? <Link href="/" className="inline-flex items-center gap-1.5 hover:text-[#167a72]"><ArrowLeft size={11}/>กลับหน้าหลัก</Link> : <span>เรียนรู้ด้วยความเข้าใจ เติบโตทีละก้าว</span>}</div></footer>
   </div>;

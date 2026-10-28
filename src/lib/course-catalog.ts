@@ -34,7 +34,7 @@ export type LearningItem = {
 };
 
 export type Enrollment = { studentId: string; courseId: CourseId; unlockedLevel: number };
-export type StudentRecord = { id: string; displayName: string; username: string; enrollments: Enrollment[] };
+export type StudentRecord = { fullName?:string; additionalInfo?:string; additionalUpdatedAt?:string|null; profileUpdatedAt?:string|null; id: string; displayName: string; username: string; enrollments: Enrollment[] };
 
 export const COURSES: CourseDefinition[] = [
   { id: "pre-posn", title: "Pre-POSN", subtitle: "เตรียมความพร้อม สอวน.", levelCount: 31, description: "ค่อย ๆ สร้างความเข้าใจฟิสิกส์ ผ่านเส้นทางการเรียน 31 เลเวล", accent: "#167a72" },

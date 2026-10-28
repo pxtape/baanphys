@@ -1,0 +1,14 @@
+import {describe,it,expect} from "vitest";
+import {calendarEntries,billingStatus,daysUntil,cycleMockCount,weeklyDates,emptyPlanning,type MockTest,type StudyPlan} from "./student-planning";
+import type {SupportPlan} from "./tutor-calendar";
+const plan:StudyPlan={user_id:"u",course_id:"pre-posn",started_on:"2026-01-31",last_renewed_on:"2026-10-31",paid_until:"2026-11-30"};
+const mock:MockTest={id:"m",user_id:"u",course_id:"pre-posn",tutor_id:"t",name:"Mock 1",starts_on:"2026-10-29",ends_on:"2026-11-04",through_level:8,status:"planned",score:null,max_score:null,completed_on:null,note:""};
+const support:SupportPlan={id:"p",user_id:"u",course_id:"pre-posn",tutor_id:"t",mode:"line",first_on:"2026-10-28",ends_on:"2026-11-04",meeting_time:null,channel_url:"",active:true};
+describe("student planning",()=>{
+ it("keeps the full seven-day Mock window across a month boundary",()=>{const result=calendarEntries({...emptyPlanning,mocks:[mock]},"2026-11-01","2026-11-30");expect(result[0]).toMatchObject({from:"2026-10-29",until:"2026-11-04",title:"Mock 1 · L1–8"});});
+ it("makes a payment band of seven days immediately before renewal",()=>{const entries=calendarEntries({...emptyPlanning,plans:[plan]},"2026-11-01","2026-11-30");expect(entries.find(e=>e.kind==="renewal")).toMatchObject({from:"2026-11-23",until:"2026-11-29"});expect(entries.find(e=>e.kind==="due")?.from).toBe("2026-11-30");});
+ it("distinguishes overdue, due today, and advance payment period",()=>{expect(billingStatus("2026-10-27","2026-10-28")).toContain("หมดอายุแล้ว 1 วัน");expect(billingStatus("2026-10-28","2026-10-28")).toContain("วันนี้");expect(billingStatus("2026-11-04","2026-10-28")).toContain("ชำระล่วงหน้า");expect(daysUntil("2027-01-01","2026-12-31")).toBe(1);});
+ it("uses selected weekly LINE days without inventing a timed appointment",()=>{expect(weeklyDates(support,"2026-10-01","2026-11-30")).toEqual(["2026-10-28","2026-11-04"]);expect(calendarEntries({...emptyPlanning,support:[support]},"2026-10-28","2026-11-04").every(e=>e.kind==="line")).toBe(true);expect(weeklyDates({...support,first_on:null},"2026-10-01","2026-11-30")).toEqual([]);});
+ it("counts Mock starts in a billing cycle and excludes cancellations",()=>{expect(cycleMockCount([mock,{...mock,id:"next",starts_on:"2026-11-14",ends_on:"2026-11-20"},{...mock,id:"cancel",starts_on:"2026-11-01",status:"cancelled"}],plan)).toBe(1);expect(cycleMockCount([mock],undefined)).toBeNull();});
+ it("keeps a saved timed legacy exam on its original Bangkok date",()=>{const result=calendarEntries({...emptyPlanning,legacy:[{id:"old",user_id:"u",course_id:"pre-posn",tutor_id:"t",starts_at:"2026-10-30T23:00:00Z",ends_at:"2026-10-31T00:00:00Z",through_level:3,status:"planned",note:""}]},"2026-10-01","2026-10-31");expect(result[0].from).toBe("2026-10-31");expect(result[0].title).toContain("06:00");});
+});
