@@ -137,8 +137,8 @@ function LevelPathway({ levels, unlockedLevel, selectedLevel, completedItemIds, 
   </div>;
 }
 
-function LessonPanel({ userId,onQuestionCompletion, level, items, completedIds, pendingItem, error, demo, directDrive, watermarkLabel, onToggle, onClose }: {
-  userId:string; onQuestionCompletion:(itemId:string,done:boolean)=>void; level: CourseLevel; items: LearningItem[]; completedIds: string[]; pendingItem: string | null;
+export function LessonPanel({ preview=false, userId,onQuestionCompletion, level, items, completedIds, pendingItem, error, demo, directDrive, watermarkLabel, onToggle, onClose }: {
+  preview?:boolean; userId:string; onQuestionCompletion:(itemId:string,done:boolean)=>void; level: CourseLevel; items: LearningItem[]; completedIds: string[]; pendingItem: string | null;
   error: string; demo: boolean;
   directDrive?: boolean; watermarkLabel?: string;
   onToggle: (itemId: string, done: boolean) => void; onClose: () => void;
@@ -170,7 +170,7 @@ function LessonPanel({ userId,onQuestionCompletion, level, items, completedIds, 
   }
   return <section aria-label={`รายการเรียน Level ${level.number}`} className="overflow-hidden rounded-2xl border border-[#dce5dd] bg-white shadow-[0_8px_24px_#172b3a04]">
     <div className="border-b border-[#e5eae2] bg-[#f3f6ef] p-5">
-      <div className="flex items-center justify-between"><p className="text-[10px] font-semibold uppercase tracking-[.15em] text-[#6d8875]">ห้องเรียนของคุณ</p><button type="button" onClick={onClose} aria-label="กลับไปเส้นทางเรียน" className="inline-flex items-center gap-2 rounded-md border border-[#ccd8ca] bg-white px-3 py-2 text-sm text-[#34483d]"><ArrowLeft size={16}/> กลับไปเส้นทางเรียน</button></div>
+      <div className="flex items-center justify-between"><p className="text-[10px] font-semibold uppercase tracking-[.15em] text-[#6d8875]">ห้องเรียนของคุณ</p><button type="button" onClick={onClose} aria-label={preview?"กลับไปแก้ไข":"กลับไปเส้นทางเรียน"} className="inline-flex items-center gap-2 rounded-md border border-[#ccd8ca] bg-white px-3 py-2 text-sm text-[#34483d]"><ArrowLeft size={16}/> {preview?"กลับไปแก้ไข":"กลับไปเส้นทางเรียน"}</button></div>
       <p className="mt-4 text-xs font-semibold text-[#167a72]">LEVEL {String(level.number).padStart(2, "0")}</p>
       <h3 className="mt-1 text-xl font-semibold leading-8 tracking-tight text-[#172b3a]">{level.title}</h3>
       <div className="mt-3 flex items-center gap-1.5 text-[11px] text-[#7c8d7e]"><Clock3 size={13}/>{formatStudyTime(level.durationMinutes)}{level.questionCount!=null ? ` · ${level.questionCount} ข้อ` : ""}{demo && level.durationMinutes !== null ? " · ตัวอย่าง" : ""}</div>
@@ -200,7 +200,7 @@ function LessonPanel({ userId,onQuestionCompletion, level, items, completedIds, 
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] text-[#586954]"><span className="inline-flex items-center gap-1">{isVideo ? <CirclePlay size={11}/> : <FileText size={11}/>} {isVideo ? "วิดีโอ" : item.kind === "sheet" ? "ชีท / เอกสาร" : "การบ้าน"}</span><span>·</span><span>{item.durationMinutes === null ? isVideo ? "ดูเวลาจากเครื่องเล่น" : "ยังไม่ระบุเวลาทำ" : `${isVideo ? "เวลาดู " : "เวลาประมาณ "}${formatStudyTime(item.durationMinutes)}`}</span></div>
                 {item.recommendedMinutes !== null && <p className="mt-1 text-[10px] leading-5 text-[#586954]">เวลาแนะนำ {formatStudyTime(item.recommendedMinutes)}</p>}
                 {!isVideo && item.questionCount == null && <p className="mt-2 text-[11px] text-[#71806a]">รอแอดมินกำหนดจำนวนข้อในไฟล์นี้ จึงจะแสดงปุ่มติ๊กทีละข้อ</p>}
-                {hasQuestions && <QuestionChecklist userId={userId} itemId={item.id} total={item.questionCount!} title={item.title} demo={demo} onCompletion={(done,count)=>{setQuestionCounts(previous=>({...previous,[item.id]:count}));onQuestionCompletion(item.id,done);}}/>}
+                {hasQuestions && <QuestionChecklist userId={userId} itemId={item.id} total={item.questionCount!} title={item.title} demo={demo} preview={preview} onCompletion={(done,count)=>{setQuestionCounts(previous=>({...previous,[item.id]:count}));onQuestionCompletion(item.id,done);}}/>}
                 {item.instructions && <p className="mt-2 whitespace-pre-line text-[11px] leading-6 text-[#71806a]">{item.instructions}</p>}
                 <button type="button" disabled={!hasMedia || demo} onClick={() => { setOpenMedia(openMedia === item.id ? null : item.id); setMediaError(""); }}
                   className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-[#dfe7d8] px-2.5 py-1.5 text-[10px] font-medium text-[#167a72] transition hover:bg-[#f3f7ee] disabled:cursor-default disabled:border-[#edf0e8] disabled:text-[#a0a895]">
