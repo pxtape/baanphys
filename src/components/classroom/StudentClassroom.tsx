@@ -5,9 +5,9 @@ import {StudentSupport} from "./StudentSupport";
 import { StudyDashboard } from "./StudyDashboard";
 import { useEffect, useRef, useState } from "react";
 import {
-  ArrowLeft, ArrowRight, Atom, BookOpen, Check, CheckCheck,
+  ArrowLeft, ArrowRight, Atom, BookOpen, Check,
   CirclePlay, Clock3, FileText, Flag, GraduationCap, LayoutGrid, LockKeyhole,
-  LogOut, Maximize, MessageCircle, Minimize, Route,
+  LogOut, Maximize, Minimize, Route,
 } from "lucide-react";
 import {
   COURSES, PRE_POSN_LEVELS, formatStudyTime,
@@ -136,23 +136,6 @@ function LevelPathway({ levels, unlockedLevel, selectedLevel, completedItemIds, 
   </div>;
 }
 
-function StudyAdvice({ homework = false }: { homework?: boolean }) {
-  const steps = homework ? [
-    "ลองทำเองให้เต็มที่ก่อน ประมาณ 3–10 นาที หรือมากกว่านั้นตามความยากของโจทย์",
-    "ถ้าติด ขอคำใบ้จากพี่ทาง LINE ได้เลย แคปหน้าจอหรือถ่ายรูป พร้อมบอกว่าลองอะไรไปแล้วและสงสัยตรงไหน",
-    "เมื่อดูเฉลยแล้ว ลองวิเคราะห์ว่าพลาดตรงไหน เพราะอะไร และครั้งหน้าจะปรับอย่างไร",
-  ] : [
-    "ลองคิดและทำโจทย์ด้วยตัวเองก่อนฟังพี่ได้เลย",
-    "เปรียบเทียบวิธีคิดของตัวเองกับวิธีที่พี่ทำ สังเกตทั้งจุดที่เหมือนและต่างกัน",
-    "ลองทำซ้ำด้วยตัวเองอีกครั้ง เพื่อเช็กว่าเข้าใจและทำได้จริง",
-  ];
-  return <aside aria-label={homework ? "คำแนะนำในการทำ HW" : "แนะนำวิธีเรียน"} className="my-5 rounded-xl border border-[#d4e2d3] bg-[#f3f7f0] p-4 sm:p-5">
-    <h4 className="text-sm font-semibold text-[#294c3c]">{homework ? "ก่อนเริ่ม HW · ลองให้เต็มที่ แล้วค่อยขอคำใบ้" : "เรียนให้เข้าใจ · คิดก่อน ดูแล้วเทียบ ลองทำซ้ำ"}</h4>
-    <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-7 text-[#4c614f]">{steps.map(step => <li key={step}>{step}</li>)}</ol>
-    <p className="mt-3 border-t border-[#dce7d7] pt-3 text-sm font-medium leading-7 text-[#47744f]">ช่วงแรกอาจใช้เวลามากหน่อย ไม่เป็นไรนะ พอฝึกจนคุ้นแล้ว จะค่อย ๆ คิดได้คล่องและเร็วขึ้น</p>
-  </aside>;
-}
-
 function LessonPanel({ level, items, completedIds, pendingItem, error, demo, directDrive, watermarkLabel, onToggle, onClose }: {
   level: CourseLevel; items: LearningItem[]; completedIds: string[]; pendingItem: string | null;
   error: string; demo: boolean;
@@ -164,7 +147,6 @@ function LessonPanel({ level, items, completedIds, pendingItem, error, demo, dir
   const [mediaFullscreen, setMediaFullscreen] = useState(false);
   const mediaWrapperRef = useRef<HTMLDivElement>(null);
   const doneCount = items.filter((item) => completedIds.includes(item.id)).length;
-  const finished = items.length > 0 && doneCount === items.length;
   useEffect(() => {
     const handleFullscreenChange = () => setMediaFullscreen(Boolean(mediaWrapperRef.current && document.fullscreenElement === mediaWrapperRef.current));
     document.addEventListener("fullscreenchange", handleFullscreenChange);
@@ -204,7 +186,6 @@ function LessonPanel({ level, items, completedIds, pendingItem, error, demo, dir
           const isVideo = item.kind === "video";
           const hasMedia = item.hasMedia ?? Boolean(item.driveFileId);
           return <article key={item.id} className="py-4">
-            {item.kind === "homework" && items.find(entry => entry.kind === "homework")?.id === item.id && <StudyAdvice homework/>}
             <div className="flex items-start gap-3"><input type="checkbox" id={`task-${item.id}`} checked={checked} disabled={pendingItem !== null}
               onChange={(event) => onToggle(item.id, event.target.checked)} aria-label={`เรียนครบ ${item.title}`}
               className="mt-1 h-4 w-4 shrink-0 accent-[#167a72] disabled:opacity-50"/>
@@ -230,11 +211,6 @@ function LessonPanel({ level, items, completedIds, pendingItem, error, demo, dir
         })}
       </div>
       {error && <p role="alert" className="mt-3 rounded-lg bg-[#fff2ed] px-3 py-2 text-xs leading-6 text-[#b15d43]">{error}</p>}
-      <div className={`mt-4 rounded-xl border p-4 ${finished ? "border-[#b9d9bd] bg-[#edf6eb]" : "border-[#e9e7d7] bg-[#faf9ef]"}`}>
-        <div className="flex items-center gap-2">{finished ? <CheckCheck size={16} className="text-[#4a8956]"/> : <MessageCircle size={16} className="text-[#978154]"/>}<p className="text-xs font-semibold text-[#5e6b46]">{finished ? "ทำครบแล้ว · ติดต่อ LINE เพื่อขอปลดล็อก" : "ขั้นตอนปลดล็อกเลเวลถัดไป"}</p></div>
-        <p className="mt-2 text-[11px] leading-6 text-[#83876d]">1. ดูคลิปและทำ HW ให้ครบ → 2. ทัก LINE หาติวเตอร์ แจ้งคอร์สและเลเวล → 3. รอติวเตอร์ตรวจและแอดมินปลดล็อก</p>
-        <p className="mt-2 border-t border-[#e4e7d7] pt-2 text-[10px] leading-5 text-[#8b937b]">การติ๊กครบเป็นการบันทึกงานของคุณ ยังไม่ได้ส่งคำขอให้ติวเตอร์ กรุณาทัก LINE ด้วยตัวเอง</p>
-      </div>
       {demo && <p className="mt-3 text-center text-[10px] leading-5 text-[#9ba391]">ลองติ๊กได้ ข้อมูลตัวอย่างเก็บเฉพาะเบราว์เซอร์นี้</p>}
     </div>
     <style>{`
