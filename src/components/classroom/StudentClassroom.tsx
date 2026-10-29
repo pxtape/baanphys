@@ -18,6 +18,7 @@ import { setClassroomTask } from "@/app/courses/actions";
 import { createClient } from "@/lib/supabase/client";
 
 type StudentClassroomProps = {
+  expiredCourseIds?:string[];
   demo?: boolean;
   user: { id: string; displayName: string; username: string };
   enrollments: Enrollment[];
@@ -232,7 +233,7 @@ export function LessonPanel({ preview=false, userId,onQuestionCompletion, level,
   </section>;
 }
 
-export function StudentClassroom({ demo = false, user, enrollments: initialEnrollments, items, completedItemIds, setupRequired = false, courseLevels, directDrive = false }: StudentClassroomProps) {
+export function StudentClassroom({ expiredCourseIds=[],demo = false, user, enrollments: initialEnrollments, items, completedItemIds, setupRequired = false, courseLevels, directDrive = false }: StudentClassroomProps) {
   const [enrollments, setEnrollments] = useState(initialEnrollments);
   const [completedIds, setCompletedIds] = useState(completedItemIds);
   const [selectedCourseId, setSelectedCourseId] = useState<CourseId | null>(initialEnrollments[0]?.courseId ?? null);
@@ -244,6 +245,7 @@ export function StudentClassroom({ demo = false, user, enrollments: initialEnrol
   const pathwayRef = useRef<HTMLElement>(null);
   const selectedCourse = COURSES.find((course) => course.id === selectedCourseId);
   const enrollment = enrollments.find((record) => record.courseId === selectedCourseId);
+  const expired=Boolean(selectedCourseId&&expiredCourseIds.includes(selectedCourseId));
   const courseItems = items.filter((item) => item.courseId === selectedCourseId);
   const baseLevels = selectedCourse ? courseLevels?.[selectedCourse.id] ?? getLevels(selectedCourse) : [];
   const levels = demo ? baseLevels.map((record) => {
@@ -283,11 +285,11 @@ export function StudentClassroom({ demo = false, user, enrollments: initialEnrol
   }, [enrollments, selectedCourseId]);
 
   useEffect(() => {
-    if (selectedLevel !== null && selectedLevel > currentLevel) setSelectedLevel(null);
-  }, [currentLevel, selectedLevel]);
+    if (selectedLevel !== null && (expired||selectedLevel > currentLevel)) setSelectedLevel(null);
+  }, [currentLevel, selectedLevel,expired]);
 
   const linkedLevelHandled=useRef(false);
-  useEffect(()=>{if(demo||linkedLevelHandled.current)return;const params=new URLSearchParams(window.location.search);const course=params.get("course"),number=Number(params.get("level"));if(course&&Number.isInteger(number)&&number>0&&initialEnrollments.some(e=>e.courseId===course&&number<=e.unlockedLevel)){setSelectedCourseId(course as CourseId);setSelectedLevel(number);}linkedLevelHandled.current=true;},[demo,initialEnrollments]);
+  useEffect(()=>{if(demo||linkedLevelHandled.current)return;const params=new URLSearchParams(window.location.search);const course=params.get("course"),number=Number(params.get("level"));if(course&&!expiredCourseIds.includes(course)&&Number.isInteger(number)&&number>0&&initialEnrollments.some(e=>e.courseId===course&&number<=e.unlockedLevel)){setSelectedCourseId(course as CourseId);setSelectedLevel(number);}linkedLevelHandled.current=true;},[demo,initialEnrollments,expiredCourseIds]);
 
   async function toggleTask(itemId: string, completed: boolean) {
     if (pendingItem !== null) return;
@@ -312,7 +314,7 @@ export function StudentClassroom({ demo = false, user, enrollments: initialEnrol
   }
 
   function openLevel(number: number) {
-    if (!enrollment || number > enrollment.unlockedLevel) return;
+    if (expired||!enrollment || number > enrollment.unlockedLevel) return;
     setSelectedLevel(number);
     setError("");
     requestAnimationFrame(() => detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
@@ -343,7 +345,7 @@ export function StudentClassroom({ demo = false, user, enrollments: initialEnrol
       @media(min-width:1024px){.study-sidebar{display:block;position:sticky;top:16px;max-height:calc(100vh - 32px);overflow-y:auto}}
     `}</style>
     <main className="mx-auto max-w-[1440px] px-5 pb-16 sm:px-9 lg:px-12">
-      <section className="flex flex-wrap items-center justify-between gap-4 py-5"><div><h1 className="text-xl font-semibold text-[#2e443a]">ห้องเรียนของฉัน</h1><p className="mt-1 text-xs text-[#758174]">{user.displayName}{selectedCourse?` · ${selectedCourse.title}`:""}</p></div><div className="flex items-center gap-2">{enrollment&&levels.length>0&&<button type="button" onClick={()=>openLevel(currentLevel)} className="inline-flex items-center gap-2 rounded-lg bg-[#447d6e] px-4 py-2.5 text-sm font-semibold text-white">เรียนต่อ · Level {currentLevel}<ArrowRight size={14}/></button>}</div></section>{!demo&&selectedCourse&&enrollment&&<StudentSupport key={`${user.id}-${selectedCourse.id}`} userId={user.id} courseId={selectedCourse.id}/>}
+      <section className="flex flex-wrap items-center justify-between gap-4 py-5"><div><h1 className="text-xl font-semibold text-[#2e443a]">ห้องเรียนของฉัน</h1><p className="mt-1 text-xs text-[#758174]">{user.displayName}{selectedCourse?` · ${selectedCourse.title}`:""}</p></div><div className="flex items-center gap-2">{enrollment&&!expired&&levels.length>0&&<button type="button" onClick={()=>openLevel(currentLevel)} className="inline-flex items-center gap-2 rounded-lg bg-[#447d6e] px-4 py-2.5 text-sm font-semibold text-white">เรียนต่อ · Level {currentLevel}<ArrowRight size={14}/></button>}</div></section>{!demo&&selectedCourse&&enrollment&&<StudentSupport key={`${user.id}-${selectedCourse.id}`} userId={user.id} courseId={selectedCourse.id}/>}
       <div className={`grid items-start gap-6 ${level?"":"lg:grid-cols-[minmax(0,1fr)_340px]"}`}><div className="min-w-0">
       {setupRequired && <div role="status" className="mb-7 rounded-xl border border-[#eedfc4] bg-[#fff9ed] p-4 text-xs leading-6 text-[#977646]">ห้องเรียนยังอยู่ระหว่างตั้งค่าระบบ บัญชีและสิทธิ์จริงจะพร้อมเมื่อแอดมินตั้งค่าฐานข้อมูลเรียบร้อยแล้ว <Link href="/preview/classroom" className="font-semibold underline">ดูหน้าตัวอย่าง</Link></div>}
 
@@ -357,7 +359,7 @@ export function StudentClassroom({ demo = false, user, enrollments: initialEnrol
         <div className={`grid items-start gap-7 ${level ? "mx-auto max-w-[1120px]" : ""}`}>
           <div hidden={Boolean(level)} className="min-w-0 rounded-2xl border border-[#e3e8dc] bg-[#fbfcfa] p-3 sm:p-5">
             <div className="mb-7 flex flex-wrap items-center justify-between gap-3 border-b border-[#e8ecdf] pb-5"><div className="flex items-center gap-2 text-[11px] text-[#7e8f70]"><Route size={15}/><span>แผนที่การเรียนของคุณ</span>{!level && <a href={`#level-${currentLevel}`} className="rounded-full bg-white px-3 py-2 text-xs font-semibold text-[#167a72]">ไปด่านปัจจุบัน ↓</a>}</div><span className="font-mono text-[10px] text-[#9aa68b]">{String(currentLevel).padStart(2, "0")} / {selectedLevelCount ?? "—"}</span></div>
-            {levels.length > 0 ? <LevelPathway themed={selectedCourseId === "pre-posn"} levels={levels} unlockedLevel={enrollment.unlockedLevel} selectedLevel={selectedLevel} items={courseItems} completedItemIds={completedIds} demo={demo} onSelect={openLevel}/> : <div className="py-16 text-center"><BookOpen size={30} className="mx-auto text-[#a5b192]"/><p className="mt-4 text-sm text-[#738463]">รอรายละเอียดเส้นทางคอร์สนี้</p><p className="mt-2 text-xs text-[#9ba68d]">ติวเตอร์กำลังจัดเตรียมเลเวลและเนื้อหา</p></div>}
+            {expired?<div role="status" className="rounded-xl border bg-amber-50 p-5 text-sm leading-7">ถึงวันต่ออายุคอร์สแล้ว กรุณาติดต่อพี่เทปเพื่อต่ออายุ · ความคืบหน้าและประวัติของคุณยังเก็บอยู่ ดูได้ในหน้าโปรไฟล์</div>:levels.length > 0 ? <LevelPathway themed={selectedCourseId === "pre-posn"} levels={levels} unlockedLevel={enrollment.unlockedLevel} selectedLevel={selectedLevel} items={courseItems} completedItemIds={completedIds} demo={demo} onSelect={openLevel}/> : <div className="py-16 text-center"><BookOpen size={30} className="mx-auto text-[#a5b192]"/><p className="mt-4 text-sm text-[#738463]">รอรายละเอียดเส้นทางคอร์สนี้</p><p className="mt-2 text-xs text-[#9ba68d]">ติวเตอร์กำลังจัดเตรียมเลเวลและเนื้อหา</p></div>}
           </div>
           <div ref={detailRef} className="min-w-0 scroll-mt-5">
             {level ? <LessonPanel userId={user.id} onQuestionCompletion={(itemId,done)=>setCompletedIds(previous=>done?Array.from(new Set([...previous,itemId])):previous.filter(id=>id!==itemId))} key={`${selectedCourseId}-${level.number}`} level={level} items={courseItems.filter((item) => item.levelNumber === level.number)} completedIds={completedIds} pendingItem={pendingItem} error={error} demo={demo} directDrive={directDrive} watermarkLabel={`${user.displayName} · ${user.username}`} onToggle={(itemId, completed) => void toggleTask(itemId, completed)} onClose={() => setSelectedLevel(null)}/> : null}
@@ -370,4 +372,5 @@ export function StudentClassroom({ demo = false, user, enrollments: initialEnrol
     <footer className="lab-footer border-t border-[#e3e8dc]"><div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-3 px-5 py-6 text-[10px] text-[#a1aa92] sm:px-9 lg:px-12"><span>© 2026 บ้านฟิสิกส์ by P&apos;Tape</span>{demo ? <Link href="/" className="inline-flex items-center gap-1.5 hover:text-[#167a72]"><ArrowLeft size={11}/>กลับหน้าหลัก</Link> : <span>เรียนรู้ด้วยความเข้าใจ เติบโตทีละก้าว</span>}</div></footer>
   </div>;
 }
+
 

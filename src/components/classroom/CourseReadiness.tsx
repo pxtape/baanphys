@@ -1,0 +1,10 @@
+"use client";
+import {useEffect,useState} from "react";
+import {classroomRows} from "@/lib/classroom-rows";
+export function CourseReadiness({courseId,levelCount,refreshKey,onLevel}:{courseId:string;levelCount:number;refreshKey:number;onLevel:(level:number)=>void}){
+ const [rows,setRows]=useState<{id:string;kind:string;level_number:number;question_count:number|null;archived?:boolean}[]>([]),[error,setError]=useState("");
+ useEffect(()=>{let active=true;void classroomRows("classroom_items",["id"],{column:"course_id",value:courseId}).then(rows=>{if(active){setRows(rows.filter(x=>!x.archived));setError("");}}).catch(()=>{if(active)setError("โหลดสรุปคอร์สไม่ได้");});return()=>{active=false;};},[courseId,refreshKey]);
+ const filled=new Set(rows.map(x=>x.level_number)),questions=rows.filter(x=>x.kind!=="video").reduce((n,x)=>n+(x.question_count??0),0),unknown=rows.filter(x=>x.kind!=="video"&&x.question_count==null).length;
+ return <details className="mt-3 rounded-lg border bg-white p-3"><summary className="cursor-pointer text-xs">ความพร้อมทั้งคอร์ส · มีเนื้อหา {filled.size}/{levelCount} Level · ลงโจทย์แล้ว {questions}{courseId==="pre-posn"?"/677":""} ข้อ</summary>{error?<p className="mt-2 text-xs">{error}</p>:<><p className="mt-2 text-xs">{unknown?`ยังไม่กรอกจำนวนข้อ ${unknown} ไฟล์` :"ไฟล์ชีท/HW ที่ลงแล้วระบุจำนวนข้อครบ"}{courseId==="pre-posn"&&questions>677?" · จำนวนข้อเกินเป้าหมาย กรุณาตรวจรายการซ้ำ":""}</p><div className="mt-3 flex flex-wrap gap-2">{Array.from({length:levelCount},(_,i)=>i+1).map(n=>{const files=rows.filter(x=>x.level_number===n),missing=[['video','วิดีโอ'],['sheet','ชีท'],['homework','HW']].filter(([kind])=>!files.some(x=>x.kind===kind)).map(([,name])=>name);return <button key={n} className="rounded border px-2 py-2 text-xs" onClick={()=>onLevel(n)}>L{n} · {missing.length?`ยังไม่มี ${missing.join('/')}`:"มีไฟล์ครบประเภท"}</button>;})}</div><p className="mt-2 text-[11px] text-[var(--muted)]">สถานะนี้ตรวจข้อมูลที่กรอก ยังต้องทดลองเปิดไฟล์ด้วยบัญชีนักเรียน</p></>}</details>;
+}
+

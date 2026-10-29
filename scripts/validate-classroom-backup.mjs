@@ -1,0 +1,12 @@
+import fs from "node:fs/promises";
+const file=process.argv[2];if(!file)throw Error("Usage: node scripts/validate-classroom-backup.mjs <backup.json>");
+const backup=JSON.parse(await fs.readFile(file,"utf8"));
+if(backup.format!=="baanphys-classroom-v1"||!backup.exportedAt||!backup.tables)throw Error("Unknown backup format");
+const keys={classroom_accounts:["user_id"],classroom_courses:["id"],classroom_levels:["course_id","number"],classroom_items:["id"],classroom_enrollments:["user_id","course_id"],classroom_progress:["user_id","item_id"],classroom_question_progress:["user_id","item_id","question_number"],classroom_study_plans:["user_id","course_id"],classroom_study_goals:["user_id","course_id"],classroom_course_workload:["course_id"],classroom_renewals:["id"],classroom_mock_tests:["id"],classroom_support_plans:["id"],classroom_support_updates:["plan_id","occurrence_on"],classroom_support_exceptions:["plan_id","occurrence_on"],classroom_support_history:["id"],classroom_tutor_events:["id"],classroom_admin_changes:["id"],classroom_practice_days:["user_id","course_id","study_on"]};
+let count=0;for(const [table,pk] of Object.entries(keys)){const rows=backup.tables[table];if(!Array.isArray(rows))throw Error(`Missing table ${table}`);const seen=new Set();for(const row of rows){if(pk.some(k=>row[k]===null||row[k]===undefined))throw Error(`Missing primary key in ${table}`);const key=JSON.stringify(pk.map(k=>row[k]));if(seen.has(key))throw Error(`Duplicate primary key in ${table}`);seen.add(key);}count+=rows.length;}
+const items=new Set(backup.tables.classroom_items.map(r=>r.id)),courses=new Set(backup.tables.classroom_courses.map(r=>r.id)),plans=new Set(backup.tables.classroom_support_plans.map(r=>r.id));
+for(const r of [...backup.tables.classroom_progress,...backup.tables.classroom_question_progress])if(!items.has(r.item_id))throw Error("Progress references a missing material");
+for(const r of [...backup.tables.classroom_levels,...backup.tables.classroom_items,...backup.tables.classroom_enrollments,...backup.tables.classroom_study_plans])if(!courses.has(r.course_id))throw Error("Missing course reference");
+for(const r of [...backup.tables.classroom_support_updates,...backup.tables.classroom_support_exceptions,...backup.tables.classroom_support_history])if(!plans.has(r.plan_id))throw Error("Missing support-plan reference");
+console.log(`Validated ${Object.keys(keys).length} classroom tables and ${count} rows. This validates the export; it does not prove that Auth accounts or Drive files can be restored.`);
+

@@ -34,6 +34,8 @@ jobs:
           cache: pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Test classroom behavior
+        run: pnpm exec vitest run src/components/classroom src/lib/classroom-audit.test.ts src/lib/study-tracking.test.ts src/lib/student-planning.test.ts src/lib/tutor-calendar.test.ts src/lib/learning-history.test.ts src/lib/classroom-auth.test.ts src/lib/classroom-edge.test.ts src/lib/classroom-manage-edge.test.ts src/lib/drive-link.test.ts
       - name: Build classroom web
         run: pnpm run build:pages
         env:
@@ -58,3 +60,4 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+

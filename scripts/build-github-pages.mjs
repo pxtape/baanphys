@@ -18,6 +18,7 @@ async function copy(relative, transform = (source) => source) { await write(rela
 // privileged credentials never enter the static site. Live mutations use RLS
 // or the authenticated classroom-admin Edge Function.
 for (const relative of [
+  "src/components/classroom/AdminSecurity.tsx", "src/components/classroom/StudentAttention.tsx", "src/components/classroom/CourseReadiness.tsx", "src/components/classroom/ClassroomMaintenance.tsx", "src/components/classroom/ScheduleExceptionEditor.tsx", "src/lib/classroom-navigation.ts", "src/lib/classroom-rows.ts",
   "src/components/classroom/StudentProfile.tsx", "src/components/classroom/StudentPersonalInfo.tsx", "src/lib/learning-history.ts",
   "src/components/classroom/QuestionChecklist.tsx", "src/lib/question-progress.ts",
   "src/components/classroom/StudentAdminHub.tsx", "src/components/classroom/StudentCourseAdmin.tsx", "src/components/classroom/StudentScheduleEditor.tsx", "src/components/classroom/StudyCharts.tsx", "src/components/classroom/MonthCalendar.tsx", "src/components/classroom/CalendarOverview.tsx", "src/lib/student-planning.ts",
@@ -67,3 +68,4 @@ const exitCode = await new Promise((resolve, reject) => {
 if (exitCode !== 0) process.exit(typeof exitCode === "number" ? exitCode : 1);
 await write("out/.nojekyll", "");
 console.log(`Pages artifact ready: ${path.join(output, "out")}`);
+
