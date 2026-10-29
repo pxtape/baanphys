@@ -38,7 +38,7 @@ export async function loadClassroomStudents(): Promise<StudentRecord[]> {
   const client = classroomClient();
   const [accounts, enrollments] = await Promise.all([client.from("classroom_accounts").select("*").order("created_at"), client.from("classroom_enrollments").select("*")]);
   if (accounts.error || enrollments.error) throw new Error("โหลดรายชื่อนักเรียนไม่ได้");
-  return (accounts.data ?? []).map((row) => ({ id: row.user_id, displayName: row.display_name, username: row.username, fullName:row.full_name??"", additionalInfo:row.additional_info??"", additionalUpdatedAt:row.additional_updated_at, profileUpdatedAt:row.profile_updated_at, enrollments: (enrollments.data ?? []).filter((e) => e.user_id === row.user_id).map((e) => ({ studentId: e.user_id, courseId: e.course_id, unlockedLevel: e.unlocked_level })) }));
+  return (accounts.data ?? []).map((row) => ({ id: row.user_id, displayName: row.display_name, username: row.username, fullName:row.full_name??"", classLevel:row.class_level??"", schoolName:row.school_name??"", posnCenter:row.posn_center??"", additionalInfo:row.additional_info??"", additionalUpdatedAt:row.additional_updated_at, profileUpdatedAt:row.profile_updated_at, enrollments: (enrollments.data ?? []).filter((e) => e.user_id === row.user_id).map((e) => ({ studentId: e.user_id, courseId: e.course_id, unlockedLevel: e.unlocked_level })) }));
 }
 
 export function classroomMutationError(message: string) {

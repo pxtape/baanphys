@@ -7,7 +7,7 @@ const { setTask } = vi.hoisted(() => ({ setTask: vi.fn() }));
 vi.mock("@/app/courses/actions", () => ({ setClassroomTask: setTask }));
 
 describe("StudentClassroom access and progress", () => {
-  afterEach(cleanup);
+  afterEach(()=>{cleanup();window.history.replaceState(null,"","/");});
   beforeEach(() => {
     localStorage.clear();
     setTask.mockReset();
@@ -92,3 +92,5 @@ describe("StudentClassroom access and progress", () => {
 
 });
 
+
+it("opens an accessible level from a profile link but keeps locked levels closed",async()=>{window.history.replaceState(null,"","/courses?course=pre-posn&level=1");const view=render(<StudentClassroom user={DEMO_STUDENT} enrollments={DEMO_ENROLLMENTS} items={DEMO_ITEMS} completedItemIds={[]}/>);expect(await screen.findByRole("region",{name:"รายการเรียน Level 1"})).toBeInTheDocument();view.unmount();window.history.replaceState(null,"","/courses?course=pre-posn&level=10");render(<StudentClassroom user={DEMO_STUDENT} enrollments={DEMO_ENROLLMENTS} items={DEMO_ITEMS} completedItemIds={[]}/>);expect(screen.queryByRole("region",{name:"รายการเรียน Level 10"})).not.toBeInTheDocument();});

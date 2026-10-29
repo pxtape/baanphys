@@ -286,6 +286,9 @@ export function StudentClassroom({ demo = false, user, enrollments: initialEnrol
     if (selectedLevel !== null && selectedLevel > currentLevel) setSelectedLevel(null);
   }, [currentLevel, selectedLevel]);
 
+  const linkedLevelHandled=useRef(false);
+  useEffect(()=>{if(demo||linkedLevelHandled.current)return;const params=new URLSearchParams(window.location.search);const course=params.get("course"),number=Number(params.get("level"));if(course&&Number.isInteger(number)&&number>0&&initialEnrollments.some(e=>e.courseId===course&&number<=e.unlockedLevel)){setSelectedCourseId(course as CourseId);setSelectedLevel(number);}linkedLevelHandled.current=true;},[demo,initialEnrollments]);
+
   async function toggleTask(itemId: string, completed: boolean) {
     if (pendingItem !== null) return;
     setError("");
@@ -329,7 +332,7 @@ export function StudentClassroom({ demo = false, user, enrollments: initialEnrol
       <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-3 px-5 py-4 sm:px-9 lg:px-12">
         <Link href="/" className="flex shrink-0 items-center gap-3" aria-label="บ้านฟิสิกส์ หน้าแรก"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#172b3a] text-white"><Atom size={22} strokeWidth={1.6}/></span><span><b className="block text-sm font-semibold">บ้านฟิสิกส์</b><small className="block text-[9px] tracking-[.13em] text-[#839084]">P&apos;TAPE PHYSICS ACADEMY</small></span></Link>
         <nav aria-label="เมนูห้องเรียน" className="hidden items-center gap-6 sm:flex"><span aria-current="page" className="inline-flex items-center gap-2 text-xs font-semibold text-[#167a72]"><LayoutGrid size={15}/>ห้องเรียนของฉัน</span>{demo ? <Link href="/preview/admin" className="text-xs text-[#8b9586]">ตัวอย่างหลังบ้าน</Link> : <Link href="/dashboard" className="text-xs text-[#8b9586]">แดชบอร์ด</Link>}</nav>
-        <div className="flex items-center gap-3"><span className="hidden text-right sm:block"><span className="block text-[11px] font-semibold text-[#55624e]">{user.displayName}</span><span className="mt-0.5 block text-[9px] text-[#9aa28d]">{demo ? "นักเรียนตัวอย่าง" : user.username}</span></span><span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#e8ecdf] text-xs font-semibold text-[#6a7956]">{user.displayName.slice(0, 1)}</span>{demo ? <Link href="/login" className="ml-1 hidden rounded-lg border border-[#dce2d3] px-3 py-2 text-[10px] text-[#68785c] md:block">เข้าสู่ระบบจริง</Link> : <button type="button" onClick={() => void signOut()} className="rounded-lg p-2 text-[#8c9780] hover:bg-[#eef1e7]" aria-label="ออกจากระบบ"><LogOut size={16}/></button>}</div>
+        <div className="flex items-center gap-3">{!demo&&<Link href="/profile" className="text-xs font-semibold text-[#527966]">โปรไฟล์ของฉัน</Link>}<span className="hidden text-right sm:block"><span className="block text-[11px] font-semibold text-[#55624e]">{user.displayName}</span><span className="mt-0.5 block text-[9px] text-[#9aa28d]">{demo ? "นักเรียนตัวอย่าง" : user.username}</span></span><span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#e8ecdf] text-xs font-semibold text-[#6a7956]">{user.displayName.slice(0, 1)}</span>{demo ? <Link href="/login" className="ml-1 hidden rounded-lg border border-[#dce2d3] px-3 py-2 text-[10px] text-[#68785c] md:block">เข้าสู่ระบบจริง</Link> : <button type="button" onClick={() => void signOut()} className="rounded-lg p-2 text-[#8c9780] hover:bg-[#eef1e7]" aria-label="ออกจากระบบ"><LogOut size={16}/></button>}</div>
       </div>
     </header>
     <style>{`

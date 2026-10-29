@@ -28,7 +28,7 @@ for (const file of htmlFiles) {
     checkedReferences++;
   }
 }
-for (const relative of ["index.html", "preview/classroom/index.html", "preview/admin/index.html", "login/index.html", "admin/content/index.html", "admin/calendar/index.html", "calendar/index.html"]) await fs.access(path.join(directory, relative));
+for (const relative of ["index.html", "preview/classroom/index.html", "preview/admin/index.html", "login/index.html", "admin/content/index.html", "admin/calendar/index.html", "calendar/index.html", "profile/index.html"]) await fs.access(path.join(directory, relative));
 for (const file of files.filter((file) => /\.(js|html|txt)$/.test(file))) {
   const content = await fs.readFile(file, "utf8");
   if (/(?:SUPABASE_SERVICE_ROLE_KEY|sb_secret_[A-Za-z0-9_-]{10,}|-----BEGIN PRIVATE KEY-----)/.test(content)) throw new Error(`Private configuration in ${path.relative(directory, file)}`);
