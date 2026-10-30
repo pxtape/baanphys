@@ -3,22 +3,6 @@ import {Compass} from "lucide-react";
 export const studioAssets=`${process.env.NEXT_PUBLIC_BASE_PATH??""}/studio`;
 export function ExplorerMark({strokeWidth=1.8}:{strokeWidth?:number}){return <svg viewBox="0 0 36 40" width="31" height="35" fill="none" stroke="currentColor" strokeWidth={strokeWidth} aria-hidden="true"><path d="M4 34C12 19 22 10 28 3L22 35M9 25L30 23M4 34C9 38 19 24 33 18M22 35L17 30" strokeLinecap="round" strokeLinejoin="round"/></svg>;}
 export function ExplorerBadge(){return <span className="explorer-badge" aria-hidden="true"><Compass size={26} strokeWidth={1.3}/></span>;}
-export function ExplorerSketch({number}:{number:number}){
- const kind=number<=3?"motion":number<=5?"force":number===6?"projectile":number===7?"circular":number===8?"relative":number<=16?"energy":number<=20?"fluid":number<=27?"circuit":number<=29?"light":number===30?"gas":"magnet";
- return <svg viewBox="0 0 180 80" className="explorer-level-sketch" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
- {kind==="force"?<><path d="M18 61H158M62 61V33H91V61M77 44V9M77 44V76M78 44H142M73 15L77 9L81 15M73 70L77 76L81 70M136 40L142 44L136 48"/><text x="85" y="15">N</text><text x="85" y="77">mg</text><text x="136" y="35">F</text></>
- :kind==="projectile"?<><path d="M15 65H164M22 64Q90 -40 156 64" strokeDasharray="4 5"/><circle cx="88" cy="17" r="3" fill="currentColor"/><path d="M88 17H120M114 13L120 17L114 21"/></>
- :kind==="circular"?<><circle cx="90" cy="43" r="29" strokeDasharray="4 5"/><circle cx="90" cy="14" r="3" fill="currentColor"/><path d="M90 14V43M86 37L90 43L94 37M90 14H127M121 10L127 14L121 18"/><text x="97" y="39">a</text></>
- :kind==="relative"?<><path d="M12 69H168M20 50H69L59 36H31ZM111 50H160L150 36H122ZM20 50V61H69V50M111 50V61H160V50M26 42H61M117 42H152M32 24H65M59 20L65 24L59 28M145 24H112M118 20L112 24L118 28"/><circle cx="31" cy="62" r="4"/><circle cx="59" cy="62" r="4"/><circle cx="122" cy="62" r="4"/><circle cx="151" cy="62" r="4"/></>
- :kind==="motion"?<><path d="M15 65H165M25 65V14M40 55L135 21M129 19L135 21L132 27"/><circle cx="65" cy="46" r="4" fill="currentColor"/><text x="145" y="62">t</text><text x="12" y="15">x</text></>
- :kind==="energy"?<><path d="M47 10H131M90 10L128 60M90 10V63M53 53Q90 85 129 60"/><circle cx="90" cy="63" r="9"/><circle cx="129" cy="60" r="9" fill="currentColor" fillOpacity=".1"/></>
- :kind==="fluid"?<><path d="M42 12V61Q42 70 52 70H118Q128 70 128 61V12M43 39Q62 28 83 39T127 39M84 46V62M80 56L84 62L88 56"/><circle cx="61" cy="52" r="3"/><circle cx="109" cy="49" r="4"/></>
- :kind==="circuit"?<><path d="M22 41V18H76M104 18H155V65H100M76 65H22V41M76 55V75M99 59V71"/><circle cx="90" cy="18" r="14"/><path d="M81 9L99 27M99 9L81 27"/><text x="63" y="45">V = IR</text></>
- :kind==="light"?<><path d="M87 9L123 70H51ZM11 38H69L108 47L166 20M109 50L167 43M111 54L166 66"/><path d="M108 47L166 20" stroke="#c28c33"/></>
- :kind==="gas"?<><path d="M48 12H128V71H48ZM42 20H134"/><circle cx="65" cy="40" r="4"/><circle cx="104" cy="34" r="4"/><circle cx="92" cy="57" r="4"/><path d="M69 44L77 51M100 37L92 43"/></>
- :<><path d="M54 26V51Q54 74 88 74T122 51V26H108V51Q108 61 88 61T68 51V26ZM61 22Q88 -9 115 22M42 28Q88 -30 135 28"/><text x="56" y="43">N</text><text x="111" y="43">S</text></>}
- </svg>;
-}
 export function ExplorerStyles(){return <style>{`
 .quiet-studio{--paper:#fbf9f2;--accent:#00566b;background:var(--paper)!important}
 .quiet-studio .quiet-rail{background:#061f29 url("${studioAssets}/explorer-observatory.jpg") center bottom/cover no-repeat;isolation:isolate}
