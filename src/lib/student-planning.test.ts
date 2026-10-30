@@ -1,5 +1,5 @@
 import {describe,it,expect} from "vitest";
-import {calendarEntries,billingStatus,daysUntil,cycleMockCount,weeklyDates,emptyPlanning,type MockTest,type StudyPlan} from "./student-planning";
+import {upcoming,mockExamUrl,calendarEntries,billingStatus,daysUntil,cycleMockCount,weeklyDates,emptyPlanning,type MockTest,type StudyPlan} from "./student-planning";
 import type {SupportPlan} from "./tutor-calendar";
 const plan:StudyPlan={user_id:"u",course_id:"pre-posn",started_on:"2026-01-31",last_renewed_on:"2026-10-31",paid_until:"2026-11-30"};
 const mock:MockTest={id:"m",user_id:"u",course_id:"pre-posn",tutor_id:"t",name:"Mock 1",starts_on:"2026-10-29",ends_on:"2026-11-04",through_level:8,status:"planned",score:null,max_score:null,completed_on:null,note:""};
@@ -12,3 +12,6 @@ describe("student planning",()=>{
  it("counts Mock starts in a billing cycle and excludes cancellations",()=>{expect(cycleMockCount([mock,{...mock,id:"next",starts_on:"2026-11-14",ends_on:"2026-11-20"},{...mock,id:"cancel",starts_on:"2026-11-01",status:"cancelled"}],plan)).toBe(1);expect(cycleMockCount([mock],undefined)).toBeNull();});
  it("keeps a saved timed legacy exam on its original Bangkok date",()=>{const result=calendarEntries({...emptyPlanning,legacy:[{id:"old",user_id:"u",course_id:"pre-posn",tutor_id:"t",starts_at:"2026-10-30T23:00:00Z",ends_at:"2026-10-31T00:00:00Z",through_level:3,status:"planned",note:""}]},"2026-10-01","2026-10-31");expect(result[0].from).toBe("2026-10-31");expect(result[0].title).toContain("06:00");});
 });
+
+it("highlights an open exam before other notices and only offers its attached HTTPS link during the window",()=>{const data={...emptyPlanning,plans:[plan],mocks:[{...mock,note:"ข้อสอบ: https://drive.google.com/file/d/example/view"}]};const open=upcoming(data,"2026-10-30")[0];expect(open).toMatchObject({kind:"mock",examOpen:true,statusLabel:"เปิดสอบอยู่ · ถึง 4 พ.ย.",examUrl:"https://drive.google.com/file/d/example/view"});expect(upcoming(data,"2026-10-28").find(n=>n.id===mock.id)).toMatchObject({examOpen:false,examUrl:null});expect(upcoming(data,"2026-11-05").some(n=>n.id===mock.id)).toBe(false);expect(mockExamUrl("ยังไม่ได้แนบข้อสอบ")).toBeNull();expect(mockExamUrl("นัดคุย https://discord.com/example")).toBeNull();expect(mockExamUrl("javascript:alert(1)")).toBeNull();expect(mockExamUrl("ข้อสอบ: https://user:secret@example.com/exam")).toBeNull();});
+
