@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'src/**'
+      - 'public/studio/**'
       - 'scripts/**'
       - '.github/workflows/pages.yml'
       - 'package.json'

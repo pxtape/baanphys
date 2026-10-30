@@ -2,12 +2,14 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { StudentClassroom } from "@/components/classroom/StudentClassroom";
 import { DEMO_ENROLLMENTS, DEMO_ITEMS, DEMO_STUDENT } from "@/lib/course-catalog";
+import {setImmediate as nextImmediate} from "node:timers";
 
 const { setTask } = vi.hoisted(() => ({ setTask: vi.fn() }));
 vi.mock("@/app/courses/actions", () => ({ setClassroomTask: setTask }));
 
+afterEach(async()=>{cleanup();await act(async()=>{await new Promise<void>(resolve=>nextImmediate(resolve));});window.history.replaceState(null,"","/");});
+
 describe("StudentClassroom access and progress", () => {
-  afterEach(async()=>{cleanup();await act(async()=>{await new Promise(resolve=>setTimeout(resolve,0));});window.history.replaceState(null,"","/");});
   beforeEach(() => {
     localStorage.clear();
     setTask.mockReset();

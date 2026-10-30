@@ -18,7 +18,7 @@ async function copy(relative, transform = (source) => source) { await write(rela
 // privileged credentials never enter the static site. Live mutations use RLS
 // or the authenticated classroom-admin Edge Function.
 for (const relative of [
-  "src/components/classroom/QuietStudio.tsx", "src/components/classroom/AdminSecurity.tsx", "src/components/classroom/StudentAttention.tsx", "src/components/classroom/CourseReadiness.tsx", "src/components/classroom/ClassroomMaintenance.tsx", "src/components/classroom/ScheduleExceptionEditor.tsx", "src/lib/classroom-navigation.ts", "src/lib/classroom-rows.ts",
+  "src/components/classroom/ExplorerStudio.tsx", "src/components/classroom/QuietStudio.tsx", "src/components/classroom/AdminSecurity.tsx", "src/components/classroom/StudentAttention.tsx", "src/components/classroom/CourseReadiness.tsx", "src/components/classroom/ClassroomMaintenance.tsx", "src/components/classroom/ScheduleExceptionEditor.tsx", "src/lib/classroom-navigation.ts", "src/lib/classroom-rows.ts",
   "src/components/classroom/StudentProfile.tsx", "src/components/classroom/StudentPersonalInfo.tsx", "src/lib/learning-history.ts",
   "src/components/classroom/QuestionChecklist.tsx", "src/lib/question-progress.ts",
   "src/components/classroom/StudentAdminHub.tsx", "src/components/classroom/StudentCourseAdmin.tsx", "src/components/classroom/StudentScheduleEditor.tsx", "src/components/classroom/StudyCharts.tsx", "src/components/classroom/MonthCalendar.tsx", "src/components/classroom/CalendarOverview.tsx", "src/lib/student-planning.ts",
@@ -41,7 +41,7 @@ await write("package.json", JSON.stringify({ ...originalPackage, name: "baanphys
 const tsconfig = JSON.parse(await fs.readFile(path.join(root, "tsconfig.json"), "utf8")); tsconfig.exclude = ["node_modules"];
 await write("tsconfig.json", JSON.stringify(tsconfig, null, 2));
 await write("next-env.d.ts", '/// <reference types="next" />\n/// <reference types="next/image-types/global" />\n');
-await write("next.config.mjs", `export default ${JSON.stringify({ output: "export", basePath, trailingSlash: true, images: { unoptimized: true }, outputFileTracingRoot: root }, null, 2)};\n`);
+await write("next.config.mjs", `export default ${JSON.stringify({ output: "export", basePath, trailingSlash: true, images: { unoptimized: true }, env:{NEXT_PUBLIC_BASE_PATH:basePath}, outputFileTracingRoot: root }, null, 2)};\n`);
 await write("src/app/layout.tsx", `import type { Metadata } from "next";
 import "./globals.css";
 export const metadata: Metadata = { title: "บ้านฟิสิกส์ | ห้องเรียนออนไลน์", description: "คอร์สเรียนบ้านฟิสิกส์ วิดีโอ ชีท และการบ้าน" };
@@ -59,6 +59,8 @@ await copy("src/app/admin/calendar/page.tsx");
 await copy("src/app/calendar/page.tsx");
 await copy("src/app/profile/page.tsx");
 await write("src/app/login/page.tsx", 'import {LiveLogin} from "@/components/classroom/LiveLogin"; export default function Page(){return <LiveLogin/>;}\n');
+
+await fs.cp(path.join(root,"public/studio"),path.join(output,"public/studio"),{recursive:true});
 
 console.log(`Building GitHub Pages classroom at ${basePath || "/"}`);
 const exitCode = await new Promise((resolve, reject) => {
