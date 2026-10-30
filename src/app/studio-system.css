@@ -41,3 +41,7 @@ body.bp-site{font-family:var(--font-ui);font-size:15px;line-height:1.65;text-ren
 @media(min-width:800px){.bp-site .bp-profile #personal-info dl{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 24px}.bp-site .bp-profile #personal-info dl>div{grid-column:auto}}
 .bp-site .bp-profile #personal-info dd{margin-top:3px}.bp-site .bp-profile #personal-info dt{font-size:12px}.bp-site .bp-profile #personal-info>p:last-child{margin-top:10px}
 
+.bp-site .bp-calendar-controls{flex-wrap:wrap}.bp-site .bp-calendar-controls button{white-space:nowrap;flex-shrink:0}.bp-site .bp-calendar-controls input{min-width:0;max-width:190px}
+@media(max-width:959px){.bp-site .lab-header a[aria-label="บ้านฟิสิกส์ หน้าแรก"]>span:first-child{background:transparent;color:#102d3c}.bp-site .lab-header>div>div:last-child>a{display:none}}
+@media(max-width:600px){.bp-site .lab-header a[aria-label="บ้านฟิสิกส์ หน้าแรก"] small{display:none}.bp-site .lab-header>div{gap:12px;padding-left:14px;padding-right:14px}.bp-site .lab-header>div>div:last-child{gap:8px}}
+
