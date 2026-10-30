@@ -142,6 +142,13 @@ export function LessonPanel({ preview=false, userId,onQuestionCompletion, level,
   const questionTotal=questionItems.reduce((sum,i)=>sum+i.questionCount!,0);
   const questionDone=questionItems.reduce((sum,i)=>sum+(questionCounts[i.id]??0),0);
   const [openMedia, setOpenMedia] = useState<string | null>(items.find(item => (preview || item.kind === "video") && (item.hasMedia ?? Boolean(item.driveFileId)))?.id ?? null);
+  const [kindFilter,setKindFilter]=useState<"all"|LearningItem["kind"]>("all");
+  const mediaItem=items.find(item=>openMedia===item.id||openMedia===`${item.id}:answer`||openMedia===`${item.id}:solution`);
+  const answerOpen=Boolean(mediaItem&&openMedia===`${mediaItem.id}:answer`),solutionOpen=Boolean(mediaItem&&openMedia===`${mediaItem.id}:solution`);
+  const mediaFileId=mediaItem?(answerOpen?mediaItem.answerFileId:solutionOpen?mediaItem.solutionFileId:mediaItem.driveFileId):null;
+  const mediaTitle=mediaItem?`${mediaItem.title}${answerOpen?" — Answer only":solutionOpen?" — Full solution":""}`:"";
+  const validMediaFile=Boolean(mediaFileId&&/^[a-zA-Z0-9_-]{10,200}$/.test(mediaFileId));
+  const isVideo=mediaItem?.kind==="video";
   const [mediaError, setMediaError] = useState("");
   const [mediaFullscreen, setMediaFullscreen] = useState(false);
   const mediaWrapperRef = useRef<HTMLDivElement>(null);
@@ -163,25 +170,26 @@ export function LessonPanel({ preview=false, userId,onQuestionCompletion, level,
     }
   }
   return <section aria-label={`รายการเรียน Level ${level.number}`} className="explorer-lesson overflow-hidden rounded-2xl border border-[#dce5dd] bg-white shadow-[0_8px_24px_#172b3a04]">
-    <div className="explorer-lesson-head border-b border-[#e5eae2] bg-[#f3f6ef] p-5">
+    <div className="bp-reader-head explorer-lesson-head border-b border-[#e5eae2] bg-[#f3f6ef] p-5">
       <div className="flex items-center justify-between"><p className="text-[10px] font-semibold uppercase tracking-[.15em] text-[#6d8875]">ห้องเรียนของคุณ</p><button type="button" onClick={onClose} aria-label={preview?"กลับไปแก้ไข":"กลับไปเส้นทางเรียน"} className="inline-flex items-center gap-2 rounded-md border border-[#ccd8ca] bg-white px-3 py-2 text-sm text-[#34483d]"><ArrowLeft size={16}/> {preview?"กลับไปแก้ไข":"กลับไปเส้นทางเรียน"}</button></div>
       <p className="mt-4 text-xs font-semibold text-[#167a72]">LEVEL {String(level.number).padStart(2, "0")}</p>
       <h3 className="mt-1 text-xl font-semibold leading-8 tracking-tight text-[#172b3a]">{level.title}</h3>
       <div className="mt-3 flex items-center gap-1.5 text-[11px] text-[#7c8d7e]"><Clock3 size={13}/>{formatStudyTime(level.durationMinutes)}{level.questionCount!=null ? ` · ${level.questionCount} ข้อ` : ""}{demo && level.durationMinutes !== null ? " · ตัวอย่าง" : ""}</div>
     </div>
-    <div className="p-5 sm:p-8">
+    <div className="bp-reader-layout"><div className="bp-reader-viewer">            {mediaItem && !demo ? <><div ref={mediaWrapperRef} className="classroom-media-shell relative mt-4 overflow-hidden rounded-lg bg-[#172b3a]">
+              <iframe title={mediaTitle} src={directDrive && validMediaFile ? `https://drive.google.com/file/d/${mediaFileId}/preview` : `/courses/media/${encodeURIComponent(mediaItem.id)}${answerOpen ? "?variant=answer" : solutionOpen ? "?variant=solution" : ""}`} className={`classroom-media-frame ${!isVideo?"bp-pdf-frame":""} aspect-video w-full border-0`} allow={directDrive ? "fullscreen 'none'" : "fullscreen"} allowFullScreen={!directDrive} referrerPolicy="no-referrer" sandbox={isVideo ? "allow-scripts allow-same-origin allow-presentation" : "allow-scripts allow-same-origin allow-presentation allow-popups allow-popups-to-escape-sandbox allow-downloads"}/>
+              {isVideo && <div aria-hidden="true" className="absolute right-0 top-0 z-20 h-16 w-16 bg-transparent" onContextMenu={event => event.preventDefault()}/> }
+              {directDrive && isVideo && <span className="classroom-account-mark pointer-events-none absolute z-10 max-w-[75%] rounded bg-black/25 px-3 py-2 text-[10px] text-white/70">{watermarkLabel}<br/>{new Date().toLocaleDateString("th-TH")}</span>}
+              <div className="flex shrink-0 items-center justify-end bg-[#172b3a] px-3 py-2"><button type="button" onClick={() => void toggleMediaFullscreen()} className="inline-flex items-center gap-1.5 rounded border border-white/20 px-2.5 py-1.5 text-[10px] text-white hover:bg-white/10">{mediaFullscreen ? <Minimize size={12}/> : <Maximize size={12}/>} {mediaFullscreen ? "ออกจากเต็มจอ" : "ขยายเต็มจอ"}</button></div>
+            </div>{!isVideo && directDrive && validMediaFile && <a href={`https://drive.google.com/file/d/${mediaFileId}/view`} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex text-xs font-semibold text-[#167a72] underline">เปิด / ดาวน์โหลด {mediaTitle} ที่ Google Drive ↗</a>}{mediaError && <p role="alert" className="mt-2 text-[11px] leading-6 text-[#ad6246]">{mediaError}</p>}</> : <div className="bp-reader-placeholder"><BookOpen size={34}/><p>{demo?"พื้นที่เปิดวิดีโอและเอกสาร":"เลือกวิดีโอ ชีท หรือเฉลยเพื่อเปิดที่นี่"}</p><small>{demo?"ตัวอย่างนี้ยังไม่มีไฟล์จริง":"ดูไฟล์ไปพร้อมกับอัปเดตข้อที่ทำได้"}</small></div>}{mediaItem&&!demo&&<p className="bp-reader-title">{mediaTitle}</p>}</div><div className="bp-reader-content">
+      <div className="bp-reader-tabs" role="group" aria-label="แสดงรายการตามประเภท">{([{kind:"all",label:"ทั้งหมด"},{kind:"video",label:"วิดีโอ"},{kind:"sheet",label:"ชีท"},{kind:"homework",label:"HW"}] as const).map(({kind,label})=><button key={kind} type="button" aria-pressed={kindFilter===kind} onClick={()=>setKindFilter(kind)}>{label} <span className="opacity-75">{kind==="all"?items.length:items.filter(i=>i.kind===kind).length}</span></button>)}</div>
       <div className="flex items-center justify-between"><h4 className="text-sm font-semibold">สิ่งที่ต้องทำในเลเวลนี้</h4><span className="rounded-full bg-[#edf3ec] px-2.5 py-1 text-[10px] text-[#6f8b72]">{doneCount} / {items.length}</span></div>
       <div className="mt-3 h-1 overflow-hidden rounded-full bg-[#eef1eb]"><div className="h-full rounded-full bg-[#167a72] transition-all" style={{ width: `${items.length ? doneCount / items.length * 100 : 0}%` }}/></div>
       {demo && <p className="mt-3 text-[10px] leading-5 text-[#92784f]">รายการและเวลาในหน้านี้เป็นตัวอย่างสำหรับลองระบบ</p>}
       {items.length === 0 && <div className="my-5 rounded-xl border border-dashed border-[#dce5d6] px-4 py-6 text-center"><BookOpen size={24} className="mx-auto text-[#9aaa95]"/><p className="mt-3 text-xs font-medium text-[#60705f]">กำลังจัดเตรียมเนื้อหาเลเวลนี้</p><p className="mt-1.5 text-[11px] leading-5 text-[#91998a]">จะมีรายการวิดีโอ การบ้าน และเวลาแนะนำที่นี่</p></div>}
       {questionTotal>0&&<p className="mt-3 text-xs font-semibold text-teal-800">ข้อที่ทำใน Level นี้: {questionDone} / {questionTotal} ข้อ{questionItems.some(i=>questionCounts[i.id]===undefined)?" · กำลังโหลด…":""}</p>}
-      <div className="mt-2 divide-y divide-[#edf0e9]">
-        {items.map((item) => {
-          const answerOpen = openMedia === `${item.id}:answer`;
-          const solutionOpen = openMedia === `${item.id}:solution`;
-          const mediaFileId = answerOpen ? item.answerFileId : solutionOpen ? item.solutionFileId : item.driveFileId;
-          const mediaTitle = `${item.title}${answerOpen ? " — Answer only" : solutionOpen ? " — Full solution" : ""}`;
-          const validMediaFile = Boolean(mediaFileId && /^[a-zA-Z0-9_-]{10,200}$/.test(mediaFileId));
+      <div className="bp-reader-list mt-2 divide-y divide-[#edf0e9]">
+        {items.filter(item=>kindFilter==="all"||item.kind===kindFilter).map((item) => {
           const checked = completedIds.includes(item.id);
           const isVideo = item.kind === "video";
           const hasQuestions = !isVideo && item.questionCount != null && item.questionCount > 0;
@@ -204,18 +212,14 @@ export function LessonPanel({ preview=false, userId,onQuestionCompletion, level,
                 {!isVideo && <div className="mt-3 rounded-lg bg-[#f1f5ef] p-3"><p className="mb-2 text-xs font-semibold text-[#34483d]">ดูเฉลย · เปิดได้ทันที</p><div className="flex flex-wrap gap-2">{([{key: "answer", label: "Answer only", file: item.answerFileId}, {key: "solution", label: "Full solution", file: item.solutionFileId}] as const).map(option => <button key={option.key} type="button" disabled={!option.file || demo} aria-pressed={openMedia === `${item.id}:${option.key}`} onClick={() => { setOpenMedia(openMedia === `${item.id}:${option.key}` ? null : `${item.id}:${option.key}`); setMediaError(""); }} className="rounded-lg border border-[#bbcebb] bg-white px-3 py-2 text-xs font-semibold text-[#167a72] disabled:opacity-50">{option.label}{!option.file ? " · รอเพิ่มไฟล์" : ""}</button>)}</div></div>}
               </div>
             </div>
-            {(openMedia === item.id || answerOpen || solutionOpen) && !demo && <><div ref={mediaWrapperRef} className="classroom-media-shell relative mt-4 overflow-hidden rounded-lg bg-[#172b3a]">
-              <iframe title={mediaTitle} src={directDrive && validMediaFile ? `https://drive.google.com/file/d/${mediaFileId}/preview` : `/courses/media/${encodeURIComponent(item.id)}${answerOpen ? "?variant=answer" : solutionOpen ? "?variant=solution" : ""}`} className="classroom-media-frame aspect-video w-full border-0" allow={directDrive ? "fullscreen 'none'" : "fullscreen"} allowFullScreen={!directDrive} referrerPolicy="no-referrer" sandbox={isVideo ? "allow-scripts allow-same-origin allow-presentation" : "allow-scripts allow-same-origin allow-presentation allow-popups allow-popups-to-escape-sandbox allow-downloads"}/>
-              {isVideo && <div aria-hidden="true" className="absolute right-0 top-0 z-20 h-16 w-16 bg-transparent" onContextMenu={event => event.preventDefault()}/> }
-              {directDrive && isVideo && <span className="classroom-account-mark pointer-events-none absolute z-10 max-w-[75%] rounded bg-black/25 px-3 py-2 text-[10px] text-white/70">{watermarkLabel}<br/>{new Date().toLocaleDateString("th-TH")}</span>}
-              <div className="flex shrink-0 items-center justify-end bg-[#172b3a] px-3 py-2"><button type="button" onClick={() => void toggleMediaFullscreen()} className="inline-flex items-center gap-1.5 rounded border border-white/20 px-2.5 py-1.5 text-[10px] text-white hover:bg-white/10">{mediaFullscreen ? <Minimize size={12}/> : <Maximize size={12}/>} {mediaFullscreen ? "ออกจากเต็มจอ" : "ขยายเต็มจอ"}</button></div>
-            </div>{!isVideo && directDrive && validMediaFile && <a href={`https://drive.google.com/file/d/${mediaFileId}/view`} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex text-xs font-semibold text-[#167a72] underline">เปิด / ดาวน์โหลด {mediaTitle} ที่ Google Drive ↗</a>}{mediaError && <p role="alert" className="mt-2 text-[11px] leading-6 text-[#ad6246]">{mediaError}</p>}</>}
+
           </article>;
         })}
       </div>
+      {kindFilter!=="all"&&!items.some(i=>i.kind===kindFilter)&&<p className="bp-reader-empty">ยังไม่มีรายการประเภทนี้ในเลเวลนี้</p>}
       {error && <p role="alert" className="mt-3 rounded-lg bg-[#fff2ed] px-3 py-2 text-xs leading-6 text-[#b15d43]">{error}</p>}
       {demo && <p className="mt-3 text-center text-[10px] leading-5 text-[#9ba391]">ลองติ๊กได้ ข้อมูลตัวอย่างเก็บเฉพาะเบราว์เซอร์นี้</p>}
-    </div>
+    </div></div>
     <style>{`
       .classroom-media-shell:fullscreen { display: flex; flex-direction: column; width: 100%; height: 100%; margin: 0; border-radius: 0; background: #172b3a; }
       .classroom-media-shell:fullscreen .classroom-media-frame { flex: 1; min-height: 0; height: auto; aspect-ratio: auto; }
@@ -332,7 +336,7 @@ export function StudentClassroom({ expiredCourseIds=[],demo = false, user, enrol
       </div>
     </header>
     <div className="quiet-layout"><aside className="quiet-rail" aria-label="เมนูหลัก"><Link href="/" className="quiet-brand"><ExplorerMark/>BAANPHYS</Link><nav><Link href={demo?"/preview/classroom":"/courses"} aria-current="page"><LayoutGrid size={18}/>ห้องเรียน</Link><Link href={demo?"/login":"/calendar"}><CalendarDays size={18}/>ปฏิทิน</Link><Link href={demo?"/login":"/profile"}><UserRound size={18}/>โปรไฟล์</Link></nav><div className="quiet-rail-foot"><p>{user.displayName}</p><p>{demo?"บัญชีตัวอย่าง":"พื้นที่เรียนรู้ของคุณ"}</p>{!demo&&<button type="button" onClick={()=>void signOut()}><LogOut size={15}/>ออกจากระบบ</button>}</div></aside>
-    <main className="quiet-main"><div className="quiet-topline"><div><h1>ห้องเรียนของฉัน</h1><p>{selectedCourse?.title??"เลือกคอร์สเพื่อเริ่มเรียน"}</p></div><span className="quiet-identity">{user.displayName}</span></div>
+    <main className={`quiet-main ${level?"is-reading":""}`}><div className="quiet-topline"><div><h1>ห้องเรียนของฉัน</h1><p>{selectedCourse?.title??"เลือกคอร์สเพื่อเริ่มเรียน"}</p></div><span className="quiet-identity">{user.displayName}</span></div>
       <div className={`quiet-workspace ${level?"is-lesson":""}`}><div className="quiet-content">
       {setupRequired && <div role="status" className="mb-7 rounded-xl border border-[#eedfc4] bg-[#fff9ed] p-4 text-xs leading-6 text-[#977646]">ห้องเรียนยังอยู่ระหว่างตั้งค่าระบบ บัญชีและสิทธิ์จริงจะพร้อมเมื่อแอดมินตั้งค่าฐานข้อมูลเรียบร้อยแล้ว <Link href="/preview/classroom" className="font-semibold underline">ดูหน้าตัวอย่าง</Link></div>}
 

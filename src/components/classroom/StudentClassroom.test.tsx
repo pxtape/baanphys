@@ -1,11 +1,26 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { StudentClassroom } from "@/components/classroom/StudentClassroom";
+import { StudentClassroom,LessonPanel } from "@/components/classroom/StudentClassroom";
 import { DEMO_ENROLLMENTS, DEMO_ITEMS, DEMO_STUDENT } from "@/lib/course-catalog";
 import {setImmediate as nextImmediate} from "node:timers";
 
 const { setTask } = vi.hoisted(() => ({ setTask: vi.fn() }));
 vi.mock("@/app/courses/actions", () => ({ setClassroomTask: setTask }));
+
+it("keeps the active video open while filtering and completing homework in the side panel",async()=>{
+ const video={...DEMO_ITEMS[0],id:"reader-video",title:"คลิปทดลอง",driveFileId:"video_file_123456",hasMedia:true};
+ const homework={...DEMO_ITEMS[1],id:"reader-hw",title:"งานทดลอง",questionCount:3};
+ const completion=vi.fn();
+ render(<LessonPanel preview directDrive userId="preview-reader" level={{number:1,title:"Linear Motion",section:"กลศาสตร์",durationMinutes:130,isPlaceholder:false}} items={[video,homework]} completedIds={[]} pendingItem={null} error="" demo={false} onQuestionCompletion={completion} onToggle={vi.fn()} onClose={vi.fn()}/>);
+ expect(screen.getByTitle("คลิปทดลอง")).toHaveAttribute("src","https://drive.google.com/file/d/video_file_123456/preview");
+ fireEvent.click(screen.getByRole("button",{name:"HW 1"}));
+ expect(screen.queryByRole("checkbox",{name:"เรียนครบ คลิปทดลอง"})).not.toBeInTheDocument();
+ expect(screen.getByTitle("คลิปทดลอง")).toBeInTheDocument();
+ await waitFor(()=>expect(screen.getByRole("button",{name:"ทำครบทุกข้อ"})).toBeEnabled());
+ fireEvent.click(screen.getByRole("button",{name:"ทำครบทุกข้อ"}));
+ await waitFor(()=>expect(completion).toHaveBeenLastCalledWith("reader-hw",true));
+ expect(screen.getByTitle("คลิปทดลอง")).toBeInTheDocument();
+});
 
 afterEach(async()=>{cleanup();await act(async()=>{await new Promise<void>(resolve=>nextImmediate(resolve));});window.history.replaceState(null,"","/");});
 

@@ -37,5 +37,8 @@ const login = await fs.readFile(path.join(directory, "login/index.html"), "utf8"
 if (!/<input\b[^>]*type="password"/.test(login)) throw new Error("Live login must include a password input");
 const css = await Promise.all(files.filter((file) => file.endsWith(".css")).map((file) => fs.readFile(file, "utf8")));
 if (!css.some((content) => content.includes(".grid-cols-2") && content.includes(".min-h-screen"))) throw new Error("Expected classroom CSS not generated");
+if (!files.some(file=>/\.(ttf|woff2?)$/.test(file))) throw new Error("Self-hosted Thai font missing");
+await fs.access(path.join(directory,"studio/NotoSansThai-OFL.txt"));
+if (!css.some(content=>content.includes("--font-studio-sans")&&content.includes(".bp-reader-layout"))) throw new Error("Studio design system or font missing");
 console.log(`Verified ${htmlFiles.length} HTML files and ${checkedReferences} local links/assets; no server secrets; live login included.`);
 

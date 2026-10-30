@@ -1,8 +1,8 @@
 @import "tailwindcss";
 @import "@xyflow/react/dist/style.css";
 @import "katex/dist/katex.min.css";
+@import "./studio-system.css";
 
-:root { --ink: #172b3a; --muted: #66767b; --paper: #fafaf7; --accent: #167a72; --copper: #ad713e; --soft: #eaf2ef; --line: #e3e7e2; }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body { margin: 0; background: var(--paper); color: var(--ink); font-family: "Noto Sans Thai", "Leelawadee UI", "Tahoma", sans-serif; }
@@ -18,3 +18,4 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .flow-no-pan .react-flow__node { cursor: pointer; }
 .skill-edge path { stroke: #a9c7bf; stroke-width: 2; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+

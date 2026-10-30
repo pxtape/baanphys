@@ -122,7 +122,7 @@ export function ClassroomAdmin({ demo = false, students: initialStudents, setupR
     finally { setBusy(false); }
   }
 
-  return <main className="min-h-screen bg-[var(--paper)]">
+  return <main className="bp-admin min-h-screen bg-[var(--paper)]">
     {demo && <div className="border-b border-amber-200 bg-amber-50 px-5 py-2 text-center text-xs leading-6 text-amber-900">โหมดตัวอย่าง · ข้อมูลจำลองเก็บเฉพาะเบราว์เซอร์นี้ ไม่มีบัญชีหรือสิทธิ์เรียนจริง <Link className="ml-3 underline underline-offset-4" href="/preview/classroom">ลองฝั่งนักเรียน →</Link></div>}
     <header className="border-b border-[var(--line)] bg-white"><div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-5 sm:px-8">
       <Link href="/" className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--ink)] text-white"><BookOpen size={20}/></span><span><b className="block text-sm">บ้านฟิสิกส์</b><span className="text-[10px] tracking-widest text-[var(--muted)]">CLASSROOM ADMIN</span></span></Link>
@@ -164,3 +164,4 @@ export function ClassroomAdmin({ demo = false, students: initialStudents, setupR
     </div>
   </main>;
 }
+

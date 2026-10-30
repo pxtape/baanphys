@@ -18,7 +18,7 @@ async function copy(relative, transform = (source) => source) { await write(rela
 // privileged credentials never enter the static site. Live mutations use RLS
 // or the authenticated classroom-admin Edge Function.
 for (const relative of [
-  "src/lib/physics-visuals.ts", "src/components/classroom/PhysicsIdentity.tsx", "src/components/classroom/ExplorerStudio.tsx", "src/components/classroom/QuietStudio.tsx", "src/components/classroom/AdminSecurity.tsx", "src/components/classroom/StudentAttention.tsx", "src/components/classroom/CourseReadiness.tsx", "src/components/classroom/ClassroomMaintenance.tsx", "src/components/classroom/ScheduleExceptionEditor.tsx", "src/lib/classroom-navigation.ts", "src/lib/classroom-rows.ts",
+  "src/app/studio-system.css", "src/components/classroom/StudioNavigation.tsx", "src/lib/physics-visuals.ts", "src/components/classroom/PhysicsIdentity.tsx", "src/components/classroom/ExplorerStudio.tsx", "src/components/classroom/QuietStudio.tsx", "src/components/classroom/AdminSecurity.tsx", "src/components/classroom/StudentAttention.tsx", "src/components/classroom/CourseReadiness.tsx", "src/components/classroom/ClassroomMaintenance.tsx", "src/components/classroom/ScheduleExceptionEditor.tsx", "src/lib/classroom-navigation.ts", "src/lib/classroom-rows.ts",
   "src/components/classroom/StudentProfile.tsx", "src/components/classroom/StudentPersonalInfo.tsx", "src/lib/learning-history.ts",
   "src/components/classroom/QuestionChecklist.tsx", "src/lib/question-progress.ts",
   "src/components/classroom/StudentAdminHub.tsx", "src/components/classroom/StudentCourseAdmin.tsx", "src/components/classroom/StudentScheduleEditor.tsx", "src/components/classroom/StudyCharts.tsx", "src/components/classroom/MonthCalendar.tsx", "src/components/classroom/CalendarOverview.tsx", "src/lib/student-planning.ts",
@@ -44,9 +44,11 @@ await write("next-env.d.ts", '/// <reference types="next" />\n/// <reference typ
 await write("next.config.mjs", `export default ${JSON.stringify({ output: "export", basePath, trailingSlash: true, images: { unoptimized: true }, env:{NEXT_PUBLIC_BASE_PATH:basePath}, outputFileTracingRoot: root }, null, 2)};\n`);
 await write("src/app/layout.tsx", `import type { Metadata } from "next";
 import "./globals.css";
+import localFont from "next/font/local";
+const studioSans=localFont({src:"./fonts/NotoSansThai-variable.ttf",display:"swap",variable:"--font-studio-sans",weight:"100 900"});
 export const metadata: Metadata = { title: "บ้านฟิสิกส์ | ห้องเรียนออนไลน์", description: "คอร์สเรียนบ้านฟิสิกส์ วิดีโอ ชีท และการบ้าน" };
 export default function Layout({children}:Readonly<{children:React.ReactNode}>) {
- return <html lang="th"><body>{children}</body></html>;
+ return <html lang="th" className={studioSans.variable}><body className="bp-site">{children}</body></html>;
 }
 `);
 await write("src/app/courses/actions.ts", 'export {setClassroomTask,advanceClassroomStudent,enrollClassroomStudent,revokeClassroomEnrollment} from "@/lib/classroom-browser";\n');
@@ -60,6 +62,7 @@ await copy("src/app/calendar/page.tsx");
 await copy("src/app/profile/page.tsx");
 await write("src/app/login/page.tsx", 'import {LiveLogin} from "@/components/classroom/LiveLogin"; export default function Page(){return <LiveLogin/>;}\n');
 
+await fs.cp(path.join(root,"src/app/fonts"),path.join(output,"src/app/fonts"),{recursive:true});
 await fs.cp(path.join(root,"public/studio"),path.join(output,"public/studio"),{recursive:true});
 
 console.log(`Building GitHub Pages classroom at ${basePath || "/"}`);

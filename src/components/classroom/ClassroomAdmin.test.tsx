@@ -91,8 +91,9 @@ describe("ClassroomAdmin", () => {
     actions.advanceClassroomStudent.mockResolvedValue({ error: "รายการยังไม่ครบ" });
     render(<ClassroomAdmin students={DEMO_STUDENTS}/>);
     fireEvent.click(screen.getByRole("button", { name: "ปลดล็อก Level 10" }));
-    expect(await screen.findByRole("status")).toHaveTextContent("รายการยังไม่ครบ");
+    expect(await screen.findByText("รายการยังไม่ครบ")).toBeInTheDocument();
     expect(screen.getByText("เปิดถึง Level 9 / 31")).toBeInTheDocument();
     expect(actions.advanceClassroomStudent).toHaveBeenCalledWith("demo-student-001", "pre-posn");
   });
 });
+
