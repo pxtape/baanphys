@@ -1,8 +1,8 @@
-import {Compass} from "lucide-react";
+
 
 export const studioAssets=`${process.env.NEXT_PUBLIC_BASE_PATH??""}/studio`;
 export function ExplorerMark({strokeWidth=1.8}:{strokeWidth?:number}){return <svg viewBox="0 0 36 40" width="31" height="35" fill="none" stroke="currentColor" strokeWidth={strokeWidth} aria-hidden="true"><path d="M4 34C12 19 22 10 28 3L22 35M9 25L30 23M4 34C9 38 19 24 33 18M22 35L17 30" strokeLinecap="round" strokeLinejoin="round"/></svg>;}
-export function ExplorerBadge(){return <span className="explorer-badge" aria-hidden="true"><Compass size={26} strokeWidth={1.3}/></span>;}
+export function ExplorerBadge(){return <span className="explorer-badge" aria-hidden="true"><svg viewBox="0 0 80 80" fill="none"><path d="M40 2l7 4 8-1 5 6 8 2 2 8 6 5-1 8 4 6-4 7 1 8-6 5-2 8-8 2-5 6-8-1-7 4-6-4-8 1-5-6-8-2-2-8-6-5 1-8-4-7 4-6-1-8 6-5 2-8 8-2 5-6 8 1z" fill="#bd8a39" stroke="#80531a"/><circle cx="40" cy="40" r="32" fill="#e6bf72" stroke="#fff0bf" strokeWidth="2"/><circle cx="40" cy="40" r="27" fill="#d1a14e" stroke="#8a5c23"/><circle cx="40" cy="40" r="23" stroke="#fbe6ab" strokeDasharray="1 4"/><path d="M40 14l6 20 20 6-20 6-6 20-6-20-20-6 20-6z" fill="#f5daa0" stroke="#80531a"/><path d="M40 22v36M22 40h36M29 29l22 22M29 51l22-22" stroke="#9b6b2c"/><circle cx="40" cy="40" r="7" fill="#bf8a35" stroke="#80531a"/><circle cx="40" cy="40" r="3" fill="#fff1bd"/></svg></span>;}
 export function ExplorerStyles(){return <style>{`
 .quiet-studio{--paper:#fbf9f2;--accent:#00566b;background:var(--paper)!important}
 .quiet-studio .quiet-rail{background:#061f29 url("${studioAssets}/explorer-observatory.jpg") center bottom/cover no-repeat;isolation:isolate}
