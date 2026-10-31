@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { StudentClassroom,LessonPanel } from "@/components/classroom/StudentClassroom";
 import { DEMO_ENROLLMENTS, DEMO_ITEMS, DEMO_STUDENT } from "@/lib/course-catalog";
@@ -111,4 +111,6 @@ describe("StudentClassroom access and progress", () => {
 
 
 it("opens an accessible level from a profile link but keeps locked levels closed",async()=>{window.history.replaceState(null,"","/courses?course=pre-posn&level=1");const view=render(<StudentClassroom user={DEMO_STUDENT} enrollments={DEMO_ENROLLMENTS} items={DEMO_ITEMS} completedItemIds={[]}/>);expect(await screen.findByRole("region",{name:"รายการเรียน Level 1"})).toBeInTheDocument();view.unmount();window.history.replaceState(null,"","/courses?course=pre-posn&level=10");render(<StudentClassroom user={DEMO_STUDENT} enrollments={DEMO_ENROLLMENTS} items={DEMO_ITEMS} completedItemIds={[]}/>);expect(screen.queryByRole("region",{name:"รายการเรียน Level 10"})).not.toBeInTheDocument();});
+
+it("groups Gravity with Newton and keeps the two Newton levels separate",()=>{render(<StudentClassroom demo user={DEMO_STUDENT} enrollments={DEMO_ENROLLMENTS} items={DEMO_ITEMS} completedItemIds={[]}/>);const mechanics=screen.getByRole("region",{name:"นิวตันและการเคลื่อนที่"});expect(within(mechanics).getByRole("button",{name:/Level 5 Newton II เปิดบทเรียน/})).toBeEnabled();expect(within(mechanics).getByRole("button",{name:/Level 6 Newton III เปิดบทเรียน/})).toBeEnabled();expect(within(mechanics).getByRole("button",{name:/Level 10 Gravity/})).toBeDisabled();expect(within(screen.getByRole("region",{name:"พลังงาน โมเมนตัม และการสั่น"})).queryByRole("button",{name:/Gravity/})).not.toBeInTheDocument();});
 

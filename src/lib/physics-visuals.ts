@@ -1,5 +1,5 @@
 export type PhysicsKind="motion"|"suvat"|"graph"|"balanced"|"force"|"projectile"|"circular"|"relative"|"gravity"|"energy"|"work"|"momentum"|"collision"|"torque"|"rotation"|"shm"|"pressure"|"flow"|"heat"|"phase"|"field"|"negative-field"|"potential"|"circuit"|"series"|"parallel"|"power"|"reflection"|"refraction"|"gas"|"magnet"|"electric";
-export const LEVEL_VISUALS:PhysicsKind[]=["motion","suvat","graph","balanced","force","projectile","circular","relative","gravity","energy","work","momentum","collision","torque","rotation","shm","pressure","flow","heat","phase","field","negative-field","potential","circuit","series","parallel","power","reflection","refraction","gas","magnet"];
+export const LEVEL_VISUALS:PhysicsKind[]=["motion","suvat","graph","balanced","force","force","projectile","circular","relative","gravity","energy","work","momentum","collision","torque","rotation","shm","pressure","flow","heat","phase","field","negative-field","potential","circuit","series","parallel","power","reflection","refraction","gas","magnet"];
 export function levelPhysics(number:number){return LEVEL_VISUALS[number-1]??"motion";}
 
 // Physical models in SI units; only the renderer converts them to screen coordinates.

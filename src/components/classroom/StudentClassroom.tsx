@@ -40,7 +40,7 @@ function readDemoEnrollments(studentId: string, fallback: Enrollment[]): Enrollm
     if (!Array.isArray(stored)) return fallback;
     return stored.filter((item): item is Enrollment => Boolean(item && typeof item === "object"
       && item.studentId === studentId && COURSES.some((course) => course.id === item.courseId)
-      && Number.isInteger(item.unlockedLevel) && item.unlockedLevel >= 1 && item.unlockedLevel <= 31));
+      && Number.isInteger(item.unlockedLevel) && item.unlockedLevel >= 1 && item.unlockedLevel <= PRE_POSN_LEVELS.length));
   } catch { return fallback; }
 }
 
@@ -82,13 +82,13 @@ function getLevels(course: CourseDefinition): CourseLevel[] {
 
 const EXPEDITIONS = [
   { start: 1, end: 3, title: "เริ่มออกเดินทาง", topic: "การเคลื่อนที่แนวตรง", note: "อ่านการเคลื่อนที่ให้เป็นภาษาเดียวกับธรรมชาติ", color: "#167a72", paper: "#eaf3ed", art: "motion" },
-  { start: 4, end: 8, title: "ทำความรู้จักกับแรง", topic: "นิวตันและการเคลื่อนที่", note: "จากลูกบอลหนึ่งลูก สู่กฎที่อธิบายทั้งโลก", color: "#3e7095", paper: "#edf3f8", art: "force" },
-  { start: 9, end: 16, title: "มองให้เห็นสิ่งที่ซ่อนอยู่", topic: "พลังงาน โมเมนตัม และการสั่น", note: "เชื่อมแรงโน้มถ่วง พลังงาน การชน และการหมุน", color: "#89602e", paper: "#faf1df", art: "energy" },
-  { start: 17, end: 20, title: "โลกที่ไหลและเปลี่ยนแปลง", topic: "ของไหลและความร้อน", note: "สำรวจสิ่งที่เกิดขึ้นในน้ำ อากาศ และอุณหภูมิ", color: "#387c91", paper: "#e9f4f5", art: "fluid" },
-  { start: 21, end: 27, title: "จุดประกายความเข้าใจ", topic: "ประจุไฟฟ้าและวงจร", note: "ตามรอยประจุ จากสนามที่มองไม่เห็นสู่หลอดไฟ", color: "#7a6197", paper: "#f2edf7", art: "electric" },
-  { start: 28, end: 29, title: "ตามลำแสงไป", topic: "แสง", note: "มองโลกอีกครั้ง ผ่านเลนส์และการหักเห", color: "#a55c53", paper: "#fcf0e9", art: "light" },
-  { start: 30, end: 30, title: "สำรวจโลกของแก๊ส", topic: "แก๊สและความชื้น", note: "จากอนุภาคเล็ก ๆ สู่ปรากฏการณ์รอบตัว", color: "#527951", paper: "#edf4e7", art: "gas" },
-  { start: 31, end: 31, title: "อีกหนึ่งแรงที่มองไม่เห็น", topic: "แม่เหล็ก", note: "จุดหมายสุดท้ายของ Pre-POSN และจุดเริ่มต้นถัดไป", color: "#536695", paper: "#edf0f9", art: "magnet" },
+  { start: 4, end: 10, title: "ทำความรู้จักกับแรง", topic: "นิวตันและการเคลื่อนที่", note: "จากลูกบอลหนึ่งลูก สู่กฎที่อธิบายทั้งโลก", color: "#3e7095", paper: "#edf3f8", art: "force" },
+  { start: 11, end: 17, title: "มองให้เห็นสิ่งที่ซ่อนอยู่", topic: "พลังงาน โมเมนตัม และการสั่น", note: "เชื่อมพลังงาน การชน การหมุน และการสั่น", color: "#89602e", paper: "#faf1df", art: "energy" },
+  { start: 18, end: 21, title: "โลกที่ไหลและเปลี่ยนแปลง", topic: "ของไหลและความร้อน", note: "สำรวจสิ่งที่เกิดขึ้นในน้ำ อากาศ และอุณหภูมิ", color: "#387c91", paper: "#e9f4f5", art: "fluid" },
+  { start: 22, end: 28, title: "จุดประกายความเข้าใจ", topic: "ประจุไฟฟ้าและวงจร", note: "ตามรอยประจุ จากสนามที่มองไม่เห็นสู่หลอดไฟ", color: "#7a6197", paper: "#f2edf7", art: "electric" },
+  { start: 29, end: 30, title: "ตามลำแสงไป", topic: "แสง", note: "มองโลกอีกครั้ง ผ่านเลนส์และการหักเห", color: "#a55c53", paper: "#fcf0e9", art: "light" },
+  { start: 31, end: 31, title: "สำรวจโลกของแก๊ส", topic: "แก๊สและความชื้น", note: "จากอนุภาคเล็ก ๆ สู่ปรากฏการณ์รอบตัว", color: "#527951", paper: "#edf4e7", art: "gas" },
+  { start: 32, end: 32, title: "อีกหนึ่งแรงที่มองไม่เห็น", topic: "แม่เหล็ก", note: "จุดหมายสุดท้ายของ Pre-POSN และจุดเริ่มต้นถัดไป", color: "#536695", paper: "#edf0f9", art: "magnet" },
 ];
 
 function LevelPathway({ levels, unlockedLevel, selectedLevel, completedItemIds, items, demo, onSelect, themed }: {

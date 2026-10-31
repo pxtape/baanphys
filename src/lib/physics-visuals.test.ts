@@ -29,3 +29,6 @@ describe("physical geometry used by classroom illustrations",()=>{
  });
 });
 
+import {COURSES,PRE_POSN_LEVELS} from "./course-catalog";
+it("keeps the 32-level syllabus aligned after splitting Newton with unknown durations",()=>{expect(COURSES[0].levelCount).toBe(32);expect(PRE_POSN_LEVELS).toHaveLength(32);expect(PRE_POSN_LEVELS.slice(4,7).map(l=>[l.number,l.title,l.durationMinutes])).toEqual([[5,"Newton II",null],[6,"Newton III",null],[7,"Projectile",170]]);expect(PRE_POSN_LEVELS[9]).toMatchObject({number:10,title:"Gravity",durationMinutes:80});expect(PRE_POSN_LEVELS[31]).toMatchObject({number:32,title:"Magnetic"});});
+

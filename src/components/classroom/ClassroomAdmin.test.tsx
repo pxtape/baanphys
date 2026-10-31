@@ -31,7 +31,7 @@ describe("ClassroomAdmin", () => {
     fireEvent.click(screen.getByRole("button", { name: "ปลดล็อก Level 10" }));
 
     expect(await screen.findByRole("status")).toHaveTextContent("Level 9 ยังทำรายการไม่ครบ");
-    expect(screen.getByText("เปิดถึง Level 9 / 31")).toBeInTheDocument();
+    expect(screen.getByText("เปิดถึง Level 9 / 32")).toBeInTheDocument();
     expect(localStorage.getItem("baanphys:demo:enrollments:demo-student-001")).toBeNull();
     expect(actions.advanceClassroomStudent).not.toHaveBeenCalled();
   });
@@ -44,11 +44,11 @@ describe("ClassroomAdmin", () => {
       window.dispatchEvent(new Event("baanphys:demo:update"));
     });
     expect(await screen.findByText("รายการ Level 9: ทำครบ 2 / 2 รายการ")).toBeInTheDocument();
-    expect(screen.getByText("เปิดถึง Level 9 / 31")).toBeInTheDocument();
+    expect(screen.getByText("เปิดถึง Level 9 / 32")).toBeInTheDocument();
     expect(localStorage.getItem("baanphys:demo:enrollments:demo-student-001")).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: "ปลดล็อก Level 10" }));
-    expect(await screen.findByText("เปิดถึง Level 10 / 31")).toBeInTheDocument();
+    expect(await screen.findByText("เปิดถึง Level 10 / 32")).toBeInTheDocument();
     expect(JSON.parse(localStorage.getItem("baanphys:demo:enrollments:demo-student-001")!)).toEqual([
       { studentId: "demo-student-001", courseId: "pre-posn", unlockedLevel: 10 },
     ]);
@@ -64,7 +64,7 @@ describe("ClassroomAdmin", () => {
     fireEvent.click(screen.getByRole("button", { name: /นักเรียนเริ่มต้น @student.new/ }));
     fireEvent.click(screen.getByRole("button", { name: "ปลดล็อก Level 2" }));
     expect(await screen.findByRole("status")).toHaveTextContent("Level 1 ยังทำรายการไม่ครบ");
-    expect(screen.getByText("เปิดถึง Level 1 / 31")).toBeInTheDocument();
+    expect(screen.getByText("เปิดถึง Level 1 / 32")).toBeInTheDocument();
     expect(localStorage.getItem("baanphys:demo:enrollments:demo-student-002")).toBeNull();
   });
 
@@ -92,7 +92,7 @@ describe("ClassroomAdmin", () => {
     render(<ClassroomAdmin students={DEMO_STUDENTS}/>);
     fireEvent.click(screen.getByRole("button", { name: "ปลดล็อก Level 10" }));
     expect(await screen.findByText("รายการยังไม่ครบ")).toBeInTheDocument();
-    expect(screen.getByText("เปิดถึง Level 9 / 31")).toBeInTheDocument();
+    expect(screen.getByText("เปิดถึง Level 9 / 32")).toBeInTheDocument();
     expect(actions.advanceClassroomStudent).toHaveBeenCalledWith("demo-student-001", "pre-posn");
   });
 });

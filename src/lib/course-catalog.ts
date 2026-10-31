@@ -38,15 +38,15 @@ export type Enrollment = { studentId: string; courseId: CourseId; unlockedLevel:
 export type StudentRecord = { classLevel?:string; schoolName?:string; posnCenter?:string; fullName?:string; additionalInfo?:string; additionalUpdatedAt?:string|null; profileUpdatedAt?:string|null; id: string; displayName: string; username: string; enrollments: Enrollment[] };
 
 export const COURSES: CourseDefinition[] = [
-  { id: "pre-posn", title: "Pre-POSN", subtitle: "เตรียมความพร้อม สอวน.", levelCount: 31, description: "ค่อย ๆ สร้างความเข้าใจฟิสิกส์ ผ่านเส้นทางการเรียน 31 เลเวล", accent: "#167a72" },
+  { id: "pre-posn", title: "Pre-POSN", subtitle: "เตรียมความพร้อม สอวน.", levelCount: 32, description: "ค่อย ๆ สร้างความเข้าใจฟิสิกส์ ผ่านเส้นทางการเรียน 32 เลเวล", accent: "#167a72" },
   { id: "camp-1", title: "Camp 1", subtitle: "ฟิสิกส์ สอวน. ค่าย 1", levelCount: null, description: "ต่อยอดพื้นฐานสู่การคิดและแก้โจทย์ในค่าย 1", accent: "#4872a5" },
   { id: "camp-2", title: "Camp 2", subtitle: "ฟิสิกส์ สอวน. ค่าย 2", levelCount: null, description: "พัฒนาทักษะและความเข้าใจสำหรับค่าย 2", accent: "#8a70a6" },
   { id: "tpho", title: "TPhO", subtitle: "ฟิสิกส์โอลิมปิกระดับชาติ", levelCount: null, description: "เตรียมตัวสู่การแข่งขันฟิสิกส์โอลิมปิกระดับชาติ", accent: "#ad713e" },
 ];
 
 // Owner-supplied Pre-POSN syllabus. Live course metadata is loaded from the database.
-const syllabus: [string, number][] = [
-  ["Linear Motion",130],["SUVAT",210],["Graph",50],["Newton I",70],["Newton II & III",270],
+const syllabus: [string, number | null][] = [
+  ["Linear Motion",130],["SUVAT",210],["Graph",50],["Newton I",70],["Newton II",null],["Newton III",null],
   ["Projectile",170],["Circular",190],["Relative",50],["Gravity",80],["Energy I",90],["Energy II",90],
   ["Momentum I",130],["Momentum II",190],["Rotation I",90],["Rotation II",120],["SHM",70],
   ["Fluid I & II",170],["Fluid III",90],["Heat I",110],["Heat II",120],["ElectroStatics I",110],
@@ -54,7 +54,7 @@ const syllabus: [string, number][] = [
   ["DC circuit III",210],["DC circuit IV",220],["Light I",210],["Light II",220],["Ideal gas & Humidity",50],["Magnetic",100],
 ];
 export const PRE_POSN_LEVELS: CourseLevel[] = syllabus.map(([title,durationMinutes],index) => ({
-  number:index+1, title, durationMinutes, section:index<16 ? "กลศาสตร์" : index<20 ? "ของไหลและความร้อน" : index<27 ? "ไฟฟ้า" : "แสง แก๊ส และแม่เหล็ก", isPlaceholder:false,
+  number:index+1, title, durationMinutes, section:index<17 ? "กลศาสตร์" : index<21 ? "ของไหลและความร้อน" : index<28 ? "ไฟฟ้า" : "แสง แก๊ส และแม่เหล็ก", isPlaceholder:false,
 }));
 
 export function formatStudyTime(minutes: number | null | undefined): string {
@@ -87,3 +87,4 @@ export const DEMO_COMPLETED_ITEM_IDS = DEMO_ITEMS.filter((item) => item.levelNum
 export function isCourseId(value: unknown): value is CourseId {
   return COURSES.some((course) => course.id === value);
 }
+
