@@ -68,10 +68,10 @@ export function formatStudyTime(minutes: number | null | undefined): string {
 // Demo content is never inserted into the production database.
 export const DEMO_ITEMS: LearningItem[] = PRE_POSN_LEVELS.flatMap((level) => [
   { id: `demo-pre-posn-${level.number}-video`, courseId: "pre-posn" as const, levelNumber: level.number, kind: "video" as const,
-    title: `วิดีโอ Level ${level.number} · ตัวอย่าง`, durationMinutes: 60, recommendedMinutes: 90, driveFileId: null,
+    title: `วิดีโอ Level ${level.number} · ตัวอย่าง`, durationMinutes: level.durationMinutes===null?null:60, recommendedMinutes: 90, driveFileId: null,
     instructions: "ตัวอย่างรายการวิดีโอ — รอชื่อคลิปและลิงก์ Google Drive จากติวเตอร์ ชั่วโมงนี้เป็นข้อมูลสาธิต" },
   { id: `demo-pre-posn-${level.number}-homework`, courseId: "pre-posn" as const, levelNumber: level.number, kind: "homework" as const,
-    title: `HW Level ${level.number} · ตัวอย่าง`, durationMinutes: 180, recommendedMinutes: 180, driveFileId: null,
+    title: `HW Level ${level.number} · ตัวอย่าง`, durationMinutes: level.durationMinutes===null?null:180, recommendedMinutes: 180, driveFileId: null,
     instructions: "ตัวอย่างรายการการบ้าน — รอไฟล์โจทย์และคำแนะนำจริง เมื่อลองทำครบแล้วให้ทัก LINE หาติวเตอร์ ชั่วโมงนี้เป็นข้อมูลสาธิต" },
 ]);
 
