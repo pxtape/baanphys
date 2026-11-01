@@ -11,6 +11,7 @@ export type CourseDefinition = {
 
 export type CourseLevel = {
   questionCount?: number | null;
+  displayNumber?: number;
   number: number;
   title: string;
   section: string;
@@ -39,8 +40,8 @@ export type StudentRecord = { classLevel?:string; schoolName?:string; posnCenter
 
 export const COURSES: CourseDefinition[] = [
   { id: "pre-posn", title: "Pre-POSN", subtitle: "เตรียมความพร้อม สอวน.", levelCount: 32, description: "ค่อย ๆ สร้างความเข้าใจฟิสิกส์ ผ่านเส้นทางการเรียน 32 เลเวล", accent: "#167a72" },
-  { id: "camp-1", title: "Camp 1", subtitle: "ฟิสิกส์ สอวน. ค่าย 1", levelCount: null, description: "ต่อยอดพื้นฐานสู่การคิดและแก้โจทย์ในค่าย 1", accent: "#4872a5" },
-  { id: "camp-2", title: "Camp 2", subtitle: "ฟิสิกส์ สอวน. ค่าย 2", levelCount: null, description: "พัฒนาทักษะและความเข้าใจสำหรับค่าย 2", accent: "#8a70a6" },
+  { id: "camp-1", title: "Camp 1", subtitle: "ฟิสิกส์ สอวน. ค่าย 1", levelCount: 19, description: "ต่อยอดพื้นฐานสู่การคิดและแก้โจทย์ในค่าย 1", accent: "#4872a5" },
+  { id: "camp-2", title: "Camp 2", subtitle: "ฟิสิกส์ สอวน. ค่าย 2", levelCount: 26, description: "พัฒนาทักษะและความเข้าใจสำหรับค่าย 2", accent: "#8a70a6" },
   { id: "tpho", title: "TPhO", subtitle: "ฟิสิกส์โอลิมปิกระดับชาติ", levelCount: null, description: "เตรียมตัวสู่การแข่งขันฟิสิกส์โอลิมปิกระดับชาติ", accent: "#ad713e" },
 ];
 
@@ -56,6 +57,29 @@ const syllabus: [string, number | null][] = [
 export const PRE_POSN_LEVELS: CourseLevel[] = syllabus.map(([title,durationMinutes],index) => ({
   number:index+1, title, durationMinutes, section:index<17 ? "กลศาสตร์" : index<21 ? "ของไหลและความร้อน" : index<28 ? "ไฟฟ้า" : "แสง แก๊ส และแม่เหล็ก", isPlaceholder:false,
 }));
+
+// Camp 2 uses a course-local ordinal for access checks and Level 20–45 on screen.
+export function displayLevelNumber(courseId:string,number:number){return number+(courseId==="camp-2"?19:0);}
+export function displayLevelRange(courseId:string,through:number){return `${displayLevelNumber(courseId,1)}–${displayLevelNumber(courseId,through)}`;}
+const camp1Outline:[string,string[]][]=[
+ ["Maths for Physics",["Differentiate","Integration","Vector","Log & Expo","Taylor's Expansion"]],
+ ["Mechanics",["Kinematics","Dynamics","Relative Motion","Non-inertia frame","Momentum","Energy"]],
+ ["Electrostatics",["Electric Field","Gauss's Law","Electric Potential","Relation between E field & potential","Capacitor"]],
+ ["Direct Current",["Ohm's Law","Kirchhoff's Rules","Electric Power"]],
+];
+const camp2Outline:[string,string[]][]=[
+ ["Mechanics",["Angular Momentum","Fixed Axis Rotation","Rigid Body","Lagrangian Mechanics"]],
+ ["Heat",["Zeroth Law","Heat Expansion","Heat Capacity","Heat Transfer"]],
+ ["Thermodynamics",["1st Law","2nd Law"]],
+ ["Wave",["Travelling Wave","Standing Wave","Interference and Diffraction","Beat","Doppler Effect"]],
+ ["Electromagnetic",["Biot-Savart Law","Ampere's Loop Law","Lorentz Force","Lenz Law","Faraday Law","Inductance","Maxwell's Equation","EM wave"]],
+ ["AC circuit",["AC circuit"]],["Quantum Mechanics",["Quantum"]],["Relativity",["Relativity"]],
+];
+function outlineLevels(courseId:CourseId,outline:[string,string[]][]):CourseLevel[]{return outline.flatMap(([section,titles])=>titles.map(title=>({section,title}))).map((l,i)=>({...l,number:i+1,displayNumber:displayLevelNumber(courseId,i+1),durationMinutes:null,isPlaceholder:false}));}
+export const CAMP_1_LEVELS=outlineLevels("camp-1",camp1Outline);
+export const CAMP_2_LEVELS=outlineLevels("camp-2",camp2Outline);
+export function catalogLevels(courseId:string):CourseLevel[]{return courseId==="pre-posn"?PRE_POSN_LEVELS:courseId==="camp-1"?CAMP_1_LEVELS:courseId==="camp-2"?CAMP_2_LEVELS:[];}
+export function catalogSection(courseId:string,number:number){return catalogLevels(courseId).find(l=>l.number===number)?.section??"";}
 
 export function formatStudyTime(minutes: number | null | undefined): string {
   if (minutes == null) return "รอระบุชั่วโมง";

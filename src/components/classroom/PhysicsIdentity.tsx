@@ -44,7 +44,7 @@ export function PhysicsDiagram({kind,compact=false,label}:{kind:PhysicsKind;comp
 
 export function LevelPhysicsSketch({number}:{number:number}){return <PhysicsDiagram kind={levelPhysics(number)} compact/>;}
 const atlasPositions:Record<PhysicsChapterKey,string>={motion:"0% 0%",force:"100% 0%",energy:"0% 33.333333%",fluid:"100% 33.333333%",electric:"0% 66.666667%",light:"100% 66.666667%",gas:"0% 100%",magnet:"100% 100%"};
-export function ChapterPhysicsArt({identity}:{identity:PhysicsChapterKey}){return <div aria-hidden="true" className="physics-chapter-visual" style={{backgroundImage:`url("${process.env.NEXT_PUBLIC_BASE_PATH??""}/studio/category-engravings.jpg")`,backgroundPosition:atlasPositions[identity]}}/>;}
+export function ChapterPhysicsArt({identity,campArt}:{identity:PhysicsChapterKey;campArt?:string}){return <div aria-hidden="true" className="physics-chapter-visual" style={{backgroundImage:`url("${process.env.NEXT_PUBLIC_BASE_PATH??""}/studio/${campArt?`camp-art/${campArt}.jpg`:"category-engravings.jpg"}")`,backgroundSize:campArt?"cover":undefined,backgroundPosition:campArt?"right center":atlasPositions[identity]}}/>;}
 export function PhysicsThinkPrompt({identity}:{identity:PhysicsChapterKey}){const p=PHYSICS_CHAPTERS[identity];return <details className="physics-think"><summary><span className="physics-think-label">ลองคิด</span><span>{p.question}</span></summary><div><figure className="physics-think-diagram"><PhysicsDiagram kind={p.kind} label={`${p.caption} · ${p.condition}`}/><figcaption>{p.caption}</figcaption></figure><p>{p.hint}</p><small>{p.condition}</small><a href={p.source} target="_blank" rel="noopener noreferrer">อ่านหลักการ ↗</a></div></details>;}
 
 export function PhysicsIdentityStyles(){return <style>{`

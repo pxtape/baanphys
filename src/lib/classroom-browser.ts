@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import {bangkokDay} from "./study-tracking";
 import { CLASSROOM_URL, CLASSROOM_PUBLIC_KEY } from "@/lib/classroom-public";
-import { COURSES, type CourseId, type CourseLevel, type Enrollment, type LearningItem, type StudentRecord } from "@/lib/course-catalog";
+import { catalogSection,displayLevelNumber,COURSES, type CourseId, type CourseLevel, type Enrollment, type LearningItem, type StudentRecord } from "@/lib/course-catalog";
 
 let singleton: SupabaseClient | undefined;
 export function classroomClient() {
@@ -25,7 +25,7 @@ export async function loadClassroom() {
   ]);
   for (const result of [profile, account, courses, levels, enrollments, items, progress, questions,plans]) if (result.error) throw new Error("โหลดข้อมูลห้องเรียนไม่สำเร็จ กรุณาลองใหม่");
   const courseLevels: Partial<Record<CourseId, CourseLevel[]>> = {};
-  for (const level of levels.data ?? []) (courseLevels[level.course_id as CourseId] ??= []).push({ number: level.number, title: level.title, durationMinutes: level.duration_minutes, questionCount: level.question_count, section: "", isPlaceholder: level.title.includes("รอ") });
+  for (const level of levels.data ?? []) (courseLevels[level.course_id as CourseId] ??= []).push({ number: level.number, title: level.title, durationMinutes: level.duration_minutes, questionCount: level.question_count, displayNumber:displayLevelNumber(level.course_id,level.number),section:catalogSection(level.course_id,level.number), isPlaceholder: level.title.includes("รอ") });
   return {
     role: profile.data?.role as string,
     expiredCourseIds:(plans.data??[]).filter(p=>p.enforce_expiry&&p.paid_until&&p.paid_until<=bangkokDay()).map(p=>String(p.course_id)),

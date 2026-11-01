@@ -1,4 +1,6 @@
 "use client";
+import {displayLevelNumber,displayLevelRange} from "@/lib/course-catalog";
+
 
 import Link from "next/link";
 import { StudentPlanEditor } from "./StudyDashboard";
@@ -75,11 +77,11 @@ export function ClassroomAdmin({ demo = false, students: initialStudents, setupR
         } else if (enrollment) {
           const tasks = DEMO_ITEMS.filter((item) => item.courseId === courseId && item.levelNumber === enrollment.unlockedLevel);
           if (!tasks.length || tasks.some((item) => !completed.includes(item.id))) {
-            setMessage(`Level ${enrollment.unlockedLevel} ยังทำรายการไม่ครบ ให้ลองติ๊กวิดีโอและ HW ในหน้าตัวอย่างนักเรียนก่อน`); return;
+            setMessage(`Level ${displayLevelNumber(course.id,enrollment.unlockedLevel)} ยังทำรายการไม่ครบ ให้ลองติ๊กวิดีโอและ HW ในหน้าตัวอย่างนักเรียนก่อน`); return;
           }
           if (enrollment.unlockedLevel >= (course.levelCount ?? 0)) { setMessage("เปิดครบทุกเลเวลแล้ว"); return; }
           saveDemoEnrollments(selected, selected.enrollments.map((row) => row.courseId === courseId ? { ...row, unlockedLevel: row.unlockedLevel + 1 } : row));
-          setMessage(`ปลดล็อก Level ${enrollment.unlockedLevel + 1} ให้ ${selected.displayName} แล้ว · ข้อมูลตัวอย่าง`);
+          setMessage(`ปลดล็อก Level ${displayLevelNumber(course.id,enrollment.unlockedLevel + 1)} ให้ ${selected.displayName} แล้ว · ข้อมูลตัวอย่าง`);
         }
       } catch { setMessage("บันทึกตัวอย่างไม่ได้ เบราว์เซอร์อาจปิดการจัดเก็บข้อมูล"); }
       return;
@@ -93,7 +95,7 @@ export function ClassroomAdmin({ demo = false, students: initialStudents, setupR
         : operation === "revoke" ? selected.enrollments.filter((row) => row.courseId !== courseId)
         : selected.enrollments.map((row) => row.courseId === courseId ? { ...row, unlockedLevel: row.unlockedLevel + 1 } : row);
       setStudents((previous) => previous.map((student) => student.id === selected.id ? { ...student, enrollments: next } : student));
-      setMessage(operation === "advance" ? `ปลดล็อก Level ${(enrollment?.unlockedLevel ?? 0) + 1} แล้ว` : operation === "enroll" ? "เปิดสิทธิ์คอร์สแล้ว" : "ปิดสิทธิ์คอร์สแล้ว");
+      setMessage(operation === "advance" ? `ปลดล็อก Level ${displayLevelNumber(course.id,(enrollment?.unlockedLevel ?? 0) + 1)} แล้ว` : operation === "enroll" ? "เปิดสิทธิ์คอร์สแล้ว" : "ปิดสิทธิ์คอร์สแล้ว");
     } catch { setMessage("บันทึกไม่สำเร็จ กรุณาลองใหม่"); }
     finally { setBusy(false); }
   }
@@ -151,9 +153,9 @@ export function ClassroomAdmin({ demo = false, students: initialStudents, setupR
               const tasks = demo && enrollment ? DEMO_ITEMS.filter((item) => item.courseId === course.id && item.levelNumber === enrollment.unlockedLevel) : [];
               const done = tasks.filter((item) => completed.includes(item.id)).length;
               const maxed = enrollment && course.levelCount !== null && enrollment.unlockedLevel >= course.levelCount;
-              return <article key={course.id} className="py-6"><div className="flex flex-wrap items-start justify-between gap-4"><div><div className="flex items-center gap-3"><h3 className="font-semibold">{course.title}</h3><span className={`rounded-full px-2.5 py-1 text-[10px] ${enrollment ? "bg-[var(--soft)] text-[var(--accent)]" : "bg-gray-100 text-gray-500"}`}>{enrollment ? "เปิดสิทธิ์แล้ว" : "ยังไม่ลงเรียน"}</span></div><p className="mt-2 text-xs text-[var(--muted)]">{enrollment ? `เปิดถึง Level ${enrollment.unlockedLevel}${course.levelCount ? ` / ${course.levelCount}` : ""}` : course.levelCount ? "เริ่มต้นที่ Level 1 เมื่อเปิดสิทธิ์" : "รอรายละเอียดหลักสูตร"}</p></div>
+              return <article key={course.id} className="py-6"><div className="flex flex-wrap items-start justify-between gap-4"><div><div className="flex items-center gap-3"><h3 className="font-semibold">{course.title}</h3><span className={`rounded-full px-2.5 py-1 text-[10px] ${enrollment ? "bg-[var(--soft)] text-[var(--accent)]" : "bg-gray-100 text-gray-500"}`}>{enrollment ? "เปิดสิทธิ์แล้ว" : "ยังไม่ลงเรียน"}</span></div><p className="mt-2 text-xs text-[var(--muted)]">{enrollment ? `เปิดถึง Level ${displayLevelNumber(course.id,enrollment.unlockedLevel)}${course.levelCount ? ` / ${displayLevelNumber(course.id,course.levelCount)}` : ""}` : course.levelCount ? "เริ่มต้นที่ Level 1 เมื่อเปิดสิทธิ์" : "รอรายละเอียดหลักสูตร"}</p></div>
               {enrollment ? <button disabled={busy || setupRequired} onClick={() => void changeEnrollment(course.id, "revoke")} className="text-xs text-[var(--muted)] underline underline-offset-4 disabled:opacity-50">ปิดสิทธิ์คอร์ส</button> : <button disabled={busy || setupRequired || course.levelCount === null} onClick={() => void changeEnrollment(course.id, "enroll")} className="flex items-center gap-2 rounded-lg border border-[var(--line)] px-4 py-2.5 text-xs font-semibold text-[var(--accent)] hover:bg-[var(--soft)] disabled:cursor-not-allowed disabled:opacity-40"><UserPlus size={14}/>เปิดสิทธิ์คอร์ส</button>}</div>
-              {enrollment && <div className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-xl bg-[var(--paper)] p-4"><div><p className="text-xs font-medium">{maxed ? "เปิดครบทุกเลเวลแล้ว" : `เลเวลถัดไป: Level ${enrollment.unlockedLevel + 1}`}</p><p className="mt-1.5 text-[11px] leading-6 text-[var(--muted)]">{demo ? `รายการ Level ${enrollment.unlockedLevel}: ทำครบ ${done} / ${tasks.length} รายการ` : "ระบบตรวจว่ารายการเลเวลปัจจุบันครบก่อนปลดล็อก"}</p></div><button disabled={busy || setupRequired || Boolean(maxed)} onClick={() => void changeEnrollment(course.id, "advance")} className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-3 text-xs font-semibold text-white hover:bg-teal-800 disabled:opacity-40">{maxed ? <Check size={14}/> : <LockKeyhole size={14}/>}{busy ? "กำลังบันทึก…" : maxed ? `ครบ ${course.levelCount} เลเวล` : `ปลดล็อก Level ${enrollment.unlockedLevel + 1}`}</button></div>}
+              {enrollment && <div className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-xl bg-[var(--paper)] p-4"><div><p className="text-xs font-medium">{maxed ? "เปิดครบทุกเลเวลแล้ว" : `เลเวลถัดไป: Level ${displayLevelNumber(course.id,enrollment.unlockedLevel + 1)}`}</p><p className="mt-1.5 text-[11px] leading-6 text-[var(--muted)]">{demo ? `รายการ Level ${displayLevelNumber(course.id,enrollment.unlockedLevel)}: ทำครบ ${done} / ${tasks.length} รายการ` : "ระบบตรวจว่ารายการเลเวลปัจจุบันครบก่อนปลดล็อก"}</p></div><button disabled={busy || setupRequired || Boolean(maxed)} onClick={() => void changeEnrollment(course.id, "advance")} className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-3 text-xs font-semibold text-white hover:bg-teal-800 disabled:opacity-40">{maxed ? <Check size={14}/> : <LockKeyhole size={14}/>}{busy ? "กำลังบันทึก…" : maxed ? `ครบ ${course.levelCount} เลเวล` : `ปลดล็อก Level ${displayLevelNumber(course.id,enrollment.unlockedLevel + 1)}`}</button></div>}
               </article>;
             })}</div>
           </> : <div className="flex min-h-[320px] flex-col items-center justify-center gap-4 text-center text-[var(--muted)]"><Users size={32}/><p className="text-sm">เลือกหรือเพิ่มนักเรียนเพื่อจัดการสิทธิ์</p></div>}

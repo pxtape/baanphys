@@ -32,3 +32,6 @@ describe("physical geometry used by classroom illustrations",()=>{
 import {COURSES,PRE_POSN_LEVELS} from "./course-catalog";
 it("keeps the 32-level syllabus aligned after splitting Newton with unknown durations",()=>{expect(COURSES[0].levelCount).toBe(32);expect(PRE_POSN_LEVELS).toHaveLength(32);expect(PRE_POSN_LEVELS.slice(4,7).map(l=>[l.number,l.title,l.durationMinutes])).toEqual([[5,"Newton II",null],[6,"Newton III",null],[7,"Projectile",170]]);expect(PRE_POSN_LEVELS[9]).toMatchObject({number:10,title:"Gravity",durationMinutes:80});expect(PRE_POSN_LEVELS[31]).toMatchObject({number:32,title:"Magnetic"});});
 
+import {CAMP_1_LEVELS,CAMP_2_LEVELS,displayLevelNumber} from "./course-catalog";
+it("preserves owner camp labels and course-local access ordinals",()=>{expect(CAMP_1_LEVELS).toHaveLength(19);expect(CAMP_2_LEVELS).toHaveLength(26);expect(CAMP_1_LEVELS[4].title).toBe("Taylor's Expansion");expect(CAMP_2_LEVELS[0]).toMatchObject({number:1,displayNumber:20,title:"Angular Momentum"});expect(CAMP_2_LEVELS[25]).toMatchObject({number:26,displayNumber:45,title:"Relativity"});expect(displayLevelNumber("camp-2",1)).toBe(20);expect([...CAMP_1_LEVELS,...CAMP_2_LEVELS].every(l=>l.durationMinutes===null)).toBe(true);});
+

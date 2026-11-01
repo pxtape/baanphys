@@ -16,7 +16,7 @@ import {
   LogOut, Maximize, Minimize, Route,
 } from "lucide-react";
 import {
-  COURSES, PRE_POSN_LEVELS, formatStudyTime,
+  COURSES, PRE_POSN_LEVELS, catalogLevels,displayLevelNumber,formatStudyTime,
   type CourseDefinition, type CourseId, type CourseLevel, type Enrollment, type LearningItem,
 } from "@/lib/course-catalog";
 import { setClassroomTask } from "@/app/courses/actions";
@@ -40,7 +40,7 @@ function readDemoEnrollments(studentId: string, fallback: Enrollment[]): Enrollm
     if (!Array.isArray(stored)) return fallback;
     return stored.filter((item): item is Enrollment => Boolean(item && typeof item === "object"
       && item.studentId === studentId && COURSES.some((course) => course.id === item.courseId)
-      && Number.isInteger(item.unlockedLevel) && item.unlockedLevel >= 1 && item.unlockedLevel <= PRE_POSN_LEVELS.length));
+      && Number.isInteger(item.unlockedLevel) && item.unlockedLevel >= 1 && item.unlockedLevel <= (COURSES.find(c=>c.id===item.courseId)?.levelCount??200)));
   } catch { return fallback; }
 }
 
@@ -55,8 +55,8 @@ function CourseCard({ course, enrollment, selected, onClick }: {
   course: CourseDefinition; enrollment?: Enrollment; selected: boolean; onClick: () => void;
 }) {
   const locked = !enrollment;
-  return <button type="button" disabled={locked} onClick={onClick} aria-pressed={selected}
-    aria-label={`${course.title}${locked ? " ยังไม่ปลดล็อก" : " เปิดคอร์ส"}`}
+  return <button type="button" onClick={onClick} aria-pressed={selected}
+    aria-label={`${course.title}${locked ? " ดูโครงคอร์ส · ยังไม่ปลดล็อก" : " เปิดคอร์ส"}`}
     className={`lab-course group relative flex min-h-[158px] flex-col overflow-hidden rounded-2xl border p-5 text-left transition ${selected ? "border-[#568677] bg-[#528273] text-white" : locked ? "border-[#e4e8e4] bg-[#f3f4f0] text-[#87918d]" : "border-[#dce4de] bg-white text-[#172b3a] hover:border-[#167a72]"}`}>
     <span className={`flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.16em] ${selected ? "text-[#e2eee6]" : "text-[#8a9790]"}`}>
       <GraduationCap size={14}/>{course.subtitle}
@@ -66,14 +66,14 @@ function CourseCard({ course, enrollment, selected, onClick }: {
       {locked ? <LockKeyhole size={19} strokeWidth={1.7}/> : <ArrowRight size={20} className="transition group-hover:translate-x-1"/>}
     </span>
     <span className={`mt-auto pt-3 text-[11px] ${selected ? "text-[#e2eee6]" : "text-[#87918d]"}`}>
-      {locked ? "รอเปิดสิทธิ์เข้าเรียน" : course.levelCount ? `ปลดล็อก ${enrollment.unlockedLevel} / ${course.levelCount} เลเวล` : "ได้รับสิทธิ์เข้าเรียนแล้ว"}
+      {locked ? "รอเปิดสิทธิ์เข้าเรียน" : course.levelCount ? `เปิดถึง Level ${displayLevelNumber(course.id,enrollment.unlockedLevel)}` : "ได้รับสิทธิ์เข้าเรียนแล้ว"}
     </span>
     {selected && <span className="absolute -bottom-10 -right-6 h-28 w-28 rounded-full border border-white/10"/>}
   </button>;
 }
 
 function getLevels(course: CourseDefinition): CourseLevel[] {
-  if (course.id === "pre-posn") return PRE_POSN_LEVELS;
+  if (catalogLevels(course.id).length) return catalogLevels(course.id);
   return Array.from({ length: course.levelCount ?? 0 }, (_, index) => ({
     number: index + 1, title: "รอข้อมูลบทเรียน", section: course.title,
     durationMinutes: null, isPlaceholder: true,
@@ -91,11 +91,13 @@ const EXPEDITIONS = [
   { start: 32, end: 32, title: "อีกหนึ่งแรงที่มองไม่เห็น", topic: "แม่เหล็ก", note: "จุดหมายสุดท้ายของ Pre-POSN และจุดเริ่มต้นถัดไป", color: "#536695", paper: "#edf0f9", art: "magnet" },
 ];
 
-function LevelPathway({ levels, unlockedLevel, selectedLevel, completedItemIds, items, demo, onSelect, themed }: {
+function LevelPathway({ levels, unlockedLevel, selectedLevel, completedItemIds, items, demo, onSelect, themed,courseId }: {
   levels: CourseLevel[]; unlockedLevel: number; selectedLevel: number | null;
-  completedItemIds: string[]; items: LearningItem[]; demo: boolean; onSelect: (level: number) => void; themed: boolean;
+  courseId:CourseId;completedItemIds: string[]; items: LearningItem[]; demo: boolean; onSelect: (level: number) => void; themed: boolean;
 }) {
-  const chapters = themed ? EXPEDITIONS : [{ start: 1, end: Infinity, title: "เส้นทางการเรียนรู้", topic: "ทีละก้าว สู่ความเข้าใจ", note: "เลือกด่านที่เปิดแล้วเพื่อเริ่มเรียน", color: "#167a72", paper: "#eaf3ed", art: "motion" }];
+  const sectionArt:Record<string,PhysicsChapterKey>={"Maths for Physics":"motion",Mechanics:"force",Electrostatics:"electric","Direct Current":"electric",Heat:"fluid",Thermodynamics:"gas",Wave:"light",Electromagnetic:"magnet","AC circuit":"electric","Quantum Mechanics":"light",Relativity:"motion"};
+  const grouped=Array.from(new Set(levels.map(l=>l.section))).filter(Boolean).map(section=>{const rows=levels.filter(l=>l.section===section),art=sectionArt[section]??"motion",identity=PHYSICS_CHAPTERS[art];return {start:rows[0].number,end:rows.at(-1)!.number,title:section,topic:section,note:"",color:identity.color,paper:identity.paper,art};});
+  const chapters = courseId==="pre-posn" ? EXPEDITIONS : grouped.length?grouped : [{ start: 1, end: Infinity, title: "เส้นทางการเรียนรู้", topic: "ทีละก้าว สู่ความเข้าใจ", note: "เลือกด่านที่เปิดแล้วเพื่อเริ่มเรียน", color: "#167a72", paper: "#eaf3ed", art: "motion" }];
   return <div>
     <nav aria-label="เลือกหมวดบทเรียน" className="quiet-chapter-links"><label className="flex items-center gap-3 text-sm text-[#586b70]">หมวดบทเรียน<select aria-label="ไปยังหมวดบทเรียน" defaultValue="" onChange={e=>{if(e.target.value)document.getElementById(`expedition-${e.target.value}`)?.scrollIntoView({behavior:"smooth",block:"start"});}} className="min-h-10 max-w-full rounded-md border border-[#ddd7ca] bg-[#fffdf8] px-3 py-2 text-sm"><option value="">เลือกหมวดที่ต้องการดู</option>{chapters.filter(ch=>levels.some(l=>l.number>=ch.start&&l.number<=ch.end)).map(ch=><option key={ch.start} value={ch.start}>{ch.topic}</option>)}</select></label></nav>
     <div className="space-y-7">{chapters.map((chapter, chapterIndex) => {
@@ -106,8 +108,8 @@ function LevelPathway({ levels, unlockedLevel, selectedLevel, completedItemIds, 
       const passed = chapterLevels.filter(l => l.number < unlockedLevel).length;
       return <section key={chapter.start} id={`expedition-${chapter.start}`} aria-label={chapter.topic} style={{"--chapter-color":chapter.color,"--identity-color":identity.color,"--identity-paper":identity.paper} as React.CSSProperties} className={`expedition ${themed?"physics-chapter":""} scroll-mt-6 overflow-hidden rounded-[24px] border ${active ? "border-[#a2bdab] shadow-[0_8px_32px_#183e2310]" : "border-[#dfe5db]"}`}>
         <div className="quiet-chapter-head relative flex min-h-40 items-center justify-between gap-3 overflow-hidden px-5 py-6 sm:px-7" style={{backgroundColor:chapter.paper}}>
-          <ExplorerBadge/><div className="explorer-chapter-copy relative z-10 max-w-[65%]"><p className="text-[10px] font-bold uppercase tracking-[.18em]" style={{color:chapter.color}}>EXPEDITION {String(chapterIndex+1).padStart(2,"0")} · LEVEL {chapterLevels[0].number}–{chapterLevels.at(-1)?.number}</p><h3 className="mt-2 text-xl font-semibold leading-8 tracking-tight text-[#203b3b] sm:text-2xl">{themed?identity.name:chapter.title}</h3><p className="mt-2 text-sm font-medium" style={{color:chapter.color}}>{chapter.topic}</p><p className="mt-2 hidden text-xs leading-6 text-[#5f7065] sm:block">{chapter.note}</p></div>
-          {themed&&<ChapterPhysicsArt identity={chapter.art as PhysicsChapterKey}/>}
+          <ExplorerBadge metal={courseId==="camp-1"?"silver":courseId==="camp-2"?"gold":"copper"}/><div className="explorer-chapter-copy relative z-10 max-w-[65%]"><p className="text-[10px] font-bold uppercase tracking-[.18em]" style={{color:chapter.color}}>EXPEDITION {String(chapterIndex+1).padStart(2,"0")} · LEVEL {displayLevelNumber(courseId,chapterLevels[0].number)}–{displayLevelNumber(courseId,chapterLevels.at(-1)!.number)}</p><h3 className="mt-2 text-xl font-semibold leading-8 tracking-tight text-[#203b3b] sm:text-2xl">{courseId==="pre-posn"?identity.name:chapter.title}</h3><p className="mt-2 text-sm font-medium" style={{color:chapter.color}}>{courseId==="pre-posn"?chapter.topic:`${chapterLevels.length} บทเรียน`}</p><p className="mt-2 hidden text-xs leading-6 text-[#5f7065] sm:block">{chapter.note}</p></div>
+          {themed&&<ChapterPhysicsArt identity={chapter.art as PhysicsChapterKey} campArt={courseId!=="pre-posn"?`${courseId.replace("camp-","camp")}-${chapter.start}`:undefined}/>}
         </div>
         <div className="quiet-chapter-body bg-white px-4 pb-6 pt-4 sm:px-7"><div className="mb-5 flex items-center justify-between gap-3 text-xs text-[#657568]"><span>{active ? "คุณกำลังสำรวจหมวดนี้" : passed === chapterLevels.length ? "ผ่านหมวดนี้แล้ว" : "เส้นทางข้างหน้า"}</span><span>{passed} / {chapterLevels.length} ด่านที่ผ่าน</span></div>
           <div className="expedition-trail relative grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">{chapterLevels.map(level => {
@@ -117,8 +119,8 @@ function LevelPathway({ levels, unlockedLevel, selectedLevel, completedItemIds, 
             const waiting = level.number === unlockedLevel && tasks.length > 0 && done === tasks.length;
             const current = level.number === unlockedLevel;
             const passedLevel = level.number < unlockedLevel;
-            return <button id={`level-${level.number}`} key={level.number} type="button" disabled={locked} onClick={() => onSelect(level.number)} aria-pressed={selectedLevel===level.number} aria-label={`Level ${level.number} ${level.title}${locked ? " ยังไม่ปลดล็อก" : current ? " เลเวลปัจจุบัน" : " เปิดบทเรียน"}`} className={`quiet-level ${current?"is-current":""} relative flex min-h-28 items-center gap-3 rounded-2xl border p-4 text-left transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#167a72] ${current ? waiting ? "border-[#c5a56c] bg-[#fff7e4]" : "border-[#167a72] bg-[#edf7f1] shadow-[0_4px_0_#167a7220]" : locked ? "border-[#e4e8e0] bg-[#f7f8f4]" : "border-[#cbdccc] bg-white hover:-translate-y-0.5 hover:border-[#167a72]"}`}>
-              <span className={`quiet-level-number relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-lg font-bold ${current ? waiting ? "bg-[#a77d39] text-white" : "bg-[#167a72] text-white" : passedLevel ? "bg-[#deeddf] text-[#377549]" : "bg-[#e9ede5] text-[#637365]"}`}>{level.number}{current&&<span className="quiet-current-label">เลเวลปัจจุบัน</span>}{passedLevel && <Check size={14} className="absolute -bottom-1 -right-1 rounded-full bg-[#387f51] p-0.5 text-white"/>}{locked && <LockKeyhole size={12} className="absolute -right-1 -top-1 rounded-full bg-[#e1e7da] p-0.5"/>}</span>
+            return <button id={`level-${level.number}`} key={level.number} type="button" disabled={locked} onClick={() => onSelect(level.number)} aria-pressed={selectedLevel===level.number} aria-label={`Level ${displayLevelNumber(courseId,level.number)} ${level.title}${locked ? " ยังไม่ปลดล็อก" : current ? " เลเวลปัจจุบัน" : " เปิดบทเรียน"}`} className={`quiet-level ${current?"is-current":""} relative flex min-h-28 items-center gap-3 rounded-2xl border p-4 text-left transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#167a72] ${current ? waiting ? "border-[#c5a56c] bg-[#fff7e4]" : "border-[#167a72] bg-[#edf7f1] shadow-[0_4px_0_#167a7220]" : locked ? "border-[#e4e8e0] bg-[#f7f8f4]" : "border-[#cbdccc] bg-white hover:-translate-y-0.5 hover:border-[#167a72]"}`}>
+              <span className={`quiet-level-number relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-lg font-bold ${current ? waiting ? "bg-[#a77d39] text-white" : "bg-[#167a72] text-white" : passedLevel ? "bg-[#deeddf] text-[#377549]" : "bg-[#e9ede5] text-[#637365]"}`}>{displayLevelNumber(courseId,level.number)}{current&&<span className="quiet-current-label">เลเวลปัจจุบัน</span>}{passedLevel && <Check size={14} className="absolute -bottom-1 -right-1 rounded-full bg-[#387f51] p-0.5 text-white"/>}{locked && <LockKeyhole size={12} className="absolute -right-1 -top-1 rounded-full bg-[#e1e7da] p-0.5"/>}</span>
               <span className="quiet-level-copy min-w-0 flex-1"><span className="quiet-level-title block text-sm font-semibold leading-6 text-[#30483e]">{level.title}</span><span className="quiet-level-meta mt-1 flex items-center gap-1 text-[11px] text-[#627465]"><Clock3 size={11}/>{formatStudyTime(level.durationMinutes)}{level.questionCount!=null ? ` · ${level.questionCount} ข้อ` : ""}{demo && level.durationMinutes!==null ? " · ตัวอย่าง" : ""}</span>{current && <span className={`quiet-level-state mt-2 block text-[11px] font-semibold ${waiting ? "text-[#8a652c]" : "text-[#167a72]"}`}>{waiting ? "ทำครบแล้ว · ติดต่อ LINE" : "เรียนต่อจากตรงนี้ →"}</span>}{!locked && tasks.length>0 && <span className="mt-2 block h-1 rounded-full bg-[#dfe8dd]"><span className="block h-1 rounded-full bg-[#438c66]" style={{width:`${done/tasks.length*100}%`}}/></span>}</span>
             </button>;
           })}</div>
@@ -168,10 +170,10 @@ export function LessonPanel({ preview=false, userId,onQuestionCompletion, level,
       setMediaError("ขยายเต็มจอไม่สำเร็จ กรุณาลองอีกครั้ง หรือดูในหน้าต่างนี้");
     }
   }
-  return <section aria-label={`รายการเรียน Level ${level.number}`} className="explorer-lesson overflow-hidden rounded-2xl border border-[#dce5dd] bg-white shadow-[0_8px_24px_#172b3a04]">
+  return <section aria-label={`รายการเรียน Level ${level.displayNumber??level.number}`} className="explorer-lesson overflow-hidden rounded-2xl border border-[#dce5dd] bg-white shadow-[0_8px_24px_#172b3a04]">
     <div className="bp-reader-head explorer-lesson-head border-b border-[#e5eae2] bg-[#f3f6ef] p-5">
       <div className="flex items-center justify-between"><p className="text-[10px] font-semibold uppercase tracking-[.15em] text-[#6d8875]">ห้องเรียนของคุณ</p><button type="button" onClick={onClose} aria-label={preview?"กลับไปแก้ไข":"กลับไปเส้นทางเรียน"} className="inline-flex items-center gap-2 rounded-md border border-[#ccd8ca] bg-white px-3 py-2 text-sm text-[#34483d]"><ArrowLeft size={16}/> {preview?"กลับไปแก้ไข":"กลับไปเส้นทางเรียน"}</button></div>
-      <p className="mt-4 text-xs font-semibold text-[#167a72]">LEVEL {String(level.number).padStart(2, "0")}</p>
+      <p className="mt-4 text-xs font-semibold text-[#167a72]">LEVEL {String(level.displayNumber??level.number).padStart(2, "0")}</p>
       <h3 className="mt-1 text-xl font-semibold leading-8 tracking-tight text-[#172b3a]">{level.title}</h3>
       <div className="mt-3 flex items-center gap-1.5 text-[11px] text-[#7c8d7e]"><Clock3 size={13}/>{formatStudyTime(level.durationMinutes)}{level.questionCount!=null ? ` · ${level.questionCount} ข้อ` : ""}{demo && level.durationMinutes !== null ? " · ตัวอย่าง" : ""}</div>
     </div>
@@ -232,7 +234,7 @@ export function LessonPanel({ preview=false, userId,onQuestionCompletion, level,
 export function StudentClassroom({ expiredCourseIds=[],demo = false, user, enrollments: initialEnrollments, items, completedItemIds, setupRequired = false, courseLevels, directDrive = false }: StudentClassroomProps) {
   const [enrollments, setEnrollments] = useState(initialEnrollments);
   const [completedIds, setCompletedIds] = useState(completedItemIds);
-  const [selectedCourseId, setSelectedCourseId] = useState<CourseId | null>(initialEnrollments[0]?.courseId ?? null);
+  const [selectedCourseId, setSelectedCourseId] = useState<CourseId | null>(initialEnrollments[0]?.courseId ?? "pre-posn");
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
   const [pendingItem, setPendingItem] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -250,7 +252,7 @@ export function StudentClassroom({ expiredCourseIds=[],demo = false, user, enrol
       ? levelItems.reduce((total, item) => total + (item.durationMinutes ?? 0), 0) : record.durationMinutes;
     return { ...record, durationMinutes };
   }) : baseLevels;
-  const level = levels.find((record) => record.number === selectedLevel);
+  const level = enrollment&&!expired?levels.find((record) => record.number === selectedLevel):undefined;
   const selectedLevelCount = levels.length || selectedCourse?.levelCount;
   const currentLevel = enrollment?.unlockedLevel ?? 1;
   const courseIsEnrolled = Boolean(enrollment);
@@ -273,12 +275,7 @@ export function StudentClassroom({ expiredCourseIds=[],demo = false, user, enrol
     };
   }, [demo, user.id, initialEnrollments, completedItemIds]);
 
-  useEffect(() => {
-    if (selectedCourseId && !enrollments.some((record) => record.courseId === selectedCourseId)) {
-      setSelectedCourseId(enrollments[0]?.courseId ?? null);
-      setSelectedLevel(null);
-    }
-  }, [enrollments, selectedCourseId]);
+
 
   useEffect(() => {
     if (selectedLevel !== null && (expired||selectedLevel > currentLevel)) setSelectedLevel(null);
@@ -336,21 +333,21 @@ export function StudentClassroom({ expiredCourseIds=[],demo = false, user, enrol
     </header>
     <div className="quiet-layout"><aside className="quiet-rail" aria-label="เมนูหลัก"><Link href="/" className="quiet-brand"><ExplorerMark/>BAANPHYS</Link><nav><Link href={demo?"/preview/classroom":"/courses"} aria-current="page"><LayoutGrid size={18}/>ห้องเรียน</Link><Link href={demo?"/login":"/calendar"}><CalendarDays size={18}/>ปฏิทิน</Link><Link href={demo?"/login":"/profile"}><UserRound size={18}/>โปรไฟล์</Link></nav><div className="quiet-rail-foot"><p>{user.displayName}</p><p>{demo?"บัญชีตัวอย่าง":"พื้นที่เรียนรู้ของคุณ"}</p>{!demo&&<button type="button" onClick={()=>void signOut()}><LogOut size={15}/>ออกจากระบบ</button>}</div></aside>
     <main className={`quiet-main ${level?"is-reading":""}`}><div className="quiet-topline"><div><h1>ห้องเรียนของฉัน</h1><p>{selectedCourse?.title??"เลือกคอร์สเพื่อเริ่มเรียน"}</p></div><span className="quiet-identity">{user.displayName}</span></div>
-      <div className={`quiet-workspace ${level?"is-lesson":""}`}><div className="quiet-content">
+      <div className={`quiet-workspace ${level?"is-lesson":!enrollment?"is-browsing":""}`}><div className="quiet-content">
       {setupRequired && <div role="status" className="mb-7 rounded-xl border border-[#eedfc4] bg-[#fff9ed] p-4 text-xs leading-6 text-[#977646]">ห้องเรียนยังอยู่ระหว่างตั้งค่าระบบ บัญชีและสิทธิ์จริงจะพร้อมเมื่อแอดมินตั้งค่าฐานข้อมูลเรียบร้อยแล้ว <Link href="/preview/classroom" className="font-semibold underline">ดูหน้าตัวอย่าง</Link></div>}
 
       <section className="quiet-courses" aria-labelledby="my-courses-heading">
         <div className="sr-only"><h2 id="my-courses-heading" className="text-sm font-semibold">คอร์สเรียนของคุณ</h2><span className="text-[10px] text-[#939e87]">{enrollments.length} คอร์สที่มีสิทธิ์เข้าเรียน</span></div>
-        <div className="quiet-course-grid">{COURSES.map((course) => <CourseCard key={course.id} course={{ ...course, levelCount: courseLevels?.[course.id]?.length || course.levelCount }} enrollment={enrollments.find((record) => record.courseId === course.id)} selected={selectedCourseId === course.id && courseIsEnrolled} onClick={() => { setSelectedCourseId(course.id); setSelectedLevel(null); setError(""); requestAnimationFrame(() => pathwayRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })); }}/>)}</div>
+        <div className="quiet-course-grid">{COURSES.map((course) => <CourseCard key={course.id} course={{ ...course, levelCount: courseLevels?.[course.id]?.length || course.levelCount }} enrollment={enrollments.find((record) => record.courseId === course.id)} selected={selectedCourseId === course.id} onClick={() => { setSelectedCourseId(course.id); setSelectedLevel(null); setError(""); requestAnimationFrame(() => pathwayRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })); }}/>)}</div>
       </section>
 
       {!level&&selectedCourse&&enrollment&&!expired&&levels.find(l=>l.number===currentLevel)&&<QuietCurrentLesson courseTitle={selectedCourse.title} level={levels.find(l=>l.number===currentLevel)!} onOpen={()=>openLevel(currentLevel)}/>}
-      {selectedCourse && enrollment ? <section ref={pathwayRef} className="quiet-pathway mt-5 scroll-mt-5 border-t border-[#e3e8dc] pt-5" aria-labelledby="pathway-heading">
+      {selectedCourse ? <section ref={pathwayRef} className="quiet-pathway mt-5 scroll-mt-5 border-t border-[#e3e8dc] pt-5" aria-labelledby="pathway-heading">
         <div className="quiet-path-head mb-4 flex flex-wrap items-start justify-between gap-3"><div><p className="text-[9px] font-semibold uppercase tracking-[.17em] text-[#8c9a7b]">เส้นทางการเรียน</p><h2 id="pathway-heading" className="mt-1.5 text-xl font-semibold tracking-tight">{selectedCourse.title}<span className="ml-3 text-xs font-normal text-[#9aa38c]">{selectedLevelCount ? `${selectedLevelCount} levels` : "รอรายละเอียดคอร์ส"}</span></h2></div><div className="flex flex-wrap items-center gap-4 pt-2 text-[10px] text-[#909b82]"><span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#b8d1b8]"/>เรียนผ่านมาแล้ว</span><span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-[#167a72]"/>เลเวลปัจจุบัน</span><span className="inline-flex items-center gap-1.5"><LockKeyhole size={10}/>ยังไม่ปลดล็อก</span></div></div>
         <div className={`grid items-start gap-7 ${level ? "mx-auto max-w-[1120px]" : ""}`}>
           <div hidden={Boolean(level)} className="quiet-path-box min-w-0 rounded-2xl border border-[#e3e8dc] bg-[#fbfcfa] p-3 sm:p-5">
-            <div className="quiet-map-caption mb-7 flex flex-wrap items-center justify-between gap-3 border-b border-[#e8ecdf] pb-5"><div className="flex items-center gap-2 text-[11px] text-[#7e8f70]"><Route size={15}/><span>แผนที่การเรียนของคุณ</span>{!level && <a href={`#level-${currentLevel}`} className="rounded-full bg-white px-3 py-2 text-xs font-semibold text-[#167a72]">ไปด่านปัจจุบัน ↓</a>}</div><span className="font-mono text-[10px] text-[#9aa68b]">{String(currentLevel).padStart(2, "0")} / {selectedLevelCount ?? "—"}</span></div>
-            {expired?<div role="status" className="rounded-xl border bg-amber-50 p-5 text-sm leading-7">ถึงวันต่ออายุคอร์สแล้ว กรุณาติดต่อพี่เทปเพื่อต่ออายุ · ความคืบหน้าและประวัติของคุณยังเก็บอยู่ ดูได้ในหน้าโปรไฟล์</div>:levels.length > 0 ? <LevelPathway themed={selectedCourseId === "pre-posn"} levels={levels} unlockedLevel={enrollment.unlockedLevel} selectedLevel={selectedLevel} items={courseItems} completedItemIds={completedIds} demo={demo} onSelect={openLevel}/> : <div className="py-16 text-center"><BookOpen size={30} className="mx-auto text-[#a5b192]"/><p className="mt-4 text-sm text-[#738463]">รอรายละเอียดเส้นทางคอร์สนี้</p><p className="mt-2 text-xs text-[#9ba68d]">ติวเตอร์กำลังจัดเตรียมเลเวลและเนื้อหา</p></div>}
+            <div className="quiet-map-caption mb-7 flex flex-wrap items-center justify-between gap-3 border-b border-[#e8ecdf] pb-5"><div className="flex items-center gap-2 text-[11px] text-[#7e8f70]"><Route size={15}/><span>แผนที่การเรียนของคุณ</span>{!level&&enrollment&&!expired && <a href={`#level-${currentLevel}`} className="rounded-full bg-white px-3 py-2 text-xs font-semibold text-[#167a72]">ไปด่านปัจจุบัน ↓</a>}</div><span className="font-mono text-[10px] text-[#9aa68b]">{enrollment?`${displayLevelNumber(selectedCourse.id,currentLevel)} / ${displayLevelNumber(selectedCourse.id,levels.at(-1)?.number??currentLevel)}`:"ดูโครงคอร์ส"}</span></div>
+            {(!enrollment||expired)&&<p role="status" className="mb-4 rounded-xl border border-[#e1d9c6] bg-[#fbf4e6] p-4 text-sm leading-7">{expired?"คอร์สถึงกำหนดต่ออายุแล้ว":"ดูโครงคอร์สได้ · ยังไม่มีสิทธิ์เข้าเรียน"} · วิดีโอ ชีท และ HW ยังล็อกอยู่ ติดต่อพี่เทปเพื่อเปิดสิทธิ์เรียน</p>}{levels.length > 0 ? <LevelPathway courseId={selectedCourse.id} themed={selectedCourse.id!=="tpho"} levels={levels} unlockedLevel={enrollment&&!expired?enrollment.unlockedLevel:0} selectedLevel={selectedLevel} items={courseItems} completedItemIds={completedIds} demo={demo} onSelect={openLevel}/> : <div className="py-16 text-center"><BookOpen size={30} className="mx-auto text-[#a5b192]"/><p className="mt-4 text-sm text-[#738463]">รอรายละเอียดเส้นทางคอร์สนี้</p><p className="mt-2 text-xs text-[#9ba68d]">ติวเตอร์กำลังจัดเตรียมเลเวลและเนื้อหา</p></div>}
           </div>
           <div ref={detailRef} className="min-w-0 scroll-mt-5">
             {level ? <LessonPanel userId={user.id} onQuestionCompletion={(itemId,done)=>setCompletedIds(previous=>done?Array.from(new Set([...previous,itemId])):previous.filter(id=>id!==itemId))} key={`${selectedCourseId}-${level.number}`} level={level} items={courseItems.filter((item) => item.levelNumber === level.number)} completedIds={completedIds} pendingItem={pendingItem} error={error} demo={demo} directDrive={directDrive} watermarkLabel={`${user.displayName} · ${user.username}`} onToggle={(itemId, completed) => void toggleTask(itemId, completed)} onClose={() => setSelectedLevel(null)}/> : null}
@@ -358,7 +355,7 @@ export function StudentClassroom({ expiredCourseIds=[],demo = false, user, enrol
         </div>
       </section> : <section className="mt-9 rounded-2xl border border-dashed border-[#dbe3d1] p-8 text-center"><LockKeyhole size={28} className="mx-auto text-[#99a785]"/><h2 className="mt-4 text-base font-semibold text-[#657d50]">ยังไม่มีคอร์สที่ปลดล็อก</h2><p className="mt-2 text-xs leading-6 text-[#95a086]">ติดต่อแอดมินเพื่อเปิดสิทธิ์คอร์สในบัญชีของคุณ</p></section>}
       {error && !level && <p role="alert" className="mt-5 rounded-lg bg-[#fff2ed] p-3 text-xs text-[#b15d43]">{error}</p>}
-      </div>{!level&&<aside className={`study-sidebar order-first lg:order-last `}>{selectedCourse && enrollment && <StudyDashboard compact key={`${user.id}-${selectedCourse.id}`} userId={user.id} courseId={selectedCourse.id} courseTitle={selectedCourse.title} passedLevels={Math.min(levels.length, Math.max(0,currentLevel-1)+(currentLevel===levels.length && courseItems.some(item=>item.levelNumber===currentLevel) && courseItems.filter(item=>item.levelNumber===currentLevel).every(item=>completedIds.includes(item.id)) ? 1 : 0))} levelCount={levels.length} demo={demo}/ >}{!demo&&selectedCourse&&enrollment&&<StudentSupport key={`support-${user.id}-${selectedCourse.id}`} userId={user.id} courseId={selectedCourse.id}/>}</aside>}</div>
+      </div>{!level&&enrollment&&<aside className={`study-sidebar order-first lg:order-last `}>{selectedCourse && enrollment && <StudyDashboard compact key={`${user.id}-${selectedCourse.id}`} userId={user.id} courseId={selectedCourse.id} courseTitle={selectedCourse.title} passedLevels={Math.min(levels.length, Math.max(0,currentLevel-1)+(currentLevel===levels.length && courseItems.some(item=>item.levelNumber===currentLevel) && courseItems.filter(item=>item.levelNumber===currentLevel).every(item=>completedIds.includes(item.id)) ? 1 : 0))} levelCount={levels.length} demo={demo}/ >}{!demo&&selectedCourse&&enrollment&&<StudentSupport key={`support-${user.id}-${selectedCourse.id}`} userId={user.id} courseId={selectedCourse.id}/>}</aside>}</div>
     </main></div>
     <nav className="quiet-mobile-nav" aria-label="เมนูมือถือ"><Link href={demo?"/preview/classroom":"/courses"} aria-current="page"><LayoutGrid size={19}/>ห้องเรียน</Link><Link href={demo?"/login":"/calendar"}><CalendarDays size={19}/>ปฏิทิน</Link><Link href={demo?"/login":"/profile"}><UserRound size={19}/>โปรไฟล์</Link></nav>
     <footer className="lab-footer border-t border-[#e3e8dc]"><div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-3 px-5 py-6 text-[10px] text-[#a1aa92] sm:px-9 lg:px-12"><span>© 2026 บ้านฟิสิกส์ by P&apos;Tape</span>{demo ? <Link href="/" className="inline-flex items-center gap-1.5 hover:text-[#167a72]"><ArrowLeft size={11}/>กลับหน้าหลัก</Link> : <span>เรียนรู้ด้วยความเข้าใจ เติบโตทีละก้าว</span>}</div></footer>

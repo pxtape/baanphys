@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { isCourseId, type CourseId, type CourseLevel, type Enrollment, type LearningItem, type StudentRecord } from "@/lib/course-catalog";
+import { catalogSection,displayLevelNumber,isCourseId, type CourseId, type CourseLevel, type Enrollment, type LearningItem, type StudentRecord } from "@/lib/course-catalog";
 
 export type ClassroomStudentData = {
   user: { id: string; displayName: string; username: string };
@@ -58,7 +58,7 @@ export async function getClassroomStudentData(): Promise<ClassroomStudentData> {
     for (const level of (levelsResult.data ?? []) as LevelRow[]) {
       if (!isCourseId(level.course_id)) continue;
       (courseLevels[level.course_id] ??= []).push({
-        number: level.number, title: level.title, section: "",
+        number: level.number, title: level.title,displayNumber:displayLevelNumber(level.course_id,level.number), section:catalogSection(level.course_id,level.number),
         durationMinutes: level.duration_minutes, isPlaceholder: level.title.includes("รอ"),
       });
     }
@@ -105,3 +105,4 @@ export async function getClassroomAdminData(): Promise<ClassroomAdminData> {
     setupRequired: false,
   };
 }
+
