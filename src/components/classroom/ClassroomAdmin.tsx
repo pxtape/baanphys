@@ -138,7 +138,7 @@ export function ClassroomAdmin({ demo = false, students: initialStudents, setupR
         <div className="sm:col-span-3"><h2 className="font-semibold">{demo ? "เพิ่มนักเรียนตัวอย่าง" : "สร้างบัญชีนักเรียน"}</h2><p className="mt-1 text-xs leading-6 text-[var(--muted)]">{demo ? "ใช้ลองจัดสิทธิ์เท่านั้น ไม่สร้างรหัสผ่านหรือบัญชีจริง" : "คุณเป็นผู้แจ้ง Username และรหัสเริ่มต้นให้นักเรียนเป็นรายคน"}</p></div>
         <label className="text-xs font-medium">ชื่อนักเรียน<input required maxLength={100} value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="mt-2 w-full rounded-lg border border-[var(--line)] p-3 text-sm"/></label>
         <label className="text-xs font-medium">Username<input required pattern="[a-zA-Z0-9._-]{3,40}" minLength={3} maxLength={40} autoComplete="off" placeholder="เช่น student001" value={username} onChange={(e) => setUsername(e.target.value)} className="mt-2 w-full rounded-lg border border-[var(--line)] p-3 text-sm"/></label>
-        {!demo && <label className="text-xs font-medium">รหัสผ่านเริ่มต้น (12 ตัวขึ้นไป)<input required type="password" minLength={12} maxLength={128} autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 w-full rounded-lg border border-[var(--line)] p-3 text-sm"/></label>}
+        {!demo && <label className="text-xs font-medium">รหัสผ่านเริ่มต้น (10 ตัวขึ้นไป)<input required type="password" minLength={10} maxLength={128} autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-2 w-full rounded-lg border border-[var(--line)] p-3 text-sm"/></label>}
         <div className="flex gap-3 sm:col-span-3"><button disabled={busy} className="button-primary disabled:opacity-50">{busy ? "กำลังสร้าง…" : demo ? "เพิ่มข้อมูลตัวอย่าง" : "สร้างบัญชี"}</button><button type="button" className="px-4 text-sm text-[var(--muted)]" onClick={() => { setShowCreate(false); setPassword(""); }}>ยกเลิก</button></div>
       </form>}
       <div className="mt-8 grid gap-6 lg:grid-cols-[320px_1fr]">
@@ -166,4 +166,3 @@ export function ClassroomAdmin({ demo = false, students: initialStudents, setupR
     </div>
   </main>;
 }
-

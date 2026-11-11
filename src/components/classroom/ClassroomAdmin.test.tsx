@@ -76,15 +76,15 @@ describe("ClassroomAdmin", () => {
     fireEvent.click(screen.getByRole("button", { name: "เพิ่มนักเรียน" }));
     fireEvent.change(screen.getByLabelText("ชื่อนักเรียน"), { target: { value: student.displayName } });
     fireEvent.change(screen.getByLabelText("Username"), { target: { value: student.username } });
-    fireEvent.change(screen.getByLabelText("รหัสผ่านเริ่มต้น (12 ตัวขึ้นไป)"), { target: { value: "secret-initial-password" } });
+    fireEvent.change(screen.getByLabelText("รหัสผ่านเริ่มต้น (10 ตัวขึ้นไป)"), { target: { value: "secret-initial-password" } });
     fireEvent.click(screen.getByRole("button", { name: "สร้างบัญชี" }));
 
     await waitFor(() => expect(actions.createClassroomStudent).toHaveBeenCalledWith({ username: "student01", password: "secret-initial-password", displayName: "นักเรียนใหม่" }));
     expect(await screen.findByRole("status")).toHaveTextContent("สร้างบัญชีนักเรียนแล้ว");
     expect(storageWrite).not.toHaveBeenCalled();
-    expect(screen.queryByLabelText("รหัสผ่านเริ่มต้น (12 ตัวขึ้นไป)")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("รหัสผ่านเริ่มต้น (10 ตัวขึ้นไป)")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "เพิ่มนักเรียน" }));
-    expect(screen.getByLabelText("รหัสผ่านเริ่มต้น (12 ตัวขึ้นไป)")).toHaveValue("");
+    expect(screen.getByLabelText("รหัสผ่านเริ่มต้น (10 ตัวขึ้นไป)")).toHaveValue("");
   });
 
   it("does not optimistically unlock a live level when the server rejects it", async () => {
@@ -96,4 +96,3 @@ describe("ClassroomAdmin", () => {
     expect(actions.advanceClassroomStudent).toHaveBeenCalledWith("demo-student-001", "pre-posn");
   });
 });
-

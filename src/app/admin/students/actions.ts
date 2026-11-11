@@ -15,7 +15,7 @@ export async function createClassroomStudent(input: { username: string; password
   const email = classroomEmail(input.username);
   const displayName = input.displayName.trim();
   if (!username || !email) return { error: "Username ต้องมี 3–40 ตัว ใช้ a–z, 0–9, จุด, ขีดกลาง หรือขีดล่าง และเริ่มกับจบด้วยตัวอักษรหรือตัวเลข" };
-  if (input.password.length < 12 || input.password.length > 128) return { error: "รหัสผ่านต้องยาว 12–128 ตัวอักษร" };
+  if (input.password.length < 10 || input.password.length > 128) return { error: "รหัสผ่านต้องยาว 10–128 ตัวอักษร" };
   if (!displayName || displayName.length > 100) return { error: "กรุณาระบุชื่อนักเรียนไม่เกิน 100 ตัวอักษร" };
   if (!isSupabaseConfigured()) return { error: "ยังไม่ได้ตั้งค่าระบบบัญชีนักเรียน" };
 

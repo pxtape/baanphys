@@ -29,7 +29,7 @@ Deno.serve(async (req: Request) => {
     const displayName = typeof body.displayName === "string" ? body.displayName.trim() : "";
     const password = typeof body.password === "string" ? body.password : "";
     if (!/^[a-z0-9][a-z0-9._-]{1,38}[a-z0-9]$/.test(username) || username.includes("..") || username === "admin") return json({ error: "Username ต้องมี 3–40 ตัว ใช้ภาษาอังกฤษ ตัวเลข จุด ขีดกลาง หรือขีดล่าง" }, 400);
-    if (!displayName || displayName.length > 100 || password.length < 12 || password.length > 128) return json({ error: "กรอกชื่อนักเรียน และรหัสผ่าน 12–128 ตัวอักษร" }, 400);
+    if (!displayName || displayName.length > 100 || password.length < 10 || password.length > 128) return json({ error: "กรอกชื่อนักเรียน และรหัสผ่าน 10–128 ตัวอักษร" }, 400);
     // Construct the privileged client only after verifying the caller's DB role.
     const admin = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false, autoRefreshToken: false } });
     const { data, error } = await admin.auth.admin.createUser({ email: `${username}@classroom.invalid`, password, email_confirm: true, user_metadata: { display_name: displayName } });
@@ -45,4 +45,3 @@ Deno.serve(async (req: Request) => {
     return json({ error: "ระบบบัญชีขัดข้อง กรุณาลองใหม่" }, 500);
   }
 });
-

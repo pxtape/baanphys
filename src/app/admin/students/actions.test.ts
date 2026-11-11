@@ -69,7 +69,7 @@ describe("createClassroomStudent authorization", () => {
   });
 
   it("requires a strong initial password before any Auth call", async () => {
-    expect((await createClassroomStudent({ ...validInput, password: "short" })).error).toContain("12–128");
+    expect((await createClassroomStudent({ ...validInput, password: "short" })).error).toContain("10–128");
     expect(mocks.getUser).not.toHaveBeenCalled();
   });
 });
