@@ -41,7 +41,7 @@ export type StudentRecord = { classLevel?:string; schoolName?:string; posnCenter
 export const COURSES: CourseDefinition[] = [
   { id: "pre-posn", title: "Pre-POSN", subtitle: "เตรียมความพร้อม สอวน.", levelCount: 32, description: "ค่อย ๆ สร้างความเข้าใจฟิสิกส์ ผ่านเส้นทางการเรียน 32 เลเวล", accent: "#167a72" },
   { id: "camp-1", title: "Camp 1", subtitle: "ฟิสิกส์ สอวน. ค่าย 1", levelCount: 19, description: "ต่อยอดพื้นฐานสู่การคิดและแก้โจทย์ในค่าย 1", accent: "#4872a5" },
-  { id: "camp-2", title: "Camp 2", subtitle: "ฟิสิกส์ สอวน. ค่าย 2", levelCount: 26, description: "พัฒนาทักษะและความเข้าใจสำหรับค่าย 2", accent: "#8a70a6" },
+  { id: "camp-2", title: "Camp 2", subtitle: "ฟิสิกส์ สอวน. ค่าย 2", levelCount: 24, description: "พัฒนาทักษะและความเข้าใจสำหรับค่าย 2", accent: "#8a70a6" },
   { id: "tpho", title: "TPhO", subtitle: "ฟิสิกส์โอลิมปิกระดับชาติ", levelCount: null, description: "เตรียมตัวสู่การแข่งขันฟิสิกส์โอลิมปิกระดับชาติ", accent: "#ad713e" },
 ];
 
@@ -58,7 +58,7 @@ export const PRE_POSN_LEVELS: CourseLevel[] = syllabus.map(([title,durationMinut
   number:index+1, title, durationMinutes, section:index<17 ? "กลศาสตร์" : index<21 ? "ของไหลและความร้อน" : index<28 ? "ไฟฟ้า" : "แสง แก๊ส และแม่เหล็ก", isPlaceholder:false,
 }));
 
-// Camp 2 uses a course-local ordinal for access checks and Level 20–45 on screen.
+// Camp 2 uses a course-local ordinal for access checks and Level 20–43 on screen.
 export function displayLevelNumber(courseId:string,number:number){return number+(courseId==="camp-2"?19:0);}
 export function displayLevelRange(courseId:string,through:number){return `${displayLevelNumber(courseId,1)}–${displayLevelNumber(courseId,through)}`;}
 const camp1Outline:[string,string[]][]=[
@@ -69,8 +69,7 @@ const camp1Outline:[string,string[]][]=[
 ];
 const camp2Outline:[string,string[]][]=[
  ["Mechanics of Rotation",["Angular Momentum","Torque","Conservation Laws","Non-Fixed Axis Rotation"]],
- ["Heat",["Zeroth Law","Heat Expansion","Heat Capacity","Heat Transfer"]],
- ["Thermodynamics",["1st Law","2nd Law"]],
+ ["Thermodynamics",["Temperature and Heat Properties","Heat Transfer","1st Law","2nd Law"]],
  ["Wave",["Travelling Wave","Standing Wave","Interference and Diffraction","Beat","Doppler Effect"]],
  ["Electromagnetic",["Biot-Savart Law","Ampere's Loop Law","Lorentz Force","Lenz Law","Faraday Law","Inductance","Maxwell's Equation","EM wave"]],
  ["AC circuit",["AC circuit"]],["Quantum Mechanics",["Quantum"]],["Relativity",["Relativity"]],
@@ -111,4 +110,3 @@ export const DEMO_COMPLETED_ITEM_IDS = DEMO_ITEMS.filter((item) => item.levelNum
 export function isCourseId(value: unknown): value is CourseId {
   return COURSES.some((course) => course.id === value);
 }
-
