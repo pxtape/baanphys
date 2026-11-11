@@ -68,7 +68,7 @@ const camp1Outline:[string,string[]][]=[
  ["Direct Current",["Ohm's Law","Kirchhoff's Rules","Electric Power"]],
 ];
 const camp2Outline:[string,string[]][]=[
- ["Mechanics",["Angular Momentum","Fixed Axis Rotation","Rigid Body","Lagrangian Mechanics"]],
+ ["Mechanics of Rotation",["Angular Momentum","Torque","Conservation Laws","Non-Fixed Axis Rotation"]],
  ["Heat",["Zeroth Law","Heat Expansion","Heat Capacity","Heat Transfer"]],
  ["Thermodynamics",["1st Law","2nd Law"]],
  ["Wave",["Travelling Wave","Standing Wave","Interference and Diffraction","Beat","Doppler Effect"]],

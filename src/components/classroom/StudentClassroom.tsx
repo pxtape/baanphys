@@ -95,7 +95,7 @@ function LevelPathway({ levels, unlockedLevel, selectedLevel, completedItemIds, 
   levels: CourseLevel[]; unlockedLevel: number; selectedLevel: number | null;
   courseId:CourseId;completedItemIds: string[]; items: LearningItem[]; demo: boolean; onSelect: (level: number) => void; themed: boolean;
 }) {
-  const sectionArt:Record<string,PhysicsChapterKey>={"Maths for Physics":"motion",Mechanics:"force",Electrostatics:"electric","Direct Current":"electric",Heat:"fluid",Thermodynamics:"gas",Wave:"light",Electromagnetic:"magnet","AC circuit":"electric","Quantum Mechanics":"light",Relativity:"motion"};
+  const sectionArt:Record<string,PhysicsChapterKey>={"Maths for Physics":"motion",Mechanics:"force","Mechanics of Rotation":"force",Electrostatics:"electric","Direct Current":"electric",Heat:"fluid",Thermodynamics:"gas",Wave:"light",Electromagnetic:"magnet","AC circuit":"electric","Quantum Mechanics":"light",Relativity:"motion"};
   const grouped=Array.from(new Set(levels.map(l=>l.section))).filter(Boolean).map(section=>{const rows=levels.filter(l=>l.section===section),art=sectionArt[section]??"motion",identity=PHYSICS_CHAPTERS[art];return {start:rows[0].number,end:rows.at(-1)!.number,title:section,topic:section,note:"",color:identity.color,paper:identity.paper,art};});
   const chapters = courseId==="pre-posn" ? EXPEDITIONS : grouped.length?grouped : [{ start: 1, end: Infinity, title: "เส้นทางการเรียนรู้", topic: "ทีละก้าว สู่ความเข้าใจ", note: "เลือกด่านที่เปิดแล้วเพื่อเริ่มเรียน", color: "#167a72", paper: "#eaf3ed", art: "motion" }];
   return <div>
